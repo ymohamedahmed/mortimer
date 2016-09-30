@@ -47,7 +47,7 @@ public class Pawn extends Piece {
 		return Move.removeIllegalMoves(pieceList, piece.getColor(), possibleMoves);
 	}
 
-	public boolean enPassant(ArrayList<Piece> pieceList, Move move,
+	public static boolean enPassant(ArrayList<Piece> pieceList, Move move,
 			int colorFactor) {
 		for (Piece piece : pieceList) {
 			if (piece.getColor() != move.getPiece().getColor()
