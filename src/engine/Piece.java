@@ -3,73 +3,101 @@ package engine;
 import java.util.ArrayList;
 
 public class Piece {
-	PieceType pieceType;
-	Position pos;
-	Color color;
-	int numberOfMoves;
+    PieceType pieceType;
+    Position pos;
+    Color color;
+    int numberOfMoves;
 
-	public Piece(PieceType pieceType, Position pos, Color color,
-			int numberOfMoves) {
-		this.pieceType = pieceType;
-		this.pos = pos;
-		this.color = color;
-		this.numberOfMoves = numberOfMoves;
-	}
+    public Piece(PieceType pieceType, Position pos, Color color,
+                 int numberOfMoves) {
+        this.pieceType = pieceType;
+        this.pos = pos;
+        this.color = color;
+        this.numberOfMoves = numberOfMoves;
+    }
 
-	public PieceType getPieceType() {
-		return pieceType;
-	}
+    public static int getPieceTableValue(Piece piece, ArrayList<Piece> pieceList) {
+        int value = 0;
+        int index = (7 - piece.getPos().getRow()) + piece.getPos().getCol();
+        switch (piece.getPieceType()) {
+            case PAWN:
+                value = Pawn.getPositionValue(index);
+                break;
+            case KNIGHT:
+                value = Knight.getPositionValue(index);
+                break;
+            case BISHOP:
+                value = Bishop.getPositionValue(index);
+                break;
+            case ROOK:
+                value = Rook.getPositionValue(index);
+                break;
+            case QUEEN:
+                value = Queen.getPositionValue(index);
+                break;
+            case KING:
+                value = King.getPositionValue(index, pieceList);
+                break;
 
-	public void setPieceType(PieceType pieceType) {
-		this.pieceType = pieceType;
-	}
 
-	public Position getPos() {
-		return pos;
-	}
+        }
+        return value;
+    }
 
-	public void setPosition(Position position) {
-		this.pos = position;
-	}
+    public static ArrayList<Move> getLegalMove(Piece piece, ArrayList<Piece> pieceList) {
+        ArrayList<Move> legalMoves = new ArrayList<Move>();
+        switch (piece.getPieceType()) {
+            case PAWN:
+                legalMoves = Pawn.getLegalMoves(piece, pieceList);
+                break;
+            case KNIGHT:
+                legalMoves = Knight.getLegalMoves(piece, pieceList);
+                break;
+            case BISHOP:
+                legalMoves = Bishop.getLegalMoves(piece, pieceList);
+                break;
+            case ROOK:
+                legalMoves = Rook.getLegalMoves(piece, pieceList);
+                break;
+            case QUEEN:
+                legalMoves = Queen.getLegalMoves(piece, pieceList);
+                break;
+            case KING:
+                legalMoves = King.getLegalMoves(piece, pieceList);
+                break;
+        }
+        return legalMoves;
+    }
 
-	public Color getColor() {
-		return color;
-	}
+    public PieceType getPieceType() {
+        return pieceType;
+    }
 
-	public void setColor(Color color) {
-		this.color = color;
-	}
+    public void setPieceType(PieceType pieceType) {
+        this.pieceType = pieceType;
+    }
 
-	public int getNumberOfMoves() {
-		return numberOfMoves;
-	}
+    public Position getPos() {
+        return pos;
+    }
 
-	public void setNumberOfMoves(int numberOfMoves) {
-		this.numberOfMoves = numberOfMoves;
-	}
+    public void setPosition(Position position) {
+        this.pos = position;
+    }
 
-	public static ArrayList<Move> getLegalMove(Piece piece, ArrayList<Piece> pieceList) {
-		ArrayList<Move> legalMoves = new ArrayList<Move>();
-		switch (piece.getPieceType()) {
-		case PAWN:
-			legalMoves = Pawn.getLegalMoves(piece, pieceList);
-			break;
-		case KNIGHT:
-			legalMoves = Knight.getLegalMoves(piece, pieceList);
-			break;
-		case BISHOP:
-			legalMoves = Bishop.getLegalMoves(piece, pieceList);
-			break;
-		case ROOK:
-			legalMoves = Rook.getLegalMoves(piece, pieceList);
-			break;
-		case QUEEN:
-			legalMoves = Queen.getLegalMoves(piece, pieceList);
-			break;
-		case KING:
-			legalMoves = King.getLegalMoves(piece, pieceList);
-			break;
-		}
-		return legalMoves;
-	}
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public int getNumberOfMoves() {
+        return numberOfMoves;
+    }
+
+    public void setNumberOfMoves(int numberOfMoves) {
+        this.numberOfMoves = numberOfMoves;
+    }
 }
