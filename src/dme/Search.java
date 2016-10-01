@@ -11,9 +11,13 @@ public class Search {
         double bestValue = Double.NEGATIVE_INFINITY;
         for (Tree.Node childNode : children) {
             double v = -negamax(-beta, -alpha, childNode, depth - 1, -colorFactor);
-
+            bestValue = Math.max(bestValue, v);
+            alpha = Math.max(alpha, v);
+            if (alpha >= beta) {
+                break;
+            }
         }
-        return alpha;
+        return bestValue;
     }
 
 }

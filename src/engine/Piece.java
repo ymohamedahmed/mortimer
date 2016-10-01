@@ -1,5 +1,6 @@
 package engine;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class Piece {
@@ -42,6 +43,55 @@ public class Piece {
 
         }
         return value;
+    }
+
+    public static JLabel getImage(PieceType type, Color color) {
+        String piece = "";
+        if (color == Color.WHITE) {
+            switch (type) {
+                case PAWN:
+                    piece = "\u2659";
+                    break;
+                case KNIGHT:
+                    piece = "\u2658";
+                    break;
+                case BISHOP:
+                    piece = "\u2657";
+                    break;
+                case ROOK:
+                    piece = "\u2656";
+                    break;
+                case QUEEN:
+                    piece = "\u2655";
+                    break;
+                case KING:
+                    piece = "\u2654";
+                    break;
+            }
+        } else if (color == Color.BLACK) {
+            switch (type) {
+                case PAWN:
+                    piece = "\u265F";
+                    break;
+                case KNIGHT:
+                    piece = "\u265E";
+                    break;
+                case BISHOP:
+                    piece = "\u265D";
+                    break;
+                case ROOK:
+                    piece = "\u265C";
+                    break;
+                case QUEEN:
+                    piece = "\u265B";
+                    break;
+                case KING:
+                    piece = "\u265A";
+                    break;
+            }
+
+        }
+        return new JLabel(piece);
     }
 
     public static ArrayList<Move> getLegalMove(Piece piece, ArrayList<Piece> pieceList) {
