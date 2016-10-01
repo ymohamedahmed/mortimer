@@ -11,23 +11,6 @@ public class Move {
 		this.finalPosition = finalPosition;
 	}
 
-	public Piece getPiece() {
-		return piece;
-	}
-
-	public void setPiece(Piece piece) {
-		this.piece = piece;
-	}
-
-	public Position getPosition() {
-		return finalPosition;
-	}
-
-	public void setPosition(Position position) {
-		this.finalPosition = position;
-	}
-
-	// Todo FINISH THIS
 	public static ArrayList<Move> removeIllegalMoves(
 			ArrayList<Piece> pieceList, Color color,
 			ArrayList<Move> possibleMoves) {
@@ -71,5 +54,21 @@ public class Move {
 			}
 		}
 		return moves;
+	}
+
+	public Piece getPiece() {
+		return piece;
+	}
+
+	public void setPiece(Piece piece) {
+		this.piece = piece;
+	}
+
+	public Position getPosition() {
+		return finalPosition;
+	}
+
+	public void setPosition(Position position) {
+		this.finalPosition = position;
 	}
 }
