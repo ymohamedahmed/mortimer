@@ -1,6 +1,7 @@
 package engine;
 
-import javax.swing.*;
+import javafx.scene.control.Label;
+
 import java.util.ArrayList;
 
 public class Piece {
@@ -8,6 +9,7 @@ public class Piece {
     Position pos;
     Color color;
     int numberOfMoves;
+
 
     public Piece(PieceType pieceType, Position pos, Color color,
                  int numberOfMoves) {
@@ -45,7 +47,7 @@ public class Piece {
         return value;
     }
 
-    public static JLabel getImage(PieceType type, Color color) {
+    public static Label getImage(PieceType type, Color color) {
         String piece = "";
         if (color == Color.WHITE) {
             switch (type) {
@@ -91,7 +93,7 @@ public class Piece {
             }
 
         }
-        return new JLabel(piece);
+        return new Label(piece);
     }
 
     public static ArrayList<Move> getLegalMove(Piece piece, ArrayList<Piece> pieceList) {
