@@ -1,6 +1,6 @@
 package engine;
 
-import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 
 import java.util.ArrayList;
 
@@ -47,53 +47,9 @@ public class Piece {
         return value;
     }
 
-    public static Label getImage(PieceType type, Color color) {
-        String piece = "";
-        if (color == Color.WHITE) {
-            switch (type) {
-                case PAWN:
-                    piece = "\u2659";
-                    break;
-                case KNIGHT:
-                    piece = "\u2658";
-                    break;
-                case BISHOP:
-                    piece = "\u2657";
-                    break;
-                case ROOK:
-                    piece = "\u2656";
-                    break;
-                case QUEEN:
-                    piece = "\u2655";
-                    break;
-                case KING:
-                    piece = "\u2654";
-                    break;
-            }
-        } else if (color == Color.BLACK) {
-            switch (type) {
-                case PAWN:
-                    piece = "\u265F";
-                    break;
-                case KNIGHT:
-                    piece = "\u265E";
-                    break;
-                case BISHOP:
-                    piece = "\u265D";
-                    break;
-                case ROOK:
-                    piece = "\u265C";
-                    break;
-                case QUEEN:
-                    piece = "\u265B";
-                    break;
-                case KING:
-                    piece = "\u265A";
-                    break;
-            }
-
-        }
-        return new Label(piece);
+    public static Image getImage(PieceType type, Color color) {
+        String piece = String.valueOf(type).toLowerCase() + (color == Color.BLACK ? "B" : "W");
+        return new Image(Piece.class.getResource("/images/" + piece + ".png").toExternalForm());
     }
 
     public static ArrayList<Move> getLegalMove(Piece piece, ArrayList<Piece> pieceList) {
@@ -119,6 +75,37 @@ public class Piece {
                 break;
         }
         return legalMoves;
+    }
+
+    public static ArrayList<Piece> getInitialPieceList() {
+        ArrayList<Piece> init = new ArrayList<>();
+
+        for (int column = 0; column <= 7; column++) {
+            init.add(new Pawn(new Position(1, column), Color.WHITE, 0));
+            init.add(new Pawn(new Position(6, column), Color.BLACK, 0));
+        }
+        init.add(new Rook(new Position(0, 0), Color.WHITE, 0));
+        init.add(new Rook(new Position(0, 7), Color.WHITE, 0));
+        init.add(new Rook(new Position(7, 0), Color.BLACK, 0));
+        init.add(new Rook(new Position(7, 7), Color.BLACK, 0));
+
+        init.add(new Knight(new Position(0, 1), Color.WHITE, 0));
+        init.add(new Knight(new Position(0, 6), Color.WHITE, 0));
+        init.add(new Knight(new Position(7, 1), Color.BLACK, 0));
+        init.add(new Knight(new Position(7, 6), Color.BLACK, 0));
+
+        init.add(new Bishop(new Position(0, 2), Color.WHITE, 0));
+        init.add(new Bishop(new Position(0, 5), Color.WHITE, 0));
+        init.add(new Bishop(new Position(7, 2), Color.BLACK, 0));
+        init.add(new Bishop(new Position(7, 5), Color.BLACK, 0));
+
+        init.add(new Queen(new Position(0, 3), Color.WHITE, 0));
+        init.add(new Queen(new Position(7, 3), Color.BLACK, 0));
+
+        init.add(new King(new Position(0, 4), Color.WHITE, 0));
+        init.add(new King(new Position(7, 4), Color.BLACK, 0));
+
+        return init;
     }
 
     public PieceType getPieceType() {
@@ -152,4 +139,5 @@ public class Piece {
     public void setNumberOfMoves(int numberOfMoves) {
         this.numberOfMoves = numberOfMoves;
     }
+
 }
