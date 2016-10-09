@@ -4,6 +4,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import ui.controllers.MainController;
 
 import java.io.IOException;
 
@@ -21,8 +22,7 @@ public class Main extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/root.fxml"));
             Parent root = loader.load();
-
-
+            ((MainController) loader.getController()).setPrimaryStage(primaryStage);
             primaryStage.setTitle("Mortimer");
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);

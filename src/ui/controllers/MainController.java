@@ -3,26 +3,33 @@ package ui.controllers;
 import engine.Piece;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
 public class MainController {
 
+    public StackPane stackPane;
     public Canvas chessPane;
+    public BorderPane borderPane;
+    private Stage primaryStage;
 
     public void initialize() {
-        setupChessPane(Piece.getInitialPieceList());
+        playGame();
     }
 
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
 
-    private void setupChessPane(ArrayList<Piece> pieceList) {
+    private void paintChessBoard(ArrayList<Piece> pieceList) {
         GraphicsContext g = chessPane.getGraphicsContext2D();
         double width = chessPane.getWidth();
         double height = chessPane.getHeight();
         double cellSize = Math.ceil(Math.min(width / 8.0, height / 8.0));
-
-
         int squareNo = 0;
         while (squareNo <= 63) {
             int x = squareNo % 8;
@@ -38,10 +45,20 @@ public class MainController {
 
         for (Piece piece : pieceList) {
             g.drawImage(Piece.getImage(piece.getPieceType(), piece.getColor()), (7 - piece.getPos().getCol()) * cellSize, (7 - piece.getPos().getRow()) * cellSize, cellSize, cellSize);
-
-
         }
 
+
+    }
+
+    public void playGame() {
+        ArrayList<Piece> pieceList = Piece.getInitialPieceList();
+        chessPane.widthProperty().bind(
+                stackPane.widthProperty());
+        chessPane.heightProperty().bind(
+                stackPane.heightProperty());
+        paintChessBoard(pieceList);
+        chessPane.widthProperty().addListener(observable -> paintChessBoard(pieceList));
+        chessPane.heightProperty().addListener(observable -> paintChessBoard(pieceList));
     }
 
     private enum CellColor {
