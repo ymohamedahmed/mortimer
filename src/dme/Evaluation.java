@@ -38,7 +38,7 @@ public class Evaluation {
         int whiteMoves = 0;
         int blackMoves = 0;
         for (Piece piece : pieceList) {
-            int noOfMoves = Piece.getLegalMove(piece, pieceList).size();
+            int noOfMoves = piece.getMovesList().size();
             if (piece.getColor() == Color.BLACK) {
                 blackMoves += noOfMoves;
             } else if (piece.getColor() == Color.WHITE) {

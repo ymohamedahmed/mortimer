@@ -11,13 +11,7 @@ public class Position {
 	public int getRow() {
 		return row;
 	}
-	public void setRow(int row) {
-		this.row = row;
-	}
 	public int getCol() {
 		return column;
-	}
-	public void setCol(int column) {
-		this.column = column;
 	}
 }

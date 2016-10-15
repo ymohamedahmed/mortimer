@@ -5,14 +5,13 @@ import javafx.scene.image.Image;
 import java.util.ArrayList;
 
 public class Piece {
-    PieceType pieceType;
-    Position pos;
-    Color color;
-    int numberOfMoves;
+    private PieceType pieceType;
+    private Position pos;
+    private Color color;
+    private int numberOfMoves;
+    private ArrayList<Move> movesList;
 
-
-    public Piece(PieceType pieceType, Position pos, Color color,
-                 int numberOfMoves) {
+    public Piece(PieceType pieceType, Position pos, Color color, int numberOfMoves) {
         this.pieceType = pieceType;
         this.pos = pos;
         this.color = color;
@@ -42,7 +41,6 @@ public class Piece {
                 value = King.getPositionValue(index, pieceList);
                 break;
 
-
         }
         return value;
     }
@@ -52,32 +50,8 @@ public class Piece {
         return new Image(Piece.class.getResource("/images/" + piece + ".png").toExternalForm());
     }
 
-    public static ArrayList<Move> getLegalMove(Piece piece, ArrayList<Piece> pieceList) {
-        ArrayList<Move> legalMoves = new ArrayList<Move>();
-        switch (piece.getPieceType()) {
-            case PAWN:
-                legalMoves = Pawn.getLegalMoves(piece, pieceList);
-                break;
-            case KNIGHT:
-                legalMoves = Knight.getLegalMoves(piece, pieceList);
-                break;
-            case BISHOP:
-                legalMoves = Bishop.getLegalMoves(piece, pieceList);
-                break;
-            case ROOK:
-                legalMoves = Rook.getLegalMoves(piece, pieceList);
-                break;
-            case QUEEN:
-                legalMoves = Queen.getLegalMoves(piece, pieceList);
-                break;
-            case KING:
-                legalMoves = King.getLegalMoves(piece, pieceList);
-                break;
-        }
-        return legalMoves;
-    }
-
     public static ArrayList<Piece> getInitialPieceList() {
+        //Adding pieces in the initial setup
         ArrayList<Piece> init = new ArrayList<>();
 
         for (int column = 0; column <= 7; column++) {
@@ -108,12 +82,16 @@ public class Piece {
         return init;
     }
 
-    public PieceType getPieceType() {
-        return pieceType;
+    public ArrayList<Move> getMovesList() {
+        return movesList;
     }
 
-    public void setPieceType(PieceType pieceType) {
-        this.pieceType = pieceType;
+    public void setMovesList(ArrayList<Move> moves) {
+        this.movesList = moves;
+    }
+
+    public PieceType getPieceType() {
+        return pieceType;
     }
 
     public Position getPos() {

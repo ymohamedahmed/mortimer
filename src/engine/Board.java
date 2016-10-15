@@ -6,11 +6,11 @@ import dme.Tree;
 import java.util.ArrayList;
 
 public class Board {
-    public static ArrayList<Tree.Node> getAlLMoves(ArrayList<Piece> pieceList, Color color) {
+    public static ArrayList<Tree.Node> getAllMoves(ArrayList<Piece> pieceList, Color color) {
         ArrayList<Tree.Node> childNodes = new ArrayList<Tree.Node>();
         for (Piece piece : pieceList) {
             if (piece.getColor() == color) {
-                for (Move move : Piece.getLegalMove(piece, pieceList)) {
+                for (Move move : piece.getMovesList()) {
                     ArrayList<Piece> pieceListUpdated = updatePieceList(move, pieceList);
                     double evalValue = Evaluation.totalEvaluation(pieceListUpdated, color);
                     Tree.Node node = new Tree.Node(evalValue);
@@ -45,7 +45,7 @@ public class Board {
 
     public static Piece getPiece(ArrayList<Piece> pieceList, Position pos) {
         for (Piece piece : pieceList) {
-            if (piece.getPos() == pos) {
+            if (piece.getPos().getRow() == pos.getRow() && piece.getPos().getCol() == pos.getCol()) {
                 return piece;
             }
         }
