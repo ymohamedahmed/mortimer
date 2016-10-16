@@ -75,19 +75,6 @@ public class MainController {
         return cellSize;
     }
 
-    private ArrayList<Move> removePositionsOffBoard(ArrayList<Move> moves) {
-        // Iterator has to be used to avoid concurrent modification exception
-        // i.e. so that we can remove from the arraylist as we loop through it
-        Iterator<Move> iter = moves.iterator();
-        while (iter.hasNext()) {
-            Move move = iter.next();
-            if (move.getPosition().getRow() > 7 || move.getPosition().getRow() < 0 || move.getPosition().getCol() > 7
-                    || move.getPosition().getRow() < 0) {
-                iter.remove();
-            }
-        }
-        return moves;
-    }
 
     private void resizingCanvas(ArrayList<Piece> pieceList) {
         chessPane.widthProperty().bind(stackPane.widthProperty());
@@ -149,13 +136,10 @@ public class MainController {
             }
 
         }
-        if (piece == null) {
-            System.out.println("CELL SHOULD BE EMPTY");
-        }
-
     }
 
     private void move(ArrayList<Piece> pieceList, Position oldPosition, Position newPosition) {
+
         try {
             Piece piece = Board.getPiece(pieceList, new Position(oldPosition.getRow(), oldPosition.getCol()));
             piece.setNumberOfMoves(piece.getNumberOfMoves() + 1);
@@ -167,14 +151,11 @@ public class MainController {
         clearCanvas();
         paintChessBoard(pieceList);
         updateMoveList(pieceList);
-
-
     }
 
     private void updateMoveList(ArrayList<Piece> pieceList) {
-        ArrayList<Piece> pieceListTemp = pieceList;
-        for (Piece piece : pieceListTemp) {
-            piece.setMovesList(getMoves(piece, pieceListTemp));
+        for (Piece piece : pieceList) {
+            piece.setMovesList(getMoves(piece, pieceList));
         }
 
 
@@ -196,39 +177,63 @@ public class MainController {
         } else if (type == PieceType.KING) {
             legalMoves = ((King) piece).getLegalMoves(pieceList);
         }
-        //return legalMoves;
-        return removeIllegalMoves(pieceList, piece.getColor(), legalMoves);
+        return removeIllegalMoves(piece, pieceList, piece.getColor(), legalMoves);
     }
 
-    private ArrayList<Move> removeIllegalMoves(ArrayList<Piece> pieceList, engine.Color color, ArrayList<Move> possibleMoves) {
-        return removeCheckMoves(pieceList, color, removePositionsOffBoard(possibleMoves));
+    private ArrayList<Move> removeIllegalMoves(Piece piece, ArrayList<Piece> pieceList, engine.Color color, ArrayList<Move> possibleMoves) {
+        ArrayList<Move> intermediate = removePositionsOffBoard(possibleMoves);
+        return removeCheckMoves(piece, pieceList, color, intermediate);
     }
 
-    private ArrayList<Move> removeCheckMoves(ArrayList<Piece> pieceList, engine.Color color, ArrayList<Move> possibleMoves) {
-        Piece king = null;
-        // Extracting the King from the array of pieces
-        for (Piece piece : pieceList) {
-            if (piece.getPieceType() == PieceType.KING && piece.getColor() == color) {
-                king = piece;
+    private ArrayList<Move> removePositionsOffBoard(ArrayList<Move> moves) {
+        // Iterator has to be used to avoid concurrent modification exception
+        // i.e. so that we can remove from the arraylist as we loop through it
+        Iterator<Move> iter = moves.iterator();
+        while (iter.hasNext()) {
+            Move move = iter.next();
+            if (move.getPosition().getRow() > 7 || move.getPosition().getRow() < 0 || move.getPosition().getCol() > 7
+                    || move.getPosition().getCol() < 0) {
+                iter.remove();
             }
         }
+        return moves;
+    }
+
+    private ArrayList<Move> removeCheckMoves(Piece piece, ArrayList<Piece> pieceList, engine.Color color, ArrayList<Move> possibleMoves) {
+        Piece king = null;
+        // Extracting the King from the array of pieces
+        for (Piece pieceLoop : pieceList) {
+            if (pieceLoop.getPieceType() == PieceType.KING && pieceLoop.getColor() == color) {
+                king = pieceLoop;
+            }
+        }
+
         // Iterator has to be used to avoid concurrent modification exception
         // i.e. so that we can remove from the arraylist as we loop through it
         Iterator<Move> iter = possibleMoves.iterator();
-
+        Position oldPosition = piece.getPos();
         //Loop through moves available to a piece
         //If any of the moves result in check remove them
         while (iter.hasNext()) {
             Move move = iter.next();
-            Position oldPosition = move.getPiece().getPos();
-            move.getPiece().setPosition(move.getPosition());
+            piece.setPosition(move.getPosition());
             if (((King) king).check(pieceList, king.getPos())) {
+                System.out.println("CHECK MOVE PIECE TYPE: " + piece.getPieceType() + " POS: " + piece.getPos().getRow() + " , " + piece.getPos().getCol());
+                printPieceList(pieceList);
                 iter.remove();
             }
-            move.getPiece().setPosition(oldPosition);
+            piece.setPosition(oldPosition);
         }
         return possibleMoves;
 
+    }
+
+    //FOR DEBUGGING PURPOSES
+    private void printPieceList(ArrayList<Piece> pieceList) {
+        for (Piece piece : pieceList) {
+            System.out.println("PIECE TYPE: " + piece.getPieceType() + " POS: " + piece.getPos().getRow() + " , " + piece.getPos().getCol());
+        }
+        System.out.println();
     }
 }
 

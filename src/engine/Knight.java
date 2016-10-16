@@ -1,6 +1,7 @@
 package engine;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Knight extends Piece {
 
@@ -33,6 +34,7 @@ public class Knight extends Piece {
 
 	public ArrayList<Move> getLegalMoves(ArrayList<Piece> pieceList) {
 		ArrayList<Move> possibleMoves = new ArrayList<Move>();
+		//Adding moves in the L-shape
 		for (int row = this.getPos().getRow() - 2; row <= this.getPos()
 				.getRow() + 2; row++) {
 			for (int col = this.getPos().getCol() - 2; col <= this.getPos()
@@ -46,6 +48,19 @@ public class Knight extends Piece {
 
 			}
 		}
+		//Removing moves that land on a same color piece
+		// Iterator has to be used to avoid concurrent modification exception
+		// i.e. so that we can remove from the arraylist as we loop through it
+		Iterator<Move> iter = possibleMoves.iterator();
+		while (iter.hasNext()) {
+			Move move = iter.next();
+			if (!Board.isSquareEmpty(pieceList, move.getPosition())) {
+				if (Board.getPiece(pieceList, move.getPosition()).getColor() == getColor()) {
+					iter.remove();
+				}
+			}
+		}
+
 		return possibleMoves;
 	}
 

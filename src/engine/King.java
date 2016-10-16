@@ -84,7 +84,7 @@ public class King extends Piece {
 
     public boolean check(ArrayList<Piece> pieceList, Position kingPos) {
         for (Piece piece : pieceList) {
-            if (this.getColor() != piece.getColor()) {
+            if (getColor() != piece.getColor()) {
                 ArrayList<Move> possibleMoves = piece.getMovesList();
                 for (Move move : possibleMoves) {
                     if (kingPos.getRow() == move.getPosition().getRow()

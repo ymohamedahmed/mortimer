@@ -54,6 +54,9 @@ public class Piece {
         //Adding pieces in the initial setup
         ArrayList<Piece> init = new ArrayList<>();
 
+        init.add(new King(new Position(0, 4), Color.WHITE, 0));
+        init.add(new King(new Position(7, 4), Color.BLACK, 0));
+
         for (int column = 0; column <= 7; column++) {
             init.add(new Pawn(new Position(1, column), Color.WHITE, 0));
             init.add(new Pawn(new Position(6, column), Color.BLACK, 0));
@@ -75,9 +78,6 @@ public class Piece {
 
         init.add(new Queen(new Position(0, 3), Color.WHITE, 0));
         init.add(new Queen(new Position(7, 3), Color.BLACK, 0));
-
-        init.add(new King(new Position(0, 4), Color.WHITE, 0));
-        init.add(new King(new Position(7, 4), Color.BLACK, 0));
 
         return init;
     }
