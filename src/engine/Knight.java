@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 public class Knight extends Piece {
 
-	public Knight(Position position, Color color, int numberOfMoves) {
+	public Knight(Position position, PieceColor color, int numberOfMoves) {
 		super(PieceType.KNIGHT, position, color, numberOfMoves);
 		this.setMovesList(getInitMovesList());
 	}
@@ -27,8 +27,8 @@ public class Knight extends Piece {
 	private ArrayList<Move> getInitMovesList() {
 		ArrayList<Move> initMovesList = new ArrayList<Move>();
 		int colorFactor = this.getColor().getColorFactor();
-		initMovesList.add(new Move(this, new Position(this.getPos().getRow() + (2 * colorFactor), this.getPos().getCol() - 1)));
-		initMovesList.add(new Move(this, new Position(this.getPos().getRow() + (2 * colorFactor), this.getPos().getCol() + 1)));
+		initMovesList.add(new Move(this, new Position(this.getPos().getRow() + (2 * colorFactor), this.getPos().getCol() - 1), false));
+		initMovesList.add(new Move(this, new Position(this.getPos().getRow() + (2 * colorFactor), this.getPos().getCol() + 1), false));
 		return initMovesList;
 	}
 
@@ -43,7 +43,7 @@ public class Knight extends Piece {
 				int colDiff = col - this.getPos().getCol();
 
 				if(Math.pow(rowDiff,2) + Math.pow(colDiff,2) == 5.0){
-					possibleMoves.add(new Move(this, new Position(row, col)));
+					possibleMoves.add(new Move(this, new Position(row, col), false));
 				}
 
 			}

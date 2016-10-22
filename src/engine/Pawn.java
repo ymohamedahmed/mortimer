@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 public class Pawn extends Piece {
 
-    public Pawn(Position position, Color color, int numberOfMoves) {
+    public Pawn(Position position, PieceColor color, int numberOfMoves) {
         super(PieceType.PAWN, position, color, numberOfMoves);
         this.setMovesList(getInitMovesList());
     }
@@ -37,8 +37,8 @@ public class Pawn extends Piece {
         int colorFactor = this.getColor().getColorFactor();
         Position doubleForward = new Position(this.getPos().getRow() + (2 * colorFactor), this.getPos().getCol());
         Position singleForward = new Position(this.getPos().getRow() + colorFactor, this.getPos().getCol());
-        initMovesList.add(new Move(this, singleForward));
-        initMovesList.add(new Move(this, doubleForward));
+        initMovesList.add(new Move(this, singleForward, false));
+        initMovesList.add(new Move(this, doubleForward, false));
         return initMovesList;
     }
 
@@ -49,11 +49,11 @@ public class Pawn extends Piece {
         if (getNumberOfMoves() == 0 && Board.isSquareEmpty(pieceList,
                 new Position(this.getPos().getRow() + colorFactor, this.getPos().getCol()))) {
             Position doubleForward = new Position(this.getPos().getRow() + (2 * colorFactor), this.getPos().getCol());
-            possibleMoves.add(new Move(this, doubleForward));
+            possibleMoves.add(new Move(this, doubleForward, false));
         }
         if (getNumberOfMoves() >= 0) {
             Position singleForward = new Position(this.getPos().getRow() + colorFactor, this.getPos().getCol());
-            possibleMoves.add(new Move(this, singleForward));
+            possibleMoves.add(new Move(this, singleForward, false));
         }
 
         // Iterator has to be used to avoid concurrent modification exception
@@ -70,13 +70,19 @@ public class Pawn extends Piece {
         try {
             Piece pieceDiagonal1 = Board.getPiece(pieceList, diagonal1);
             Piece pieceDiagonal2 = Board.getPiece(pieceList, diagonal2);
+            boolean enPassantDiagonal1 = enPassant(pieceList, new Move(this, diagonal1, false), colorFactor);
+            boolean enPassantDiagonal2 = enPassant(pieceList, new Move(this, diagonal2, false), colorFactor);
             if ((!Board.isSquareEmpty(pieceList, diagonal1) && pieceDiagonal1.getColor() != getColor())
-                    || enPassant(pieceList, new Move(this, diagonal1), colorFactor)) {
-                possibleMoves.add(new Move(this, diagonal1));
+                    || enPassantDiagonal1) {
+                Move move = new Move(this, diagonal1, false);
+                move.setEnPassant(enPassantDiagonal1);
+                possibleMoves.add(move);
             }
             if ((!Board.isSquareEmpty(pieceList, diagonal2) && pieceDiagonal2.getColor() != getColor())
-                    || enPassant(pieceList, new Move(this, diagonal2), colorFactor)) {
-                possibleMoves.add(new Move(this, diagonal2));
+                    || enPassantDiagonal2) {
+                Move move = new Move(this, diagonal2, false);
+                move.setEnPassant(enPassantDiagonal2);
+                possibleMoves.add(move);
             }
         } catch (NullPointerException e) {
 
@@ -86,9 +92,9 @@ public class Pawn extends Piece {
 
     public boolean pawnPromotion(Piece piece, ArrayList<Piece> thisList) {
         boolean promotion = false;
-        if ((piece.getColor() == Color.BLACK && piece.getPos().getRow() == 6
+        if ((piece.getColor() == PieceColor.BLACK && piece.getPos().getRow() == 6
                 && Board.isSquareEmpty(thisList, new Position(7, piece.getPos().getCol())))
-                || (piece.getColor() == Color.WHITE && piece.getPos().getRow() == 1
+                || (piece.getColor() == PieceColor.WHITE && piece.getPos().getRow() == 1
                 && Board.isSquareEmpty(thisList, new Position(0, piece.getPos().getCol())))) {
             promotion = true;
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Rook extends Piece {
 
-    public Rook(Position pos, Color color, int numberOfMoves) {
+    public Rook(Position pos, PieceColor color, int numberOfMoves) {
         super(PieceType.ROOK, pos, color, numberOfMoves);
         setMovesList(new ArrayList<Move>());
     }
@@ -40,11 +40,11 @@ public class Rook extends Piece {
                             offBoard = true;
                         } else if (!Board.isSquareEmpty(pieceList, pos)) {
                             if (getColor() != Board.getPiece(pieceList, pos).getColor()) {
-                                possibleMoves.add(new Move(this, pos));
+                                possibleMoves.add(new Move(this, pos, false));
                             }
                             emptyLine = false;
                         } else {
-                            possibleMoves.add(new Move(this, pos));
+                            possibleMoves.add(new Move(this, pos, false));
                         }
                     }
                 }

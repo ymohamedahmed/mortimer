@@ -7,14 +7,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-enum Mode {
-    SelectMove, MakeMove
-}
 
 enum CellColor {
     COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
@@ -36,16 +31,11 @@ public class MainController {
     public Canvas chessPane;
     public BorderPane borderPane;
 
-    private Stage primaryStage;
     private ArrayList<Position> blueSquares = new ArrayList<>();
     private Position oldPos;
 
     public void initialize() {
         playGame();
-    }
-
-    public void setPrimaryStage(Stage primaryStage) {
-        this.primaryStage = primaryStage;
     }
 
     private double paintChessBoard(ArrayList<Piece> pieceList) {
@@ -67,14 +57,12 @@ public class MainController {
         }
 
         for (Piece piece : pieceList) {
-            g.drawImage(Piece.getImage(piece.getPieceType(), piece.getColor()),
-                    (piece.getPos().getCol()) * cellSize, (7 - piece.getPos().getRow()) * cellSize, cellSize,
-                    cellSize);
+            g.drawImage(Piece.getImage(piece.getPieceType(), piece.getColor()), (piece.getPos().getCol()) * cellSize,
+                    (7 - piece.getPos().getRow()) * cellSize, cellSize, cellSize);
         }
 
         return cellSize;
     }
-
 
     private void resizingCanvas(ArrayList<Piece> pieceList) {
         chessPane.widthProperty().bind(stackPane.widthProperty());
@@ -85,7 +73,6 @@ public class MainController {
 
     private void playGame() {
         ArrayList<Piece> pieceList = Piece.getInitialPieceList();
-        Mode mode = Mode.SelectMove;
         double cellSize = paintChessBoard(pieceList);
         chessPane.setOnMouseClicked(evt -> clickListenerChessPane(pieceList, evt, cellSize));
     }
@@ -96,72 +83,115 @@ public class MainController {
     }
 
     private void clickListenerChessPane(ArrayList<Piece> pieceList, MouseEvent evt, double cellSize) {
-        //System.out.println("CLICK");
-        //Get the position clicked in terms of the board
+        // Get the position clicked in terms of the board
         int column = (int) Math.floor(evt.getX() / cellSize);
         int row = 7 - (int) Math.floor(evt.getY() / cellSize);
-
-        //Get the piece that was clicked
+        boolean pieceMoved = false;
+        // Get the piece that was clicked
         Piece piece = Board.getPiece(pieceList, new Position(row, column));
-
-
-        //System.out.println("Position clicked: " + row + ", " + column + " ,BLUE SQUARES SIZE: " + blueSquares.size());
 
         for (Position square : blueSquares) {
             if (square.getRow() == row && square.getCol() == column) {
-                move(pieceList, oldPos, new Position(row, column));
+                move(pieceList, oldPos, new Position(row, column), true);
                 blueSquares.clear();
+                pieceMoved = true;
                 break;
             }
         }
 
-
-        //Clicks square with piece in it
-        if (piece != null) {
-            //Get its available moves
+        // Clicks square with piece in it
+        if (piece != null && !pieceMoved) {
+            // Get its available moves
             ArrayList<Move> moves = piece.getMovesList();
             oldPos = piece.getPos();
-            //Clear the canvas and then repaint it
+            // Clear the canvas and then repaint it
             clearCanvas();
             paintChessBoard(pieceList);
             GraphicsContext g = chessPane.getGraphicsContext2D();
-
-            //Show available moves by painting a blue circle in the cells
+            // Show available moves by painting a blue circle in the cells
             blueSquares.clear();
             g.setFill(Color.BLUE);
             for (Move move : moves) {
-                g.fillOval((move.getPosition().getCol()) * cellSize, (7 - move.getPosition().getRow()) * cellSize, cellSize,
-                        cellSize);
+                g.fillOval((move.getPosition().getCol()) * cellSize, (7 - move.getPosition().getRow()) * cellSize,
+                        cellSize, cellSize);
                 blueSquares.add(move.getPosition());
             }
 
         }
     }
 
-    private void move(ArrayList<Piece> pieceList, Position oldPosition, Position newPosition) {
+    private Move getMove(ArrayList<Move> moves, Position finalPosition) {
+        Move moveFound = null;
+        for (Move move : moves) {
+            if (move.getPosition().getRow() == finalPosition.getRow()
+                    && move.getPosition().getCol() == finalPosition.getCol()) {
+                moveFound = move;
+            }
+        }
+        return moveFound;
+    }
 
+    private Piece move(ArrayList<Piece> pieceList, Position oldPosition, Position newPosition, boolean repaint) {
+        Piece pieceCaptured = null;
         try {
             Piece piece = Board.getPiece(pieceList, new Position(oldPosition.getRow(), oldPosition.getCol()));
+            Move move = getMove(piece.getMovesList(), newPosition);
+            if (move.isCastling()) {
+                Position rookNewPosition = null;
+                Position rookOldPosition = null;
+                if (move.getPosition().getCol() == 6) {
+                    rookNewPosition = new Position(move.getPosition().getRow(), 5);
+                    rookOldPosition = (piece.getColor() == PieceColor.WHITE) ? new Position(0, 7) : new Position(7, 7);
+                } else if (move.getPosition().getCol() == 2) {
+                    rookNewPosition = new Position(move.getPosition().getRow(), 3);
+                    rookOldPosition = (piece.getColor() == PieceColor.WHITE) ? new Position(0, 0) : new Position(7, 0);
+                }
+                Piece rook = Board.getPiece(pieceList, rookOldPosition);
+                rook.setPosition(rookNewPosition);
+            }
+            if (move.isCapture()) {
+                pieceCaptured = Board.getPiece(pieceList, move.getPosition());
+            }
+            if (move.isEnPassant()) {
+                pieceCaptured = Board.getPiece(pieceList, new Position(
+                        move.getPosition().getRow() - piece.getColor().getColorFactor(), move.getPosition().getCol()));
+            }
+            pieceList.remove(pieceCaptured);
             piece.setNumberOfMoves(piece.getNumberOfMoves() + 1);
             piece.setPosition(newPosition);
         } catch (NullPointerException e) {
-
         }
-        //Clear the canvas and then repaint it
-        clearCanvas();
-        paintChessBoard(pieceList);
-        updateMoveList(pieceList);
+
+        if (repaint) {
+            // Clear the canvas and then repaint it
+            clearCanvas();
+            paintChessBoard(pieceList);
+            updateMoveList(pieceList, true);
+        }
+        return pieceCaptured;
     }
 
-    private void updateMoveList(ArrayList<Piece> pieceList) {
+    private void undoMove(Piece piece, ArrayList<Piece> pieceList, Move move, Position oldPos, Piece pieceCaptured) {
+        piece.setPosition(oldPos);
+        piece.setNumberOfMoves(piece.getNumberOfMoves() - 1);
+        if (pieceCaptured != null) {
+            pieceList.add(pieceCaptured);
+        }
+    }
+
+    private void updateMoveList(ArrayList<Piece> pieceList, boolean removeCheck) {
         for (Piece piece : pieceList) {
-            piece.setMovesList(getMoves(piece, pieceList));
+            piece.setMovesList(getMoves(piece, pieceList, removeCheck));
         }
-
-
     }
 
-    public ArrayList<Move> getMoves(Piece piece, ArrayList<Piece> pieceList) {
+    private void revertMoveList(ArrayList<ArrayList<Move>> move, ArrayList<Piece> pieceList) {
+        for (int i = 0; i < move.size(); i++) {
+            pieceList.get(i).setMovesList(move.get(i));
+        }
+    }
+
+    private ArrayList<Move> getMoves(Piece piece, ArrayList<Piece> pieceList, boolean removeCheck) {
         ArrayList<Move> legalMoves = new ArrayList<Move>();
         PieceType type = piece.getPieceType();
         if (type == PieceType.PAWN) {
@@ -177,11 +207,14 @@ public class MainController {
         } else if (type == PieceType.KING) {
             legalMoves = ((King) piece).getLegalMoves(pieceList);
         }
-        return removeIllegalMoves(piece, pieceList, piece.getColor(), legalMoves);
+        ArrayList<Move> captureRecognised = recogniseCaptureMoves(piece, pieceList, legalMoves);
+        return removeCheck ? removeIllegalMoves(piece, pieceList, piece.getColor(), captureRecognised)
+                : removePositionsOffBoard(captureRecognised);
     }
 
-    private ArrayList<Move> removeIllegalMoves(Piece piece, ArrayList<Piece> pieceList, engine.Color color, ArrayList<Move> possibleMoves) {
-        ArrayList<Move> intermediate = removePositionsOffBoard(possibleMoves);
+    private ArrayList<Move> removeIllegalMoves(Piece piece, ArrayList<Piece> pieceList, engine.PieceColor color,
+                                               ArrayList<Move> possibleMoves) {
+        ArrayList<Move> intermediate = removeMovesToKing(pieceList, removePositionsOffBoard(possibleMoves));
         return removeCheckMoves(piece, pieceList, color, intermediate);
     }
 
@@ -199,41 +232,78 @@ public class MainController {
         return moves;
     }
 
-    private ArrayList<Move> removeCheckMoves(Piece piece, ArrayList<Piece> pieceList, engine.Color color, ArrayList<Move> possibleMoves) {
-        Piece king = null;
-        // Extracting the King from the array of pieces
-        for (Piece pieceLoop : pieceList) {
-            if (pieceLoop.getPieceType() == PieceType.KING && pieceLoop.getColor() == color) {
-                king = pieceLoop;
+    private ArrayList<Move> removeMovesToKing(ArrayList<Piece> pieceList, ArrayList<Move> moves) {
+        // Iterator has to be used to avoid concurrent modification exception
+        // i.e. so that we can remove from the arraylist as we loop through it
+        Iterator<Move> iter = moves.iterator();
+        while (iter.hasNext()) {
+            Move move = iter.next();
+            try {
+                Piece piece = Board.getPiece(pieceList, move.getPosition());
+                if (piece.getPieceType() == PieceType.KING) {
+                    iter.remove();
+                }
+            } catch (NullPointerException e) {
             }
         }
+        return moves;
+    }
+
+    private ArrayList<Move> removeCheckMoves(Piece piece, ArrayList<Piece> pieceList, engine.PieceColor color,
+                                             ArrayList<Move> possibleMoves) {
+        Piece king = null;
 
         // Iterator has to be used to avoid concurrent modification exception
         // i.e. so that we can remove from the arraylist as we loop through it
         Iterator<Move> iter = possibleMoves.iterator();
         Position oldPosition = piece.getPos();
-        //Loop through moves available to a piece
-        //If any of the moves result in check remove them
+        ArrayList<ArrayList<Move>> moves = new ArrayList<ArrayList<Move>>();
+
+        // Extracting the King from the array of pieces
+        for (Piece pieceLoop : pieceList) {
+            if (pieceLoop.getPieceType() == PieceType.KING && pieceLoop.getColor() == color) {
+                king = pieceLoop;
+            }
+            moves.add(pieceLoop.getMovesList());
+        }
+
+        // Loop through moves available to a piece
+        // If any of the moves result in check remove them
         while (iter.hasNext()) {
             Move move = iter.next();
-            piece.setPosition(move.getPosition());
+            Piece pieceCaptured = move(pieceList, piece.getPos(), move.getPosition(), false);
+            //piece.setPosition(move.getPosition());
+            updateMoveList(pieceList, false);
             if (((King) king).check(pieceList, king.getPos())) {
-                System.out.println("CHECK MOVE PIECE TYPE: " + piece.getPieceType() + " POS: " + piece.getPos().getRow() + " , " + piece.getPos().getCol());
-                printPieceList(pieceList);
                 iter.remove();
             }
-            piece.setPosition(oldPosition);
+            undoMove(piece, pieceList, move, oldPosition, pieceCaptured);
+            //piece.setPosition(oldPosition);
+            revertMoveList(moves, pieceList);
         }
+
         return possibleMoves;
 
     }
 
-    //FOR DEBUGGING PURPOSES
-    private void printPieceList(ArrayList<Piece> pieceList) {
-        for (Piece piece : pieceList) {
-            System.out.println("PIECE TYPE: " + piece.getPieceType() + " POS: " + piece.getPos().getRow() + " , " + piece.getPos().getCol());
-        }
-        System.out.println();
-    }
-}
+    private ArrayList<Move> recogniseCaptureMoves(Piece piece, ArrayList<Piece> pieceList, ArrayList<Move> moves) {
+        for (Move move : moves) {
+            try {
+                Piece capturePiece = Board.getPiece(pieceList, move.getPosition());
+                if (capturePiece.getColor() != piece.getColor() && capturePiece.getPieceType() != PieceType.KING) {
+                    move.setCapture(true);
+                } else {
+                    move.setCapture(false);
+                }
 
+            } catch (NullPointerException e) {
+                move.setCapture(false);
+            }
+
+        }
+
+        return moves;
+
+    }
+
+}

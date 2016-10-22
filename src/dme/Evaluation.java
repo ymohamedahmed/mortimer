@@ -1,8 +1,8 @@
 package dme;
 
 import engine.Board;
-import engine.Color;
 import engine.Piece;
+import engine.PieceColor;
 import engine.PieceType;
 
 import java.util.ArrayList;
@@ -15,18 +15,18 @@ public class Evaluation {
         int knightConst = 3;
         int bishopConst = 3;
         int pawnConst = 1;
-        int kingW = Board.noOfPieces(pieceList, PieceType.KING, Color.WHITE);
-        int kingB = Board.noOfPieces(pieceList, PieceType.KING, Color.BLACK);
-        int queenW = Board.noOfPieces(pieceList, PieceType.QUEEN, Color.WHITE);
-        int queenB = Board.noOfPieces(pieceList, PieceType.QUEEN, Color.BLACK);
-        int rookW = Board.noOfPieces(pieceList, PieceType.ROOK, Color.WHITE);
-        int rookB = Board.noOfPieces(pieceList, PieceType.ROOK, Color.BLACK);
-        int knightW = Board.noOfPieces(pieceList, PieceType.KNIGHT, Color.WHITE);
-        int knightB = Board.noOfPieces(pieceList, PieceType.KNIGHT, Color.BLACK);
-        int bishopW = Board.noOfPieces(pieceList, PieceType.BISHOP, Color.WHITE);
-        int bishopB = Board.noOfPieces(pieceList, PieceType.BISHOP, Color.BLACK);
-        int pawnW = Board.noOfPieces(pieceList, PieceType.PAWN, Color.WHITE);
-        int pawnB = Board.noOfPieces(pieceList, PieceType.PAWN, Color.BLACK);
+        int kingW = Board.noOfPieces(pieceList, PieceType.KING, PieceColor.WHITE);
+        int kingB = Board.noOfPieces(pieceList, PieceType.KING, PieceColor.BLACK);
+        int queenW = Board.noOfPieces(pieceList, PieceType.QUEEN, PieceColor.WHITE);
+        int queenB = Board.noOfPieces(pieceList, PieceType.QUEEN, PieceColor.BLACK);
+        int rookW = Board.noOfPieces(pieceList, PieceType.ROOK, PieceColor.WHITE);
+        int rookB = Board.noOfPieces(pieceList, PieceType.ROOK, PieceColor.BLACK);
+        int knightW = Board.noOfPieces(pieceList, PieceType.KNIGHT, PieceColor.WHITE);
+        int knightB = Board.noOfPieces(pieceList, PieceType.KNIGHT, PieceColor.BLACK);
+        int bishopW = Board.noOfPieces(pieceList, PieceType.BISHOP, PieceColor.WHITE);
+        int bishopB = Board.noOfPieces(pieceList, PieceType.BISHOP, PieceColor.BLACK);
+        int pawnW = Board.noOfPieces(pieceList, PieceType.PAWN, PieceColor.WHITE);
+        int pawnB = Board.noOfPieces(pieceList, PieceType.PAWN, PieceColor.BLACK);
 
         double eval = kingConst * (kingW - kingB) + queenConst * (queenW - queenB) + rookConst * (rookW - rookB)
                 + knightConst * (knightW - knightB) + bishopConst * (bishopW - bishopB) + pawnConst * (pawnW - pawnB);
@@ -39,9 +39,9 @@ public class Evaluation {
         int blackMoves = 0;
         for (Piece piece : pieceList) {
             int noOfMoves = piece.getMovesList().size();
-            if (piece.getColor() == Color.BLACK) {
+            if (piece.getColor() == PieceColor.BLACK) {
                 blackMoves += noOfMoves;
-            } else if (piece.getColor() == Color.WHITE) {
+            } else if (piece.getColor() == PieceColor.WHITE) {
                 whiteMoves += noOfMoves;
             }
         }
@@ -54,9 +54,9 @@ public class Evaluation {
         int blackScore = 0;
         for (Piece piece : pieceList) {
             int score = Piece.getPieceTableValue(piece, pieceList);
-            if (piece.getColor() == Color.BLACK) {
+            if (piece.getColor() == PieceColor.BLACK) {
                 blackScore += score;
-            } else if (piece.getColor() == Color.WHITE) {
+            } else if (piece.getColor() == PieceColor.WHITE) {
                 whiteScore += score;
             }
         }
@@ -64,8 +64,8 @@ public class Evaluation {
 
     }
 
-    public static double totalEvaluation(ArrayList<Piece> pieceList, Color color) {
-        return (color.getColorFactor() * (evalMat(pieceList) + evalMob(pieceList))) + evalPos(pieceList);
+    public static double totalEvaluation(ArrayList<Piece> pieceList, PieceColor pieceColor) {
+        return (pieceColor.getColorFactor() * (evalMat(pieceList) + evalMob(pieceList))) + evalPos(pieceList);
     }
 
 

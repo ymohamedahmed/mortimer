@@ -3,7 +3,7 @@ package engine;
 import java.util.ArrayList;
 
 public class King extends Piece {
-    public King(Position pos, Color color, int numberOfMoves) {
+    public King(Position pos, PieceColor color, int numberOfMoves) {
         super(PieceType.KING, pos, color, numberOfMoves);
         this.setMovesList(new ArrayList<Move>());
     }
@@ -19,23 +19,23 @@ public class King extends Piece {
                 -30, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30, -20, -30, -30, -40,
                 -40, -30, -30, -20, -10, -20, -20, -20, -20, -20, -20, -10, 20, 20, 0, 0, 0, 0, 20, 20, 20, 30, 10, 0,
                 0, 10, 30, 20};
-        boolean noBlackQueen = Board.noOfPieces(pieceList, PieceType.QUEEN, Color.BLACK) == 0;
-        boolean noWhiteQueen = Board.noOfPieces(pieceList, PieceType.QUEEN, Color.WHITE) == 0;
+        boolean noBlackQueen = Board.noOfPieces(pieceList, PieceType.QUEEN, PieceColor.BLACK) == 0;
+        boolean noWhiteQueen = Board.noOfPieces(pieceList, PieceType.QUEEN, PieceColor.WHITE) == 0;
         // Both sides have no queens
         if (noBlackQueen && noWhiteQueen) {
             endGame = true;
         }
         // Each side only has one queen and one king
-        if ((!noBlackQueen && Board.noOfPiecesColor(pieceList, Color.BLACK) == 2)
-                && (!noWhiteQueen && Board.noOfPiecesColor(pieceList, Color.WHITE) == 2)) {
+        if ((!noBlackQueen && Board.noOfPiecesColor(pieceList, PieceColor.BLACK) == 2)
+                && (!noWhiteQueen && Board.noOfPiecesColor(pieceList, PieceColor.WHITE) == 2)) {
             endGame = true;
         }
         // Each side only has one queen and one minor piece (e.g. knight or
         // bishop)
-        int blackMinorPieces = Board.noOfPieces(pieceList, PieceType.KNIGHT, Color.BLACK)
-                + Board.noOfPieces(pieceList, PieceType.BISHOP, Color.BLACK);
-        int whiteMinorPieces = Board.noOfPieces(pieceList, PieceType.KNIGHT, Color.WHITE)
-                + Board.noOfPieces(pieceList, PieceType.BISHOP, Color.WHITE);
+        int blackMinorPieces = Board.noOfPieces(pieceList, PieceType.KNIGHT, PieceColor.BLACK)
+                + Board.noOfPieces(pieceList, PieceType.BISHOP, PieceColor.BLACK);
+        int whiteMinorPieces = Board.noOfPieces(pieceList, PieceType.KNIGHT, PieceColor.WHITE)
+                + Board.noOfPieces(pieceList, PieceType.BISHOP, PieceColor.WHITE);
 
         if ((!noBlackQueen && blackMinorPieces <= 1) && (!noWhiteQueen && whiteMinorPieces <= 1)) {
             endGame = true;
@@ -56,10 +56,10 @@ public class King extends Piece {
                 try {
                     Piece piece = Board.getPiece(pieceList, pos);
                     if (piece.getColor() != getColor()) {
-                        possibleMoves.add(new Move(this, pos));
+                        possibleMoves.add(new Move(this, pos, false));
                     }
                 } catch (NullPointerException e) {
-                    possibleMoves.add(new Move(this, pos));
+                    possibleMoves.add(new Move(this, pos, false));
                 }
 
             }
@@ -74,7 +74,7 @@ public class King extends Piece {
                     kingColumn = 6;
                 }
                 if (castling(piece, new Position(this.getPos().getRow(), kingColumn), this.getPos(), pieceList)) {
-                    possibleMoves.add(new Move(this, new Position(this.getPos().getRow(), kingColumn)));
+                    possibleMoves.add(new Move(this, new Position(this.getPos().getRow(), kingColumn), true));
                 }
             }
         }
@@ -135,6 +135,7 @@ public class King extends Piece {
     }
 
     public boolean castling(Piece rook, Position kingNewPos, Position kingOldPos, ArrayList<Piece> pieceList) {
+        //Work out which type of castling is being used
         CastleType castleType;
         if (kingNewPos.getCol() == 6) {
             castleType = CastleType.KINGSIDE;
@@ -143,10 +144,11 @@ public class King extends Piece {
         } else {
             return false;
         }
+        //Only allowed if each piece is yet to move
         if (this.getNumberOfMoves() != 0 || rook.getNumberOfMoves() != 0) {
             return false;
         }
-        // Checking that none of the square the king moves through cause check
+        // Checking that none of the squares the king moves through cause check
         if (check(pieceList, this.getPos())
                 || check(pieceList,
                 new Position(this.getPos().getRow(), this.getPos().getCol() + castleType.getCastleFactor()))

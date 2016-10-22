@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Queen extends Piece {
 
-    public Queen(Position pos, Color color, int numberOfMoves) {
+    public Queen(Position pos, PieceColor color, int numberOfMoves) {
         super(PieceType.QUEEN, pos, color, numberOfMoves);
         this.setMovesList(new ArrayList<Move>());
     }

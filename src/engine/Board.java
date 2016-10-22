@@ -6,7 +6,7 @@ import dme.Tree;
 import java.util.ArrayList;
 
 public class Board {
-    public static ArrayList<Tree.Node> getAllMoves(ArrayList<Piece> pieceList, Color color) {
+    public static ArrayList<Tree.Node> getAllMoves(ArrayList<Piece> pieceList, PieceColor color) {
         ArrayList<Tree.Node> childNodes = new ArrayList<Tree.Node>();
         for (Piece piece : pieceList) {
             if (piece.getColor() == color) {
@@ -58,7 +58,7 @@ public class Board {
                 || position.getRow() < 0 || position.getCol() < 0;
     }
 
-    public static int noOfPieces(ArrayList<Piece> pieceList, PieceType type, Color color) {
+    public static int noOfPieces(ArrayList<Piece> pieceList, PieceType type, PieceColor color) {
         int number = 0;
         for (Piece piece : pieceList) {
             if (piece.getPieceType() == type && piece.getColor() == color) {
@@ -68,7 +68,7 @@ public class Board {
         return number;
     }
 
-    public static int noOfPiecesColor(ArrayList<Piece> pieceList, Color color) {
+    public static int noOfPiecesColor(ArrayList<Piece> pieceList, PieceColor color) {
         int answer = 0;
         for (Piece piece : pieceList) {
             if (color == piece.getColor()) {
@@ -77,4 +77,5 @@ public class Board {
         }
         return answer;
     }
+
 }

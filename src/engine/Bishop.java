@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Bishop extends Piece {
 
-    public Bishop(Position pos, Color color, int numberOfMoves) {
+    public Bishop(Position pos, PieceColor color, int numberOfMoves) {
         super(PieceType.BISHOP, pos, color, numberOfMoves);
         this.setMovesList(new ArrayList<Move>());
     }
@@ -40,11 +40,11 @@ public class Bishop extends Piece {
                     } else {
                         if (!Board.isSquareEmpty(pieceList, pos)) {
                             if (getColor() != Board.getPiece(pieceList, pos).getColor()) {
-                                possibleMoves.add(new Move(this, pos));
+                                possibleMoves.add(new Move(this, pos, false));
                             }
                             emptyDiagonal = false;
                         } else {
-                            possibleMoves.add(new Move(this, pos));
+                            possibleMoves.add(new Move(this, pos, false));
                         }
                     }
 
