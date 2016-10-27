@@ -19,7 +19,7 @@ public class Pawn extends Piece {
                     if (piece.getPos().getRow() == 3 || piece.getPos().getRow() == 4) {
                         return true;
                     }
-                    }
+                }
             }
         }
         return false;
@@ -90,15 +90,18 @@ public class Pawn extends Piece {
         return possibleMoves;
     }
 
-    public boolean pawnPromotion(Piece piece, ArrayList<Piece> thisList) {
+    public boolean pawnPromotion(Position newPosition, ArrayList<Piece> pieceList) {
         boolean promotion = false;
-        if ((piece.getColor() == PieceColor.BLACK && piece.getPos().getRow() == 6
-                && Board.isSquareEmpty(thisList, new Position(7, piece.getPos().getCol())))
-                || (piece.getColor() == PieceColor.WHITE && piece.getPos().getRow() == 1
-                && Board.isSquareEmpty(thisList, new Position(0, piece.getPos().getCol())))) {
+        int row = getPos().getRow();
+        int col = getPos().getCol();
+        int newRow = newPosition.getRow();
+        if ((getColor() == PieceColor.WHITE && row == 6
+                && Board.isSquareEmpty(pieceList, new Position(7, col)) && newRow == 7)
+                || (getColor() == PieceColor.BLACK && row == 1
+                && Board.isSquareEmpty(pieceList, new Position(0, col)) && newRow == 0)) {
             promotion = true;
-
         }
         return promotion;
     }
+
 }

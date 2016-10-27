@@ -3,6 +3,7 @@ package ui.controllers;
 import engine.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -10,6 +11,8 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 
 public class MainController {
@@ -124,6 +127,9 @@ public class MainController {
         try {
             Piece piece = Board.getPiece(pieceList, new Position(oldPosition.getRow(), oldPosition.getCol()));
             Move move = getMove(piece.getMovesList(), newPosition);
+            //Checks if the move selected is a castling move
+            //If so changes the position of the rook based on whether
+            //it is Queenside or Kingside castling
             if (move.isCastling()) {
                 Position rookNewPosition = null;
                 Position rookOldPosition = null;
@@ -137,19 +143,26 @@ public class MainController {
                 Piece rook = Board.getPiece(pieceList, rookOldPosition);
                 rook.setPosition(rookNewPosition);
             }
-
+            //If the move results in pawn promotion display the pawn promotion dialog
+            if (piece.getPieceType() == PieceType.PAWN) {
+                if (((Pawn) piece).pawnPromotion(newPosition, pieceList)) {
+                    displayPawnPromotionDialog(piece, pieceList);
+                }
+            }
+            //If it is a capture move, the piece to be captured is found
             if (move.isCapture()) {
                 pieceCaptured = Board.getPiece(pieceList, move.getPosition());
             }
+            //Finds the piece captured during en passant
             if (move.isEnPassant()) {
                 pieceCaptured = Board.getPiece(pieceList, new Position(
                         move.getPosition().getRow() - piece.getColor().getColorFactor(), move.getPosition().getCol()));
             }
 
-            //removedPieces.add(pieceCaptured);
             pieceList.remove(pieceCaptured);
             piece.setNumberOfMoves(piece.getNumberOfMoves() + 1);
             piece.setPosition(newPosition);
+
 
         } catch (NullPointerException e) {
         }
@@ -247,44 +260,34 @@ public class MainController {
 
         // Iterator has to be used to avoid concurrent modification exception
         // i.e. so that we can remove from the arraylist as we loop through it
-        Iterator<Move> iter = possibleMoves.iterator();
+        Iterator<Move> moveIterator = possibleMoves.iterator();
         Position oldPosition = piece.getPos();
-        ArrayList<ArrayList<Move>> moves = new ArrayList<ArrayList<Move>>();
 
         // Extracting the King from the array of pieces
         for (Piece pieceLoop : pieceList) {
             if (pieceLoop.getPieceType() == PieceType.KING && pieceLoop.getColor() == color) {
                 king = pieceLoop;
             }
-            moves.add(pieceLoop.getMovesList());
         }
 
         // Loop through moves available to a piece
         // If any of the moves result in check remove them
-        while (iter.hasNext()) {
-            Move move = iter.next();
-            //Piece pieceCaptured = move(pieceListTemp, piece.getPos(), move.getPosition(), false);
-            Piece capPiece = null;
+        while (moveIterator.hasNext()) {
+            Move move = moveIterator.next();
             ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
             Piece pieceTemp = Board.getPiece(pieceListTemp, piece.getPos());
             if (move.isCapture()) {
-                capPiece = Board.getPiece(pieceListTemp, move.getPosition());
+                Piece capPiece = Board.getPiece(pieceListTemp, move.getPosition());
                 pieceListTemp.remove(capPiece);
             }
             pieceTemp.setPosition(move.getPosition());
             pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() + 1);
             updateMoveList(pieceListTemp, false);
             if (((King) king).check(pieceListTemp, king.getPos())) {
-                iter.remove();
+                moveIterator.remove();
             }
-            //undoMove(piece, pieceListTemp, move, oldPosition, pieceCaptured);
-
             pieceTemp.setPosition(oldPosition);
             pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() - 1);
-/*            if (move.isCapture()) {
-                pieceListTemp.add(index, capPiece);
-            }
-            revertMoveList(moves, pieceListTemp);*/
         }
 
         return possibleMoves;
@@ -295,7 +298,6 @@ public class MainController {
         ArrayList<Piece> clonedList = new ArrayList<>();
         for (Piece piece : pieceList) {
             PieceType type = piece.getPieceType();
-
             if (type == PieceType.PAWN) {
                 clonedList.add(new Pawn(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
             } else if (type == PieceType.KNIGHT) {
@@ -313,6 +315,42 @@ public class MainController {
         return clonedList;
     }
 
+    public void displayPawnPromotionDialog(Piece pawn, ArrayList<Piece> pieceList) {
+        String choice = new String();
+        List<String> choices = new ArrayList<>();
+        choices.add("Queen");
+        choices.add("Rook");
+        choices.add("Bishop");
+        choices.add("Knight");
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("Queen", choices);
+        dialog.setTitle("Pawn Promotion");
+        dialog.setHeaderText("Choose the piece to switch your pawn to");
+        dialog.setContentText("Choose piece:");
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            choice = result.get();
+        } else {
+            displayPawnPromotionDialog(pawn, pieceList);
+        }
+        Position newPosition = new Position(pawn.getPos().getRow() + pawn.getColor().getColorFactor(), pawn.getPos().getCol());
+        switch (choice) {
+            case "Queen":
+                pieceList.add(new Queen(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+                break;
+            case "Rook":
+                pieceList.add(new Rook(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+                break;
+            case "Bishop":
+                pieceList.add(new Bishop(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+                break;
+            case "Knight":
+                pieceList.add(new Knight(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+                break;
+        }
+        pieceList.remove(pawn);
+    }
     private ArrayList<Move> recogniseCaptureMoves(Piece piece, ArrayList<Piece> pieceList, ArrayList<Move> moves) {
         for (Move move : moves) {
             try {
@@ -333,7 +371,7 @@ public class MainController {
 
     }
 
-    enum CellColor {
+    private enum CellColor {
         COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
         private Color color;
 
