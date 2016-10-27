@@ -73,7 +73,7 @@ public class King extends Piece {
                 } else if (piece.getPos().getCol() == 7) {
                     kingColumn = 6;
                 }
-                if (castling(piece, new Position(this.getPos().getRow(), kingColumn), this.getPos(), pieceList)) {
+                if (castling(piece, new Position(this.getPos().getRow(), kingColumn), pieceList)) {
                     possibleMoves.add(new Move(this, new Position(this.getPos().getRow(), kingColumn), true));
                 }
             }
@@ -134,7 +134,7 @@ public class King extends Piece {
 
     }
 
-    public boolean castling(Piece rook, Position kingNewPos, Position kingOldPos, ArrayList<Piece> pieceList) {
+    private boolean castling(Piece rook, Position kingNewPos, ArrayList<Piece> pieceList) {
         //Work out which type of castling is being used
         CastleType castleType;
         if (kingNewPos.getCol() == 6) {

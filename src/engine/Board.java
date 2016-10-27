@@ -19,6 +19,7 @@ public class Board {
                     childNodes.add(node);
                 }
             }
+
         }
         return childNodes;
     }

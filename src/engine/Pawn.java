@@ -19,7 +19,7 @@ public class Pawn extends Piece {
                     if (piece.getPos().getRow() == 3 || piece.getPos().getRow() == 4) {
                         return true;
                     }
-                }
+                    }
             }
         }
         return false;

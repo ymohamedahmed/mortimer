@@ -11,18 +11,6 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-enum CellColor {
-    COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
-    private Color color;
-
-    CellColor(Color color) {
-        this.color = color;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-}
 
 public class MainController {
     // Variables loaded from the fxml file
@@ -149,6 +137,7 @@ public class MainController {
                 Piece rook = Board.getPiece(pieceList, rookOldPosition);
                 rook.setPosition(rookNewPosition);
             }
+
             if (move.isCapture()) {
                 pieceCaptured = Board.getPiece(pieceList, move.getPosition());
             }
@@ -156,9 +145,12 @@ public class MainController {
                 pieceCaptured = Board.getPiece(pieceList, new Position(
                         move.getPosition().getRow() - piece.getColor().getColorFactor(), move.getPosition().getCol()));
             }
+
+            //removedPieces.add(pieceCaptured);
             pieceList.remove(pieceCaptured);
             piece.setNumberOfMoves(piece.getNumberOfMoves() + 1);
             piece.setPosition(newPosition);
+
         } catch (NullPointerException e) {
         }
 
@@ -175,7 +167,7 @@ public class MainController {
         piece.setPosition(oldPos);
         piece.setNumberOfMoves(piece.getNumberOfMoves() - 1);
         if (pieceCaptured != null) {
-            pieceList.add(pieceCaptured);
+            //pieceList.add(index, pieceCaptured);
         }
     }
 
@@ -271,19 +263,54 @@ public class MainController {
         // If any of the moves result in check remove them
         while (iter.hasNext()) {
             Move move = iter.next();
-            Piece pieceCaptured = move(pieceList, piece.getPos(), move.getPosition(), false);
-            //piece.setPosition(move.getPosition());
-            updateMoveList(pieceList, false);
-            if (((King) king).check(pieceList, king.getPos())) {
+            //Piece pieceCaptured = move(pieceListTemp, piece.getPos(), move.getPosition(), false);
+            Piece capPiece = null;
+            ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
+            Piece pieceTemp = Board.getPiece(pieceListTemp, piece.getPos());
+            if (move.isCapture()) {
+                capPiece = Board.getPiece(pieceListTemp, move.getPosition());
+                pieceListTemp.remove(capPiece);
+            }
+            pieceTemp.setPosition(move.getPosition());
+            pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() + 1);
+            updateMoveList(pieceListTemp, false);
+            if (((King) king).check(pieceListTemp, king.getPos())) {
                 iter.remove();
             }
-            undoMove(piece, pieceList, move, oldPosition, pieceCaptured);
-            //piece.setPosition(oldPosition);
-            revertMoveList(moves, pieceList);
+            //undoMove(piece, pieceListTemp, move, oldPosition, pieceCaptured);
+
+            pieceTemp.setPosition(oldPosition);
+            pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() - 1);
+/*            if (move.isCapture()) {
+                pieceListTemp.add(index, capPiece);
+            }
+            revertMoveList(moves, pieceListTemp);*/
         }
 
         return possibleMoves;
 
+    }
+
+    private ArrayList<Piece> clonePieceList(ArrayList<Piece> pieceList) {
+        ArrayList<Piece> clonedList = new ArrayList<>();
+        for (Piece piece : pieceList) {
+            PieceType type = piece.getPieceType();
+
+            if (type == PieceType.PAWN) {
+                clonedList.add(new Pawn(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.KNIGHT) {
+                clonedList.add(new Knight(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.BISHOP) {
+                clonedList.add(new Bishop(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.ROOK) {
+                clonedList.add(new Rook(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.QUEEN) {
+                clonedList.add(new Queen(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.KING) {
+                clonedList.add(new King(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            }
+        }
+        return clonedList;
     }
 
     private ArrayList<Move> recogniseCaptureMoves(Piece piece, ArrayList<Piece> pieceList, ArrayList<Move> moves) {
@@ -305,5 +332,19 @@ public class MainController {
         return moves;
 
     }
+
+    enum CellColor {
+        COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
+        private Color color;
+
+        CellColor(Color color) {
+            this.color = color;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+    }
+
 
 }

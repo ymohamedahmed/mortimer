@@ -105,7 +105,6 @@ public class Piece {
         return color;
     }
 
-
     public int getNumberOfMoves() {
         return numberOfMoves;
     }
