@@ -1,21 +1,19 @@
 package engine;
 
 import dme.Evaluation;
-import dme.Tree;
+import dme.Node;
 
 import java.util.ArrayList;
 
 public class Board {
-    public static ArrayList<Tree.Node> getAllMoves(ArrayList<Piece> pieceList, PieceColor color) {
-        ArrayList<Tree.Node> childNodes = new ArrayList<Tree.Node>();
+    public static ArrayList<Node> getAllMoves(ArrayList<Piece> pieceList, PieceColor color) {
+        ArrayList<Node> childNodes = new ArrayList<Node>();
         for (Piece piece : pieceList) {
             if (piece.getColor() == color) {
                 for (Move move : piece.getMovesList()) {
                     ArrayList<Piece> pieceListUpdated = updatePieceList(move, pieceList);
                     double evalValue = Evaluation.totalEvaluation(pieceListUpdated, color);
-                    Tree.Node node = new Tree.Node(evalValue);
-                    node.setMove(move);
-                    node.setPieceList(pieceListUpdated);
+                    Node node = new Node(evalValue);
                     childNodes.add(node);
                 }
             }

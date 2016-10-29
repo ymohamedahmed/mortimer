@@ -1,5 +1,6 @@
 package ui.controllers;
 
+import dme.Search;
 import engine.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -24,6 +25,8 @@ public class MainController {
 
     private ArrayList<Position> blueSquares = new ArrayList<>();
     private Position oldPos;
+    private PieceColor playerColor = PieceColor.WHITE;
+    private PieceColor aiColor = PieceColor.BLACK;
 
     public void initialize() {
         playGame();
@@ -122,11 +125,13 @@ public class MainController {
         return moveFound;
     }
 
-    private Piece move(ArrayList<Piece> pieceList, Position oldPosition, Position newPosition, boolean repaint) {
+    private void move(ArrayList<Piece> pieceList, Position oldPosition, Position newPosition, boolean repaint) {
         Piece pieceCaptured = null;
+        PieceColor colorMoved = null;
         try {
             Piece piece = Board.getPiece(pieceList, new Position(oldPosition.getRow(), oldPosition.getCol()));
             Move move = getMove(piece.getMovesList(), newPosition);
+            colorMoved = move.getPiece().getColor();
             //Checks if the move selected is a castling move
             //If so changes the position of the rook based on whether
             //it is Queenside or Kingside castling
@@ -166,15 +171,24 @@ public class MainController {
 
         } catch (NullPointerException e) {
         }
-
         if (repaint) {
             // Clear the canvas and then repaint it
             clearCanvas();
             paintChessBoard(pieceList);
             updateMoveList(pieceList, true);
         }
-        return pieceCaptured;
+        if (colorMoved != aiColor) {
+            moveAI(pieceList);
+        }
     }
+
+    private void moveAI(ArrayList<Piece> pieceList) {
+        Search search = new Search();
+        System.out.println("MOVING AI");
+        Move moveSelected = search.rootNegamax(pieceList, aiColor);
+        move(pieceList, moveSelected.getPiece().getPos(), moveSelected.getPosition(), true);
+    }
+
 
     private void undoMove(Piece piece, ArrayList<Piece> pieceList, Move move, Position oldPos, Piece pieceCaptured) {
         piece.setPosition(oldPos);

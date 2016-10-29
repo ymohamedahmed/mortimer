@@ -7,6 +7,11 @@ public enum PieceColor {
     PieceColor(int colorFactor) {
         this.colorFactor = colorFactor;
 	}
+
+    public static PieceColor getColorByFactor(int factor) {
+        return (factor == 1) ? PieceColor.WHITE : PieceColor.BLACK;
+    }
+
 	public int getColorFactor(){
 		return colorFactor;
 	}
