@@ -26,7 +26,6 @@ public class Search {
             children = grandChildren;
             i++;
             colorFactor = colorFactor * -1;
-            System.out.println(i);
         }
         Move move = null;
         System.out.println("REACHED NEGAMAX");
@@ -36,18 +35,24 @@ public class Search {
                 // move = node.getMove();
             }
         }
+
+        //
+        int maxScore = 0;
+
         return move;
     }
 
     private double negamax(double alpha, double beta, Node node, int depth, int colorFactor) {
-        if (depth == 0 || node.isTerminal()) {
+        if (depth == 0) {
             return colorFactor * node.getEvalValue();
         }
         //TODO add sorting algorithm here
         ArrayList<Node> children = node.getChildren();
         double bestValue = Double.NEGATIVE_INFINITY;
         for (Node childNode : children) {
+            //makeMove();
             double v = -negamax(-beta, -alpha, childNode, depth - 1, -colorFactor);
+            //unmakeMove();
             bestValue = Math.max(bestValue, v);
             alpha = Math.max(alpha, v);
             if (alpha >= beta) {
