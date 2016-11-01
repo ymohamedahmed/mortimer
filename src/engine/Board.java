@@ -59,16 +59,6 @@ public class Board {
         return answer;
     }
 
-    public static ArrayList<Move> getAllMovesColor(ArrayList<Piece> pieceList, PieceColor color) {
-        ArrayList<Move> possibleMoves = new ArrayList<>();
-        for (Piece piece : pieceList) {
-            if (piece.getColor() == color) {
-                possibleMoves.addAll(piece.getMovesList());
-            }
-        }
-        return possibleMoves;
-    }
-
 
 
 }
