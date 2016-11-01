@@ -1,26 +1,8 @@
 package engine;
 
-import dme.Evaluation;
-import dme.Node;
-
 import java.util.ArrayList;
 
 public class Board {
-    public static ArrayList<Node> getAllMoves(ArrayList<Piece> pieceList, PieceColor color) {
-        ArrayList<Node> childNodes = new ArrayList<Node>();
-        for (Piece piece : pieceList) {
-            if (piece.getColor() == color) {
-                for (Move move : piece.getMovesList()) {
-                    ArrayList<Piece> pieceListUpdated = updatePieceList(move, pieceList);
-                    double evalValue = Evaluation.totalEvaluation(pieceListUpdated, color);
-                    Node node = new Node(evalValue);
-                    childNodes.add(node);
-                }
-            }
-
-        }
-        return childNodes;
-    }
 
     public static ArrayList<Piece> updatePieceList(Move move, ArrayList<Piece> pieceList) {
         for (Piece piece : pieceList) {
@@ -76,5 +58,17 @@ public class Board {
         }
         return answer;
     }
+
+    public static ArrayList<Move> getAllMovesColor(ArrayList<Piece> pieceList, PieceColor color) {
+        ArrayList<Move> possibleMoves = new ArrayList<>();
+        for (Piece piece : pieceList) {
+            if (piece.getColor() == color) {
+                possibleMoves.addAll(piece.getMovesList());
+            }
+        }
+        return possibleMoves;
+    }
+
+
 
 }

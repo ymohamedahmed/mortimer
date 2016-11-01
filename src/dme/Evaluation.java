@@ -8,7 +8,7 @@ import engine.PieceType;
 import java.util.ArrayList;
 
 public class Evaluation {
-    private static double evalMat(ArrayList<Piece> pieceList) {
+    private double evalMat(ArrayList<Piece> pieceList) {
         int kingConst = 200;
         int queenConst = 9;
         int rookConst = 5;
@@ -33,7 +33,7 @@ public class Evaluation {
         return eval;
     }
 
-    private static double evalMob(ArrayList<Piece> pieceList) {
+    private double evalMob(ArrayList<Piece> pieceList) {
         double mobilityFactor = 0.1;
         int whiteMoves = 0;
         int blackMoves = 0;
@@ -48,8 +48,8 @@ public class Evaluation {
         return mobilityFactor * (whiteMoves - blackMoves);
     }
 
-    private static double evalPos(ArrayList<Piece> pieceList) {
-        double positionFactor = 50;
+    private double evalPos(ArrayList<Piece> pieceList) {
+        double positionFactor = 150;
         int whiteScore = 0;
         int blackScore = 0;
         for (Piece piece : pieceList) {
@@ -64,7 +64,7 @@ public class Evaluation {
 
     }
 
-    public static double totalEvaluation(ArrayList<Piece> pieceList, PieceColor pieceColor) {
+    public double totalEvaluation(ArrayList<Piece> pieceList, PieceColor pieceColor) {
         return (pieceColor.getColorFactor() * (evalMat(pieceList) + evalMob(pieceList))) + evalPos(pieceList);
     }
 

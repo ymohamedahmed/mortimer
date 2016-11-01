@@ -114,24 +114,17 @@ public class MainController {
         }
     }
 
-    private Move getMove(ArrayList<Move> moves, Position finalPosition) {
-        Move moveFound = null;
-        for (Move move : moves) {
-            if (move.getPosition().getRow() == finalPosition.getRow()
-                    && move.getPosition().getCol() == finalPosition.getCol()) {
-                moveFound = move;
-            }
-        }
-        return moveFound;
-    }
+
 
     private void move(ArrayList<Piece> pieceList, Position oldPosition, Position newPosition, boolean repaint) {
         Piece pieceCaptured = null;
         PieceColor colorMoved = null;
+        System.out.println("move");
         try {
             Piece piece = Board.getPiece(pieceList, new Position(oldPosition.getRow(), oldPosition.getCol()));
             Move move = getMove(piece.getMovesList(), newPosition);
             colorMoved = move.getPiece().getColor();
+            System.out.println("COLOR MOVED: " + colorMoved);
             //Checks if the move selected is a castling move
             //If so changes the position of the rook based on whether
             //it is Queenside or Kingside castling
@@ -177,15 +170,28 @@ public class MainController {
             paintChessBoard(pieceList);
             updateMoveList(pieceList, true);
         }
-        if (colorMoved != aiColor) {
+        if (colorMoved == playerColor && colorMoved != null) {
+            System.out.println("ColorMoved" + colorMoved);
             moveAI(pieceList);
         }
+
     }
 
+    private Move getMove(ArrayList<Move> moves, Position finalPosition) {
+        Move moveFound = null;
+        for (Move move : moves) {
+            if (move.getPosition().getRow() == finalPosition.getRow()
+                    && move.getPosition().getCol() == finalPosition.getCol()) {
+                moveFound = move;
+            }
+        }
+        return moveFound;
+    }
     private void moveAI(ArrayList<Piece> pieceList) {
         Search search = new Search();
-        System.out.println("MOVING AI");
         Move moveSelected = search.rootNegamax(pieceList, aiColor);
+        System.out.println("COLOR AI MOVE: " + moveSelected.getPiece().getColor());
+        System.out.println("AI MOVE : " + moveSelected.getPiece().getPieceType() + " " + moveSelected.getPiece().getColor() + " to (" + moveSelected.getPosition().getRow() + " , " + moveSelected.getPosition().getCol() + " )");
         move(pieceList, moveSelected.getPiece().getPos(), moveSelected.getPosition(), true);
     }
 
@@ -204,11 +210,6 @@ public class MainController {
         }
     }
 
-    private void revertMoveList(ArrayList<ArrayList<Move>> move, ArrayList<Piece> pieceList) {
-        for (int i = 0; i < move.size(); i++) {
-            pieceList.get(i).setMovesList(move.get(i));
-        }
-    }
 
     private ArrayList<Move> getMoves(Piece piece, ArrayList<Piece> pieceList, boolean removeCheck) {
         ArrayList<Move> legalMoves = new ArrayList<Move>();

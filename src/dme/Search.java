@@ -1,58 +1,49 @@
 package dme;
 
-import engine.Board;
-import engine.Move;
-import engine.Piece;
-import engine.PieceColor;
+import engine.*;
 
 import java.util.ArrayList;
 
 public class Search {
     public Move rootNegamax(ArrayList<Piece> pieceList, PieceColor color) {
-        int depth = 5;
-        Tree tree = new Tree(0);
-        Node rootNode = tree.getRootNode();
-        int colorFactor = color.getColorFactor();
-        ArrayList<Node> children = Board.getAllMoves(pieceList, color);
-        rootNode.setChildren(children);
-        int i = 0;
-        while (i <= depth) {
-            ArrayList<Node> grandChildren = new ArrayList<>();
-            for (Node node : children) {
-                ArrayList<Node> grandChild = Board.getAllMoves(pieceList, PieceColor.getColorByFactor(colorFactor));
-                node.setChildren(grandChild);
-                grandChild.forEach(child -> grandChildren.add(child));
-            }
-            children = grandChildren;
-            i++;
-            colorFactor = colorFactor * -1;
-        }
-        Move move = null;
-        System.out.println("REACHED NEGAMAX");
-        double bestMove = negamax(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, rootNode, depth, color.getColorFactor());
-        for (Node node : children) {
-            if (node.getEvalValue() == bestMove) {
-                // move = node.getMove();
+        int depth = 8;
+        double maxScore = 0;
+        Move bestMove = null;
+        for (Move move : Board.getAllMovesColor(clonePieceList(pieceList), color)) {
+            double score = negamax(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, pieceList, depth,
+                    color.getColorFactor());
+            System.out.println("Score  " + score);
+            if (score > maxScore) {
+                maxScore = score;
+                bestMove = move;
             }
         }
 
-        //
-        int maxScore = 0;
-
-        return move;
+        return bestMove;
     }
 
-    private double negamax(double alpha, double beta, Node node, int depth, int colorFactor) {
+    private double negamax(double alpha, double beta, ArrayList<Piece> pieceList, int depth, int colorFactor) {
         if (depth == 0) {
-            return colorFactor * node.getEvalValue();
+            return new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor));
         }
-        //TODO add sorting algorithm here
-        ArrayList<Node> children = node.getChildren();
+        // TODO add sorting algorithm here
         double bestValue = Double.NEGATIVE_INFINITY;
-        for (Node childNode : children) {
-            //makeMove();
-            double v = -negamax(-beta, -alpha, childNode, depth - 1, -colorFactor);
-            //unmakeMove();
+        for (Move move : Board.getAllMovesColor(pieceList, PieceColor.getColorByFactor(colorFactor))) {
+            // Move piece
+            ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
+            Position oldPosition = move.getPiece().getPos();
+            Piece pieceTemp = Board.getPiece(pieceListTemp, move.getPiece().getPos());
+            if (move.isCapture()) {
+                Piece capPiece = Board.getPiece(pieceListTemp, move.getPosition());
+                pieceListTemp.remove(capPiece);
+            }
+            pieceTemp.setPosition(move.getPosition());
+            pieceTemp.setNumberOfMoves(move.getPiece().getNumberOfMoves() + 1);
+            //updateMoveList(pieceListTemp, false);
+            double v = -negamax(-beta, -alpha, pieceListTemp, depth - 1, -colorFactor);
+            // Undo Move
+            pieceTemp.setPosition(oldPosition);
+            pieceTemp.setNumberOfMoves(move.getPiece().getNumberOfMoves() - 1);
             bestValue = Math.max(bestValue, v);
             alpha = Math.max(alpha, v);
             if (alpha >= beta) {
@@ -62,4 +53,24 @@ public class Search {
         return bestValue;
     }
 
+    private ArrayList<Piece> clonePieceList(ArrayList<Piece> pieceList) {
+        ArrayList<Piece> clonedList = new ArrayList<>();
+        for (Piece piece : pieceList) {
+            PieceType type = piece.getPieceType();
+            if (type == PieceType.PAWN) {
+                clonedList.add(new Pawn(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.KNIGHT) {
+                clonedList.add(new Knight(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.BISHOP) {
+                clonedList.add(new Bishop(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.ROOK) {
+                clonedList.add(new Rook(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.QUEEN) {
+                clonedList.add(new Queen(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            } else if (type == PieceType.KING) {
+                clonedList.add(new King(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
+            }
+        }
+        return clonedList;
+    }
 }

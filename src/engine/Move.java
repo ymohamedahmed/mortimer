@@ -9,26 +9,26 @@ public class Move {
 
     public Move(Piece piece, Position finalPosition, boolean castling) {
         this.piece = piece;
-		this.finalPosition = finalPosition;
+        this.finalPosition = finalPosition;
         this.castling = castling;
     }
 
 
-	public Piece getPiece() {
-		return piece;
-	}
+    public Piece getPiece() {
+        return piece;
+    }
 
-	public void setPiece(Piece piece) {
-		this.piece = piece;
-	}
+    public void setPiece(Piece piece) {
+        this.piece = piece;
+    }
 
-	public Position getPosition() {
-		return finalPosition;
-	}
+    public Position getPosition() {
+        return finalPosition;
+    }
 
-	public void setPosition(Position position) {
-		this.finalPosition = position;
-	}
+    public void setPosition(Position position) {
+        this.finalPosition = position;
+    }
 
     public boolean isCastling() {
         return castling;
