@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class Evaluation {
     private double evalMat(ArrayList<Piece> pieceList) {
-        int kingConst = 200;
-        int queenConst = 9;
+        int kingConst = 600;
+        int queenConst = 450;
         int rookConst = 5;
         int knightConst = 3;
         int bishopConst = 3;
