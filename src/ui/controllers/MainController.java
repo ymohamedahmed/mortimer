@@ -99,11 +99,17 @@ public class MainController {
 			paintChessBoard(pieceList);
 			GraphicsContext g = chessPane.getGraphicsContext2D();
 			// Show available moves by painting a blue circle in the cells
-			blueSquares.clear();
-			g.setFill(Color.BLUE);
+			blueSquares.clear();	
 			for (Move move : moves) {
-				g.fillOval((move.getPosition().getCol()) * cellSize, (7 - move.getPosition().getRow()) * cellSize,
-						cellSize, cellSize);
+				if (!move.isCapture()) {
+					g.setFill(Color.BLUE);
+					g.fillOval((move.getPosition().getCol()) * cellSize, (7 - move.getPosition().getRow()) * cellSize,
+							cellSize, cellSize);
+				}else{
+					g.setFill(Color.RED);
+					g.fillOval((move.getPosition().getCol()) * cellSize, (7 - move.getPosition().getRow()) * cellSize,
+							cellSize/5, cellSize/5);
+				}
 				blueSquares.add(move.getPosition());
 			}
 
@@ -111,15 +117,12 @@ public class MainController {
 	}
 
 	private Move rootNegamax(ArrayList<Piece> pieceList, PieceColor color) {
-		int depth = 10;
-		double maxScore = 0;
+		int depth = 50;
+		double maxScore = Double.NEGATIVE_INFINITY;
 		Move bestMove = null;
 		ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, color);
 		double startTime = System.currentTimeMillis();
-		// debugging:
-		if (possibleMoves.size() == 0) {
-			System.out.println("NO MOVES AVAILABLE");
-		}
+		noOfMovesAnalyzed = 0;
 		noOfMovesAnalyzed += possibleMoves.size();
 		for (Move move : possibleMoves) {
 			ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
@@ -216,10 +219,7 @@ public class MainController {
 			}
 			// If it is a capture move, the piece to be captured is found
 			if (move.isCapture()) {
-				pieceCaptured = Board.getPiece(pieceList, move.getPosition());
-				if (pieceCaptured.getPieceType() == PieceType.QUEEN) {
-					System.out.println("QUEEN CAPTURED");
-				}
+				pieceCaptured = Board.getPiece(pieceList, move.getPosition());				
 			}
 			// Finds the piece captured during en passant
 			if (move.isEnPassant()) {
@@ -393,27 +393,26 @@ public class MainController {
 		}
 		// Consider the case when the piece variable is the king in check
 		boolean kingInCheck = piece.getPieceType() == PieceType.KING && piece.getColor() == color;
-		
-			// Loop through moves available to a piece
-			// If any of the moves result in check remove them
-			while (moveIterator.hasNext()) {
-				Move move = moveIterator.next();
-				ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
-				Piece pieceTemp = Board.getPiece(pieceListTemp, piece.getPos());
-				if (move.isCapture()) {
-					Piece capPiece = Board.getPiece(pieceListTemp, move.getPosition());
-					pieceListTemp.remove(capPiece);
-				}
-				pieceTemp.setPosition(move.getPosition());
-				pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() + 1);
-				updateMoveList(pieceListTemp, false);
-				if (((King) king).check(pieceListTemp, (kingInCheck) ? move.getPosition() : king.getPos())) {
-					moveIterator.remove();
-				}
-				pieceTemp.setPosition(oldPosition);
-				pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() - 1);
+
+		// Loop through moves available to a piece
+		// If any of the moves result in check remove them
+		while (moveIterator.hasNext()) {
+			Move move = moveIterator.next();
+			ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
+			Piece pieceTemp = Board.getPiece(pieceListTemp, piece.getPos());
+			if (move.isCapture()) {
+				Piece capPiece = Board.getPiece(pieceListTemp, move.getPosition());
+				pieceListTemp.remove(capPiece);
 			}
-		
+			pieceTemp.setPosition(move.getPosition());
+			pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() + 1);
+			updateMoveList(pieceListTemp, false);
+			if (((King) king).check(pieceListTemp, (kingInCheck) ? move.getPosition() : king.getPos())) {
+				moveIterator.remove();
+			}
+			pieceTemp.setPosition(oldPosition);
+			pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() - 1);
+		}
 
 		return possibleMoves;
 
