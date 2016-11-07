@@ -9,14 +9,11 @@ import java.util.ArrayList;
 
 public class Evaluation {
     private double evalMat(ArrayList<Piece> pieceList) {
-        int kingConst = 600;
-        int queenConst = 450;
+        int queenConst = 9;
         int rookConst = 5;
         int knightConst = 3;
         int bishopConst = 3;
         int pawnConst = 1;
-        int kingW = Board.noOfPieces(pieceList, PieceType.KING, PieceColor.WHITE);
-        int kingB = Board.noOfPieces(pieceList, PieceType.KING, PieceColor.BLACK);
         int queenW = Board.noOfPieces(pieceList, PieceType.QUEEN, PieceColor.WHITE);
         int queenB = Board.noOfPieces(pieceList, PieceType.QUEEN, PieceColor.BLACK);
         int rookW = Board.noOfPieces(pieceList, PieceType.ROOK, PieceColor.WHITE);
@@ -28,7 +25,7 @@ public class Evaluation {
         int pawnW = Board.noOfPieces(pieceList, PieceType.PAWN, PieceColor.WHITE);
         int pawnB = Board.noOfPieces(pieceList, PieceType.PAWN, PieceColor.BLACK);
 
-        double eval = kingConst * (kingW - kingB) + queenConst * (queenW - queenB) + rookConst * (rookW - rookB)
+        double eval = queenConst * (queenW - queenB) + rookConst * (rookW - rookB)
                 + knightConst * (knightW - knightB) + bishopConst * (bishopW - bishopB) + pawnConst * (pawnW - pawnB);
         return eval;
     }
@@ -65,7 +62,8 @@ public class Evaluation {
     }
 
     public double totalEvaluation(ArrayList<Piece> pieceList, PieceColor pieceColor) {
-        return (pieceColor.getColorFactor() * (evalMat(pieceList) + evalMob(pieceList))) + evalPos(pieceList);
+        // return (pieceColor.getColorFactor() * (evalMat(pieceList) + evalMob(pieceList))) + evalPos(pieceList);
+        return (pieceColor.getColorFactor() * (evalMat(pieceList) + evalMob(pieceList)));
     }
 
 
