@@ -1,4 +1,4 @@
-package engine;
+package core;
 
 public enum PieceColor {
     WHITE(1), BLACK(-1);

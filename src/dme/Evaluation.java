@@ -1,11 +1,8 @@
 package dme;
 
-import java.util.ArrayList;
+import core.*;
 
-import core.Board;
-import core.Piece;
-import core.PieceColor;
-import core.PieceType;
+import java.util.ArrayList;
 
 public class Evaluation {
     private double evalMat(ArrayList<Piece> pieceList) {
@@ -51,23 +48,24 @@ public class Evaluation {
         double bishopConst = 400;
         double pawnConst = 70;
         for(Piece piece : pieceList){
-        	if(piece.getNumberOfMoves() != 0){
+            int colorFactor = piece.getColor().getColorFactor();
+            if(piece.getNumberOfMoves() != 0){
         		switch(piece.getPieceType()){
         			case QUEEN:
-        				score += queenConst;
-        				break;
+                        score += (queenConst * colorFactor);
+                        break;
         			case ROOK:
-        				score += rookConst;
-        				break;
+                        score += (rookConst * colorFactor);
+                        break;
         			case KNIGHT:
-        				score += knightConst;
-        				break;
+                        score += (knightConst * colorFactor);
+                        break;
         			case BISHOP:
-        				score += bishopConst;
-        				break;
+                        score += (bishopConst * colorFactor);
+                        break;
         			case PAWN:
-        				score += pawnConst;
-        				break;
+                        score += (pawnConst * colorFactor);
+                        break;
         			default:
         				score += 0;
         				break;
@@ -78,10 +76,19 @@ public class Evaluation {
     }
     private double advancedPawns(ArrayList<Piece> pieceList){
     	double score = 0;
-    	for(Piece piece : pieceList){    		
+        double advancePawnConstant = 40;
+        double promotionBonus = 350;
+        for(Piece piece : pieceList){
     		if(piece.getPieceType() == PieceType.PAWN){
-    			
-    		}
+                int row = piece.getPos().getRow();
+                PieceColor color = piece.getColor();
+                if ((color == PieceColor.WHITE && row >= 4) || (color == PieceColor.BLACK && row <= 3)) {
+                    score += (color == PieceColor.WHITE) ? (row * advancePawnConstant) : -1 * ((8 - row) * advancePawnConstant);
+                }
+                if (((Pawn) piece).isPawnPromotion(pieceList)) {
+                    score += (color == PieceColor.WHITE) ? promotionBonus : -1 * (promotionBonus);
+                }
+            }
     	}
     	return score;
     }

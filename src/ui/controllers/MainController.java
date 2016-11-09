@@ -1,7 +1,7 @@
 package ui.controllers;
 
+import core.*;
 import dme.Evaluation;
-import engine.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ChoiceDialog;
@@ -339,8 +339,8 @@ public class MainController {
 				: removePositionsOffBoard(captureRecognised);
 	}
 
-	private ArrayList<Move> removeIllegalMoves(Piece piece, ArrayList<Piece> pieceList, engine.PieceColor color,
-			ArrayList<Move> possibleMoves) {
+	private ArrayList<Move> removeIllegalMoves(Piece piece, ArrayList<Piece> pieceList, core.PieceColor color,
+											   ArrayList<Move> possibleMoves) {
 		ArrayList<Move> intermediate = removeMovesToKing(pieceList, removePositionsOffBoard(possibleMoves));
 		return removeCheckMoves(piece, pieceList, color, intermediate);
 	}
@@ -376,8 +376,8 @@ public class MainController {
 		return moves;
 	}
 
-	private ArrayList<Move> removeCheckMoves(Piece piece, ArrayList<Piece> pieceList, engine.PieceColor color,
-			ArrayList<Move> possibleMoves) {
+	private ArrayList<Move> removeCheckMoves(Piece piece, ArrayList<Piece> pieceList, core.PieceColor color,
+											 ArrayList<Move> possibleMoves) {
 		Piece king = null;
 
 		// Iterator has to be used to avoid concurrent modification exception
