@@ -3,6 +3,7 @@ package core;
 import java.util.ArrayList;
 
 public class King extends Piece {
+    private int noOfCastleMoves;
     public King(Position pos, PieceColor color, int numberOfMoves) {
         super(PieceType.KING, pos, color, numberOfMoves);
         this.setMovesList(new ArrayList<Move>());
@@ -46,6 +47,14 @@ public class King extends Piece {
             value = kingTableMidgame[index];
         }
         return value;
+    }
+
+    public int getNoOfCastleMoves() {
+        return noOfCastleMoves;
+    }
+
+    public void setNoOfCastleMoves(int noOfCastleMoves) {
+        this.noOfCastleMoves = noOfCastleMoves;
     }
 
     public ArrayList<Move> getLegalMoves(ArrayList<Piece> pieceList) {
