@@ -26,6 +26,7 @@ public class Evaluation {
         if (!sideNeutral) {
             eval = queenConst * (queenW - queenB) + rookConst * (rookW - rookB) + knightConst * (knightW - knightB)
                     + bishopConst * (bishopW - bishopB) + pawnConst * (pawnW - pawnB);
+            //System.out.println("MAT EVAL : "  + eval);
         } else {
             eval = queenConst * (queenW + queenB) + rookConst * (rookW + rookB) + knightConst * (knightW + knightB)
                     + bishopConst * (bishopW + bishopB) + pawnConst * (pawnW + pawnB);
@@ -34,7 +35,6 @@ public class Evaluation {
             eval = queenConst * (2) + rookConst * (2) + knightConst * (4) + bishopConst * (4) + pawnConst * (16)
                     + kingConst * (2);
         }
-        System.out.println("EVAL : " + eval);
         return eval;
     }
 
@@ -42,6 +42,7 @@ public class Evaluation {
         double mobilityFactor = 10;
         int whiteMoves = 0;
         int blackMoves = 0;
+        double score = 0;
         for (Piece piece : pieceList) {
             int noOfMoves = piece.getMovesList().size();
             if (piece.getColor() == PieceColor.BLACK) {
@@ -50,7 +51,9 @@ public class Evaluation {
                 whiteMoves += noOfMoves;
             }
         }
-        return mobilityFactor * (whiteMoves - blackMoves);
+        score = mobilityFactor * (whiteMoves - blackMoves);
+        //System.out.println("Mob EVAL : "  + score);
+        return score;
     }
 
     private double developmentEval(ArrayList<Piece> pieceList) {
@@ -80,11 +83,13 @@ public class Evaluation {
                         score += (pawnConst * colorFactor);
                         break;
                     default:
+                        //System.out.println("Evaluation.developmentEval");
                         score += 0;
                         break;
                 }
             }
         }
+        //System.out.println("DEV EVAL : "  + score);
         return score;
     }
 
@@ -105,6 +110,7 @@ public class Evaluation {
                 }
             }
         }
+        //System.out.println("PAWN ADV EVAL : "  + score);
         return score;
     }
 
@@ -114,6 +120,7 @@ public class Evaluation {
         int noOfBishopsBlack = Board.noOfPieces(pieceList, PieceType.BISHOP, PieceColor.BLACK);
         double whiteScore = (noOfBishopsWhite == 2) ? bishopPairBonus : 0;
         double blackScore = (noOfBishopsBlack == 2) ? bishopPairBonus : 0;
+        //System.out.println("BISHOP PAIR EVAL : "  + (whiteScore-blackScore));
         return whiteScore - blackScore;
     }
 
@@ -127,6 +134,7 @@ public class Evaluation {
                 }
             }
         }
+        //System.out.println("KNIGHT EDGE EVAL : "  + score);
         return score;
     }
 
@@ -139,6 +147,7 @@ public class Evaluation {
         if (endgame) {
             score = kingEndGameConst * (noOfKingWhite - noOfKingBlack);
         }
+        //System.out.println("KING END EVAL : "  + score);
         return score;
     }
 
@@ -179,7 +188,7 @@ public class Evaluation {
                 score -= castleBonus;
             }
         }
-
+        //System.out.println("CASTLING EVAL : "  + score);
         return score;
     }
 
@@ -222,7 +231,7 @@ public class Evaluation {
         if (noOfBlackPawns == 8) {
             score -= fullPawnBonus;
         }
-
+        //System.out.println("PAWN ARRANGEMENT EVAL : "  + score);
         return score;
     }
 
@@ -246,6 +255,7 @@ public class Evaluation {
             }
         }
         score = (noOfBadBishopsWhite * incorrectBishopPosConst) - (noOfBadBishopsBlack * incorrectBishopPosConst);
+        //System.out.println("BISHOP STRENGTH EVAL : "  + score);
         return score;
     }
 
@@ -289,6 +299,7 @@ public class Evaluation {
         double positionFactor = 50;
         int whiteScore = 0;
         int blackScore = 0;
+        double overallScore = 0;
         for (Piece piece : pieceList) {
             int score = Piece.getPieceTableValue(piece, pieceList);
             if (piece.getColor() == PieceColor.BLACK) {
@@ -297,15 +308,16 @@ public class Evaluation {
                 whiteScore += score;
             }
         }
-        return positionFactor * (whiteScore - blackScore);
-
+        overallScore = positionFactor * (whiteScore - blackScore);
+        //System.out.println("POS EVAL : "  + overallScore);
+        return overallScore;
     }
 
     public double totalEvaluation(ArrayList<Piece> pieceList, PieceColor pieceColor) {
-        return pieceColor.getColorFactor() * (matEval(pieceList, false, false) + mobEval(pieceList)
+        return matEval(pieceList, false, false) + mobEval(pieceList)
                 + developmentEval(pieceList) + pawnAdvancementEval(pieceList) + bishopPairEval(pieceList)
                 + knightOnEdgeEval(pieceList) + kingEndGameEval(pieceList) + castlingEval(pieceList)
-                + pawnArrangementEval(pieceList) + bishopStrengthEval(pieceList) + posEval(pieceList));
+                + pawnArrangementEval(pieceList) + bishopStrengthEval(pieceList) + posEval(pieceList);
 
     }
 

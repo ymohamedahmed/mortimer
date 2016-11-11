@@ -117,7 +117,7 @@ public class MainController {
     }
 
     private Move rootNegamax(ArrayList<Piece> pieceList, PieceColor color) {
-        int depth = 16;
+        int depth = 15;
         double maxScore = Double.NEGATIVE_INFINITY;
         Move bestMove = null;
         ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, color);
@@ -145,7 +145,7 @@ public class MainController {
 
     private double negamax(double alpha, double beta, ArrayList<Piece> pieceList, int depth, int colorFactor) {
         if (depth == 0) {
-            return new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor));
+            return colorFactor * new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor));
         }
         // TODO add sorting algorithm here
         double bestValue = Double.NEGATIVE_INFINITY;
