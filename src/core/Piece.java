@@ -21,16 +21,15 @@ public class Piece {
     public static int getIndex(Piece piece) {
         int index = 0;
         if (piece.getColor() == PieceColor.WHITE) {
-            index = (8 * piece.getPos().getRow()) + piece.getPos().getCol();
+            index = 8 * (7 - piece.getPos().getRow()) + piece.getPos().getCol();
         } else {
-            index = (8 * (7 - piece.getPos().getRow())) + piece.getPos().getCol();
+            index = 8 * ((piece.getPos().getRow())) + piece.getPos().getCol();
         }
         return index;
     }
     public static int getPieceTableValue(Piece piece, ArrayList<Piece> pieceList) {
         int value = 0;
-        int index = 0;
-
+        int index = Piece.getIndex(piece);
         switch (piece.getPieceType()) {
             case PAWN:
                 value = Pawn.getPositionValue(index);
@@ -50,7 +49,6 @@ public class Piece {
             case KING:
                 value = King.getPositionValue(index, pieceList);
                 break;
-
         }
         return value;
     }

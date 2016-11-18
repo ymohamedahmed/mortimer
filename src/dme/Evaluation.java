@@ -51,6 +51,8 @@ public class Evaluation {
                 whiteMoves += noOfMoves;
             }
         }
+        //System.out.println("WHITE MOVES: " + whiteMoves);
+        //System.out.println("BLACK MOVES: " + blackMoves);
         score = mobilityFactor * (whiteMoves - blackMoves);
         //System.out.println("Mob EVAL : "  + score);
         return score;
@@ -83,7 +85,6 @@ public class Evaluation {
                         score += (pawnConst * colorFactor);
                         break;
                     default:
-                        //System.out.println("Evaluation.developmentEval");
                         score += 0;
                         break;
                 }
@@ -308,16 +309,18 @@ public class Evaluation {
                 whiteScore += score;
             }
         }
+        //System.out.println("WHITE SCORE : " + whiteScore);
+        //System.out.println("BLACK SCORE: " + blackScore);
         overallScore = positionFactor * (whiteScore - blackScore);
         //System.out.println("POS EVAL : "  + overallScore);
         return overallScore;
     }
 
     public double totalEvaluation(ArrayList<Piece> pieceList, PieceColor pieceColor) {
-        return matEval(pieceList, false, false) + mobEval(pieceList)
+        return pieceColor.getColorFactor() * (matEval(pieceList, false, false) + mobEval(pieceList)
                 + developmentEval(pieceList) + pawnAdvancementEval(pieceList) + bishopPairEval(pieceList)
                 + knightOnEdgeEval(pieceList) + kingEndGameEval(pieceList) + castlingEval(pieceList)
-                + pawnArrangementEval(pieceList) + bishopStrengthEval(pieceList) + posEval(pieceList);
+                + pawnArrangementEval(pieceList) + bishopStrengthEval(pieceList) + posEval(pieceList));
 
     }
 

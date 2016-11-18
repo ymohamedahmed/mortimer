@@ -24,8 +24,8 @@ public class MainController {
 
     private ArrayList<Position> blueSquares = new ArrayList<>();
     private Position oldPos;
-    private PieceColor playerColor = PieceColor.WHITE;
-    private PieceColor aiColor = PieceColor.BLACK;
+    private PieceColor playerColor = PieceColor.BLACK;
+    private PieceColor aiColor = PieceColor.WHITE;
 
     // DEBUGGING
     private int noOfMovesAnalyzed = 0;
@@ -64,6 +64,9 @@ public class MainController {
         ArrayList<Piece> pieceList = Piece.getInitialPieceList();
         double cellSize = paintChessBoard(pieceList);
         chessPane.setOnMouseClicked(evt -> clickListenerChessPane(pieceList, evt, cellSize));
+        if (aiColor == PieceColor.WHITE) {
+            moveAI(pieceList);
+        }
     }
 
     private void clearCanvas() {
@@ -117,7 +120,7 @@ public class MainController {
     }
 
     private Move rootNegamax(ArrayList<Piece> pieceList, PieceColor color) {
-        int depth = 15;
+        int depth = 2;
         double maxScore = Double.NEGATIVE_INFINITY;
         Move bestMove = null;
         ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, color);
@@ -128,7 +131,7 @@ public class MainController {
             ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
             pieceListTemp = move(pieceListTemp, move, false);
             updateMoveList(pieceListTemp, false);
-            double score = negamax(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, pieceListTemp, depth,
+            double score = negamax(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, pieceListTemp, depth,
                     color.getColorFactor());
             System.out.println("SCORE: " + score);
             if (score > maxScore) {
@@ -145,20 +148,18 @@ public class MainController {
 
     private double negamax(double alpha, double beta, ArrayList<Piece> pieceList, int depth, int colorFactor) {
         if (depth == 0) {
-            return colorFactor * new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor));
+            return colorFactor
+                    * (new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor)));
         }
-        // TODO add sorting algorithm here
         double bestValue = Double.NEGATIVE_INFINITY;
-
-        // Move piece
-        // ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
         ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, PieceColor.getColorByFactor(colorFactor));
+        possibleMoves = sortMoves(pieceList, possibleMoves);
         noOfMovesAnalyzed += possibleMoves.size();
         for (Move move : possibleMoves) {
             ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
             pieceListTemp = move(pieceListTemp, move, false);
             updateMoveList(pieceListTemp, false);
-            double v = -negamax(-beta, -alpha, pieceListTemp, depth - 1, -colorFactor);
+            double v = -negamax(-beta, -alpha, pieceListTemp, depth - 1, -1 * colorFactor);
             bestValue = Math.max(bestValue, v);
             alpha = Math.max(alpha, v);
             if (alpha >= beta) {
@@ -166,6 +167,48 @@ public class MainController {
             }
         }
         return bestValue;
+    }
+
+    private ArrayList<Move> sortMoves(ArrayList<Piece> pieceList, ArrayList<Move> possibleMoves) {
+        // Calculating score for each move
+        ArrayList<Move> sortedMoves = new ArrayList<>();
+        ArrayList<MoveScore> movesScore = new ArrayList<>();
+        for (Move move : possibleMoves) {
+            ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
+            move(pieceListTemp, move, false);
+            MoveScore moveScore = new MoveScore(move,
+                    new Evaluation().totalEvaluation(pieceListTemp, move.getPiece().getColor()));
+            movesScore.add(moveScore);
+        }
+        ArrayList<MoveScore> sorted = quickSort(movesScore);
+        sorted.forEach(e -> sortedMoves.add(e.getMove()));
+        return sortedMoves;
+    }
+
+    private ArrayList<MoveScore> quickSort(ArrayList<MoveScore> moves) {
+        if (!moves.isEmpty()) {
+            MoveScore pivot = moves.get(0);
+            ArrayList<MoveScore> less = new ArrayList<>();
+            ArrayList<MoveScore> pivotList = new ArrayList<>();
+            ArrayList<MoveScore> more = new ArrayList<>();
+
+            for (MoveScore move : moves) {
+                if (move.getScore() < pivot.getScore()) {
+                    less.add(move);
+                } else if (move.getScore() > pivot.getScore()) {
+                    more.add(move);
+                } else {
+                    pivotList.add(move);
+                }
+            }
+            less = quickSort(less);
+            more = quickSort(more);
+
+            less.addAll(pivotList);
+            less.addAll(more);
+            return less;
+        }
+        return moves;
     }
 
     private ArrayList<Move> getAllMovesColor(ArrayList<Piece> pieceList, PieceColor color) {
@@ -180,7 +223,7 @@ public class MainController {
         return possibleMoves;
     }
 
-    private ArrayList<Piece> move(ArrayList<Piece> pieceList, Move move, boolean repaint) {
+    public ArrayList<Piece> move(ArrayList<Piece> pieceList, Move move, boolean repaint) {
         Piece pieceCaptured = null;
         PieceColor colorMoved = null;
         try {
@@ -268,58 +311,10 @@ public class MainController {
         move(pieceList, moveSelected, true);
     }
 
-    private void updateMoveList(ArrayList<Piece> pieceList, boolean removeCheck) {
-    /*	Thread thread1 = new Thread() {
-            public void run() {
-				for (int i = 0; i < pieceList.size() / 4; i++) {
-					Piece piece = pieceList.get(i);
-					piece.setMovesList(getMoves(piece, pieceList, removeCheck));
-				}
-			}
-		};
-		thread1.start();
-		Thread thread2 = new Thread() {
-			public void run() {
-				for (int i = pieceList.size() / 4; i < pieceList.size() / 2; i++) {
-					Piece piece = pieceList.get(i);
-					piece.setMovesList(getMoves(piece, pieceList, removeCheck));
-				}
-			}
-		};
-		thread2.start();
-		Thread thread3 = new Thread() {
-			public void run() {
-				for (int i = pieceList.size() / 2; i < 3 * pieceList.size() / 4; i++) {
-					Piece piece = pieceList.get(i);
-					piece.setMovesList(getMoves(piece, pieceList, removeCheck));
-				}
-			}
-		};
-		thread3.start();
-		Thread thread4 = new Thread() {
-			public void run() {
-				for (int i = 3 * pieceList.size() / 4; i < pieceList.size(); i++) {
-					Piece piece = pieceList.get(i);
-					piece.setMovesList(getMoves(piece, pieceList, removeCheck));
-				}
-			}
-		};
-		thread4.start();
-		try {
-			thread1.join();
-			thread2.join();
-			thread3.join();
-			thread4.join();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}*/
-
-
+    public void updateMoveList(ArrayList<Piece> pieceList, boolean removeCheck) {
         for (Piece piece : pieceList) {
-            piece.setMovesList(getMoves(piece,
-                    pieceList, removeCheck));
+            piece.setMovesList(getMoves(piece, pieceList, removeCheck));
         }
-
     }
 
     private ArrayList<Move> getMoves(Piece piece, ArrayList<Piece> pieceList, boolean removeCheck) {
@@ -511,6 +506,24 @@ public class MainController {
 
         public Color getColor() {
             return color;
+        }
+    }
+
+    class MoveScore {
+        private Move move;
+        private double score;
+
+        public MoveScore(Move move, double score) {
+            this.move = move;
+            this.score = score;
+        }
+
+        public Move getMove() {
+            return move;
+        }
+
+        public double getScore() {
+            return score;
         }
     }
 
