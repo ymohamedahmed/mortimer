@@ -10,22 +10,19 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class MainController {
+    private final PieceColor PLAYER_COLOR = PieceColor.BLACK;
     // Variables loaded from the fxml file
     // Must be global so that they can be loaded from the fxml file
     public StackPane stackPane;
     public Canvas chessPane;
     public BorderPane borderPane;
-
     private ArrayList<Position> blueSquares = new ArrayList<>();
     private Position oldPos;
-    private PieceColor playerColor = PieceColor.BLACK;
-    private PieceColor aiColor = PieceColor.WHITE;
+    private PieceColor AI_COLOR = PieceColor.WHITE;
+    private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
 
     // DEBUGGING
     private int noOfMovesAnalyzed = 0;
@@ -64,7 +61,7 @@ public class MainController {
         ArrayList<Piece> pieceList = Piece.getInitialPieceList();
         double cellSize = paintChessBoard(pieceList);
         chessPane.setOnMouseClicked(evt -> clickListenerChessPane(pieceList, evt, cellSize));
-        if (aiColor == PieceColor.WHITE) {
+        if (AI_COLOR == PieceColor.WHITE) {
             moveAI(pieceList);
         }
     }
@@ -133,20 +130,38 @@ public class MainController {
             updateMoveList(pieceListTemp, false);
             double score = negamax(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, pieceListTemp, depth,
                     color.getColorFactor());
-            System.out.println("SCORE: " + score);
+            //System.out.println("SCORE: " + score);
             if (score > maxScore) {
                 maxScore = score;
                 bestMove = move;
             }
         }
         double endTime = System.currentTimeMillis();
-        System.out.println("BEST MOVE SCORE: " + maxScore);
         System.out.println("TIME TO SELECT: " + (endTime - startTime));
-        System.out.println("NUMBER OF MOVES ANALYZED " + noOfMovesAnalyzed);
+        //System.out.println("NUMBER OF MOVES ANALYZED " + noOfMovesAnalyzed);
         return bestMove;
     }
 
     private double negamax(double alpha, double beta, ArrayList<Piece> pieceList, int depth, int colorFactor) {
+        double alphaOrig = alpha;
+        TranspositionEntry transpositionEntry = new TranspositionEntry();
+        //Checking the transposition table
+        transpositionEntry = hashtable.get(pieceList.hashCode());
+
+        if (transpositionEntry != null) {
+            System.out.println("TRANSPOSITION WORKING");
+            if (transpositionEntry.getDepth() >= depth) {
+                if (transpositionEntry.getFlag() == TranspositionFlag.EXACT) {
+                    return transpositionEntry.getScore();
+                } else if (transpositionEntry.getFlag() == TranspositionFlag.LOWERBOUND) {
+                    alpha = Math.max(alpha, transpositionEntry.getScore());
+                } else if (transpositionEntry.getFlag() == TranspositionFlag.UPPERBOUND) {
+                    beta = Math.min(beta, transpositionEntry.getScore());
+                }
+            }
+        }
+
+
         if (depth == 0) {
             return colorFactor
                     * (new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor)));
@@ -166,6 +181,20 @@ public class MainController {
                 break;
             }
         }
+
+        TranspositionEntry transpositionEntryFinal = new TranspositionEntry();
+        transpositionEntryFinal.setScore(bestValue);
+        if (bestValue <= alphaOrig) {
+            transpositionEntryFinal.setFlag(TranspositionFlag.UPPERBOUND);
+        } else if (bestValue >= beta) {
+            transpositionEntryFinal.setFlag(TranspositionFlag.LOWERBOUND);
+        } else {
+            transpositionEntryFinal.setFlag(TranspositionFlag.EXACT);
+        }
+        transpositionEntryFinal.setDepth(depth);
+        transpositionEntryFinal.setValid(true);
+        hashtable.put(pieceList.hashCode(), transpositionEntryFinal);
+
         return bestValue;
     }
 
@@ -252,12 +281,12 @@ public class MainController {
             // dialog
             if (piece.getPieceType() == PieceType.PAWN) {
                 if (((Pawn) piece).pawnPromotion(move.getPosition(), pieceList)) {
-                    if (piece.getColor() == aiColor && repaint) {
+                    if (piece.getColor() == AI_COLOR && repaint) {
                         Position newPiecePosition = new Position(
                                 piece.getPos().getRow() + piece.getColor().getColorFactor(), piece.getPos().getCol());
                         pieceList.add(new Queen(newPiecePosition, piece.getColor(), piece.getNumberOfMoves()));
                         pieceList.remove(piece);
-                    } else if (piece.getColor() == playerColor && repaint) {
+                    } else if (piece.getColor() == PLAYER_COLOR && repaint) {
                         displayPawnPromotionDialog(piece, pieceList);
                     }
                 }
@@ -284,7 +313,7 @@ public class MainController {
             paintChessBoard(pieceList);
             updateMoveList(pieceList, true);
         }
-        if (colorMoved == playerColor && colorMoved != null && repaint) {
+        if (colorMoved == PLAYER_COLOR && colorMoved != null && repaint) {
             moveAI(pieceList);
         }
         return pieceList;
@@ -303,7 +332,7 @@ public class MainController {
 
     private void moveAI(ArrayList<Piece> pieceList) {
         updateMoveList(pieceList, true);
-        Move moveSelected = rootNegamax(pieceList, aiColor);
+        Move moveSelected = rootNegamax(pieceList, AI_COLOR);
         System.out.println("COLOR AI MOVE: " + moveSelected.getPiece().getColor());
         System.out.println("AI MOVE : " + moveSelected.getPiece().getPieceType() + " "
                 + moveSelected.getPiece().getColor() + " to (" + moveSelected.getPosition().getRow() + " , "
@@ -438,7 +467,7 @@ public class MainController {
         return clonedList;
     }
 
-    public void displayPawnPromotionDialog(Piece pawn, ArrayList<Piece> pieceList) {
+    private void displayPawnPromotionDialog(Piece pawn, ArrayList<Piece> pieceList) {
         String choice = new String();
         List<String> choices = new ArrayList<>();
         choices.add("Queen");
@@ -496,6 +525,10 @@ public class MainController {
 
     }
 
+    private enum TranspositionFlag {
+        EXACT, LOWERBOUND, UPPERBOUND
+    }
+
     private enum CellColor {
         COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
         private Color color;
@@ -506,6 +539,48 @@ public class MainController {
 
         public Color getColor() {
             return color;
+        }
+    }
+
+    private class TranspositionEntry {
+        private double score;
+        private TranspositionFlag flag;
+        private int depth;
+        private boolean valid = false;
+
+        public TranspositionEntry() {
+        }
+
+        public double getScore() {
+            return score;
+        }
+
+        public void setScore(double score) {
+            this.score = score;
+        }
+
+        public TranspositionFlag getFlag() {
+            return flag;
+        }
+
+        public void setFlag(TranspositionFlag flag) {
+            this.flag = flag;
+        }
+
+        public int getDepth() {
+            return depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
+
+        public boolean isValid() {
+            return valid;
+        }
+
+        public void setValid(boolean valid) {
+            this.valid = valid;
         }
     }
 
