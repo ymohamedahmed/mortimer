@@ -1,5 +1,6 @@
 package ui.controllers;
 
+import core.Board;
 import core.Piece;
 import org.junit.Test;
 
@@ -11,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class MainControllerTest {
     @Test
     public void testingHashValues() {
-        assertEquals(Piece.getInitialPieceList().hashCode(), Piece.getInitialPieceList().hashCode());
+        assertEquals(Board.hash(Piece.getInitialPieceList()), Board.hash(Piece.getInitialPieceList()));
     }
 
 }

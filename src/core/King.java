@@ -156,20 +156,21 @@ public class King extends Piece {
         //Only allowed if each piece is yet to move
         if (this.getNumberOfMoves() != 0 || rook.getNumberOfMoves() != 0) {
             return false;
+        } else {
+            // Checking that none of the squares the king moves through cause check
+            if (check(pieceList, this.getPos())
+                    || check(pieceList,
+                    new Position(this.getPos().getRow(), this.getPos().getCol() + castleType.getCastleFactor()))
+                    || check(pieceList, kingNewPos)) {
+                return false;
+            }
+            if (!Board.isSquareEmpty(pieceList,
+                    new Position(this.getPos().getRow(), this.getPos().getCol() + castleType.getCastleFactor()))
+                    || !Board.isSquareEmpty(pieceList, kingNewPos)) {
+                return false;
+            }
+            return !(castleType == CastleType.QUEENSIDE && !Board.isSquareEmpty(pieceList,
+                    new Position(kingNewPos.getRow(), kingNewPos.getCol() + castleType.getCastleFactor())));
         }
-        // Checking that none of the squares the king moves through cause check
-        if (check(pieceList, this.getPos())
-                || check(pieceList,
-                new Position(this.getPos().getRow(), this.getPos().getCol() + castleType.getCastleFactor()))
-                || check(pieceList, kingNewPos)) {
-            return false;
-        }
-        if (!Board.isSquareEmpty(pieceList,
-                new Position(this.getPos().getRow(), this.getPos().getCol() + castleType.getCastleFactor()))
-                || !Board.isSquareEmpty(pieceList, kingNewPos)) {
-            return false;
-        }
-        return !(castleType == CastleType.QUEENSIDE && !Board.isSquareEmpty(pieceList,
-                new Position(kingNewPos.getRow(), kingNewPos.getCol() + castleType.getCastleFactor())));
     }
 }

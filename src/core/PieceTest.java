@@ -21,6 +21,10 @@ public class PieceTest {
         assertEquals(59, Piece.getIndex(testPiece2));
         assertEquals(10, Piece.getPieceTableValue(testPiece1, null));
         assertEquals(-5, Piece.getPieceTableValue(testPiece2, null));
+        assertEquals(7, Piece.getPosition(0).getRow());
+        assertEquals(0, Piece.getPosition(0).getCol());
+        assertEquals(0, Piece.getPosition(56).getRow());
+        assertEquals(0, Piece.getPosition(56).getCol());
     }
 
 }

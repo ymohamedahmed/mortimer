@@ -26,6 +26,12 @@ public class MainController {
 
     // DEBUGGING
     private int noOfMovesAnalyzed = 0;
+    private double cloneTime = 0;
+    private double updateTime = 0;
+    private int iClone = 0;
+    private int iUpdate = 0;
+    private double[] updateTimeArr = new double[6];
+    private int[] iUpdateArr = new int[6];
 
     public void initialize() {
         playGame();
@@ -130,26 +136,34 @@ public class MainController {
             updateMoveList(pieceListTemp, false);
             double score = negamax(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, pieceListTemp, depth,
                     color.getColorFactor());
-            //System.out.println("SCORE: " + score);
+            // System.out.println("SCORE: " + score);
             if (score > maxScore) {
                 maxScore = score;
                 bestMove = move;
             }
         }
         double endTime = System.currentTimeMillis();
+        //DEBUGGING
         System.out.println("TIME TO SELECT: " + (endTime - startTime));
-        //System.out.println("NUMBER OF MOVES ANALYZED " + noOfMovesAnalyzed);
+        // System.out.println("NUMBER OF MOVES ANALYZED " + noOfMovesAnalyzed);
+        System.out.println("CLONE AVG: " + (cloneTime / iClone));
+        System.out.println("UPDATE AVG: " + (updateTime / iUpdate));
+        System.out.println("CLONE TIME: " + cloneTime);
+        System.out.println("UPDATE TIME: " + updateTime);
+        for (int i = 0; i <= 5; i++) {
+            System.out.println("AVG TIME " + i + " : " + (updateTimeArr[i] / iUpdateArr[i]));
+            System.out.println("TOTAL TIME " + i + " : " + updateTimeArr[i]);
+        }
         return bestMove;
     }
 
     private double negamax(double alpha, double beta, ArrayList<Piece> pieceList, int depth, int colorFactor) {
         double alphaOrig = alpha;
         TranspositionEntry transpositionEntry = new TranspositionEntry();
-        //Checking the transposition table
-        transpositionEntry = hashtable.get(pieceList.hashCode());
+        // Checking the transposition table
+        transpositionEntry = hashtable.get(Board.hash(pieceList));
 
         if (transpositionEntry != null) {
-            System.out.println("TRANSPOSITION WORKING");
             if (transpositionEntry.getDepth() >= depth) {
                 if (transpositionEntry.getFlag() == TranspositionFlag.EXACT) {
                     return transpositionEntry.getScore();
@@ -161,14 +175,13 @@ public class MainController {
             }
         }
 
-
         if (depth == 0) {
             return colorFactor
                     * (new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor)));
         }
         double bestValue = Double.NEGATIVE_INFINITY;
         ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, PieceColor.getColorByFactor(colorFactor));
-        possibleMoves = sortMoves(pieceList, possibleMoves);
+        // possibleMoves = sortMoves(pieceList, possibleMoves);
         noOfMovesAnalyzed += possibleMoves.size();
         for (Move move : possibleMoves) {
             ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
@@ -193,7 +206,7 @@ public class MainController {
         }
         transpositionEntryFinal.setDepth(depth);
         transpositionEntryFinal.setValid(true);
-        hashtable.put(pieceList.hashCode(), transpositionEntryFinal);
+        hashtable.put(Board.hash(pieceList), transpositionEntryFinal);
 
         return bestValue;
     }
@@ -341,26 +354,43 @@ public class MainController {
     }
 
     public void updateMoveList(ArrayList<Piece> pieceList, boolean removeCheck) {
+        double before = System.currentTimeMillis();
+
         for (Piece piece : pieceList) {
             piece.setMovesList(getMoves(piece, pieceList, removeCheck));
         }
+        updateTime += (System.currentTimeMillis() - before);
+        iUpdate++;
     }
 
     private ArrayList<Move> getMoves(Piece piece, ArrayList<Piece> pieceList, boolean removeCheck) {
         ArrayList<Move> legalMoves = new ArrayList<Move>();
         PieceType type = piece.getPieceType();
+        double before = System.currentTimeMillis();
         if (type == PieceType.PAWN) {
             legalMoves = ((Pawn) piece).getLegalMoves(pieceList);
+            updateTimeArr[0] += (System.currentTimeMillis() - before);
+            iUpdateArr[0]++;
         } else if (type == PieceType.KNIGHT) {
             legalMoves = ((Knight) piece).getLegalMoves(pieceList);
+            updateTimeArr[1] += (System.currentTimeMillis() - before);
+            iUpdateArr[1]++;
         } else if (type == PieceType.BISHOP) {
             legalMoves = ((Bishop) piece).getLegalMoves(pieceList);
+            updateTimeArr[2] += (System.currentTimeMillis() - before);
+            iUpdateArr[2]++;
         } else if (type == PieceType.ROOK) {
             legalMoves = ((Rook) piece).getLegalMoves(pieceList);
+            updateTimeArr[3] += (System.currentTimeMillis() - before);
+            iUpdateArr[3]++;
         } else if (type == PieceType.QUEEN) {
             legalMoves = ((Queen) piece).getLegalMoves(pieceList);
+            updateTimeArr[4] += (System.currentTimeMillis() - before);
+            iUpdateArr[4]++;
         } else if (type == PieceType.KING) {
             legalMoves = ((King) piece).getLegalMoves(pieceList);
+            updateTimeArr[5] += (System.currentTimeMillis() - before);
+            iUpdateArr[5]++;
         }
         ArrayList<Move> captureRecognised = recogniseCaptureMoves(piece, pieceList, legalMoves);
         return removeCheck ? removeIllegalMoves(piece, pieceList, piece.getColor(), captureRecognised)
@@ -447,6 +477,7 @@ public class MainController {
     }
 
     private ArrayList<Piece> clonePieceList(ArrayList<Piece> pieceList) {
+        double before = System.currentTimeMillis();
         ArrayList<Piece> clonedList = new ArrayList<>();
         for (Piece piece : pieceList) {
             PieceType type = piece.getPieceType();
@@ -464,6 +495,8 @@ public class MainController {
                 clonedList.add(new King(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
             }
         }
+        cloneTime += (System.currentTimeMillis() - before);
+        iClone++;
         return clonedList;
     }
 

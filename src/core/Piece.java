@@ -18,6 +18,9 @@ public class Piece {
         this.numberOfMoves = numberOfMoves;
     }
 
+    public static Position getPosition(int index) {
+        return new Position(7 - (index / 8), index % 8);
+    }
     public static int getIndex(Piece piece) {
         int index = 0;
         if (piece.getColor() == PieceColor.WHITE) {

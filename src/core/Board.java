@@ -1,9 +1,11 @@
 package core;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Board {
-
+    private static int[][] table = new int[64][12];
+    private static boolean initialised = false;
     public static ArrayList<Piece> updatePieceList(Move move, ArrayList<Piece> pieceList) {
         for (Piece piece : pieceList) {
             if (piece.getColor() == move.getPiece().getColor()
@@ -111,5 +113,56 @@ public class Board {
             color = PieceColor.BLACK;
         }
         return color;
+    }
+
+    // Used as a part of Zobrist Hashing
+    private static int getPieceIndex(PieceType type, PieceColor color) {
+        int result = 0;
+        switch (type) {
+            case PAWN:
+                result = (color == PieceColor.WHITE) ? 0 : 6;
+                break;
+            case ROOK:
+                result = (color == PieceColor.WHITE) ? 1 : 7;
+                break;
+            case KNIGHT:
+                result = (color == PieceColor.WHITE) ? 2 : 8;
+                break;
+            case BISHOP:
+                result = (color == PieceColor.WHITE) ? 3 : 9;
+                break;
+            case QUEEN:
+                result = (color == PieceColor.WHITE) ? 4 : 10;
+                break;
+            case KING:
+                result = (color == PieceColor.WHITE) ? 5 : 11;
+                break;
+        }
+        return result;
+    }
+
+    private static void initialiseZobrist() {
+        for (int x = 0; x <= 63; x++) {
+            for (int y = 0; y <= 11; y++) {
+                table[x][y] = new Random().nextInt((int) Math.pow(2, 64) - 1);
+            }
+        }
+        initialised = true;
+    }
+
+    public static int hash(ArrayList<Piece> pieceList) {
+        int hash = 0;
+        if (!initialised) {
+            Board.initialiseZobrist();
+        }
+        for (int index = 0; index <= 63; index++) {
+            Position position = Piece.getPosition(index);
+            if (!Board.isSquareEmpty(pieceList, position)) {
+                Piece piece = Board.getPiece(pieceList, position);
+                int j = Board.getPieceIndex(piece.getPieceType(), piece.getColor());
+                hash = hash ^ table[index][j];
+            }
+        }
+        return hash;
     }
 }
