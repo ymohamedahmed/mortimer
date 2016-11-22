@@ -64,7 +64,7 @@ public class BitBoard {
 
     }
 
-    public void undoMove() {
+    public void undoMove(int moveNumber) {
         whites = lastWhites;
         blacks = lastBlacks;
         pawns = lastPawns;
