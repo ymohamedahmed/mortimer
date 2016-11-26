@@ -136,7 +136,7 @@ public class MainController {
             updateMoveList(pieceListTemp, false);
             double score = negamax(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, pieceListTemp, depth,
                     color.getColorFactor());
-            // System.out.println("SCORE: " + score);
+            System.out.println("SCORE: " + score);
             if (score > maxScore) {
                 maxScore = score;
                 bestMove = move;
@@ -150,6 +150,7 @@ public class MainController {
         System.out.println("UPDATE AVG: " + (updateTime / iUpdate));
         System.out.println("CLONE TIME: " + cloneTime);
         System.out.println("UPDATE TIME: " + updateTime);
+        System.out.println("SIZE HASH TABLE : " + hashtable.size());
         for (int i = 0; i <= 5; i++) {
             System.out.println("AVG TIME " + i + " : " + (updateTimeArr[i] / iUpdateArr[i]));
             System.out.println("TOTAL TIME " + i + " : " + updateTimeArr[i]);
@@ -181,7 +182,7 @@ public class MainController {
         }
         double bestValue = Double.NEGATIVE_INFINITY;
         ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, PieceColor.getColorByFactor(colorFactor));
-        // possibleMoves = sortMoves(pieceList, possibleMoves);
+        possibleMoves = sortMoves(pieceList, possibleMoves);
         noOfMovesAnalyzed += possibleMoves.size();
         for (Move move : possibleMoves) {
             ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
@@ -257,9 +258,7 @@ public class MainController {
         ArrayList<Move> possibleMoves = new ArrayList<>();
         for (Piece piece : pieceList) {
             if (piece.getColor() == color) {
-                for (Move move : piece.getMovesList()) {
-                    possibleMoves.add(move);
-                }
+                possibleMoves.addAll(piece.getMovesList());
             }
         }
         return possibleMoves;
