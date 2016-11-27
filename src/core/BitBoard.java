@@ -27,6 +27,9 @@ public class BitBoard {
     private final byte QUEEN = 10;
     private final byte KING = 12;
     private final int NULL_SQUARE = 64;
+    private final long ROW_1 = 0xFF << 0;
+
+
     //Castling
     private final byte WHITE_KINGSIDE = 1;
     private final byte WHITE_QUEENSIDE = 2;
@@ -98,6 +101,15 @@ public class BitBoard {
         pushes &= ~row8;
     }
 
+    void addPawnPushes() {
+        int[] diffs = {8, 64 - 8};
+        long[] promotions_mask[ 2] ={
+        }
+    }
+
+    void circularLeftShift(long target, int shift) {
+        return target << shift | target >> (64 - shift);
+    }
     class Flags {
         byte castlingRights;
         byte enPassantSquare;
