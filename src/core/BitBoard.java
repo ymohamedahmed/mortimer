@@ -4,8 +4,6 @@ package core;
  * Created by yousuf on 11/22/16.
  */
 public class BitBoard {
-
-
 	public long[] bitboards = new long[14];
 	public byte[] board = new byte[64];
 	Flags flags = new Flags();
