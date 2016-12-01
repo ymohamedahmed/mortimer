@@ -6,7 +6,7 @@ public class MoveGen {
 	public MoveGen(BitBoard board) {
 		this.board = board;
 	}
-
+	
 	void addPawnPushes(int side) {
 		int[] offsets = { 8, 64 - 8 };
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
@@ -15,11 +15,11 @@ public class MoveGen {
 		long pawns = board.bitboards[side | Constants.PAWN];
 		long emptySquares = ~(board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK]);
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
-		//add moves
+		// add moves
 		double promotions = pushes & promotions_mask[side];
-		//add moves
+		// add moves
 		double doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
-		//add moves
+		// add moves
 	}
 
 	void addPawnAttacks(int side) {
@@ -32,11 +32,11 @@ public class MoveGen {
 			int offset = offsets[direction][side];
 			long targets = circularLeftShift(pawns, offset) & file_mask[direction];
 			long attacks = enemy & targets;
-			//add moves
+			// add moves
 			long enPassantAttacks = targets & (1 << board.flags.enPassantSquare);
-			//add moves
+			// add moves
 			long promotions = attacks & promotions_mask[side];
-			//add moves
+			// add moves
 		}
 	}
 
@@ -49,17 +49,38 @@ public class MoveGen {
 		}
 	}
 
-	void addKnightMoves(int side){
-		long knights = board.bitboards[Constants.KNIGHT|side];
+	void addKnightMoves(int side) {
+		long knights = board.bitboards[Constants.KNIGHT | side];
 		long enemy = ~board.bitboards[side];
-		while(knights > 0){
+		while (knights > 0) {
 			int from = bitScanForward(knights);
 			long targets = Constants.KNIGHT_TABLE[from] & enemy;
-			//add moves
+			// add moves
 			knights &= knights - 1;
 		}
 	}
 
+	void addKingMoves(int side) {
+		long kings = board.bitboards[Constants.KING | side];
+		long enemy = ~board.bitboards[side];
+		while (kings > 0) {
+			int from = bitScanForward(kings);
+			long targets = Constants.KING_TABLE[from] & enemy;
+			// add moves
+			kings &= kings - 1;
+		}
+	}
+
+	void addRookMoves(int side){
+		
+	}
+	void addBishopMoves(int side){
+		
+	}
+	void addQueenMoves(int side){
+		
+	}
+	
 	long circularLeftShift(long target, int shift) {
 		return target << shift | target >> (64 - shift);
 	}
