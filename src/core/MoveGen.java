@@ -1,12 +1,16 @@
 package core;
 
+import java.util.ArrayList;
+
 public class MoveGen {
 	private BitBoard board;
+	private ArrayList<Move> moveList;
 
-	public MoveGen(BitBoard board) {
+	public MoveGen(BitBoard board, ArrayList<Move> moveList) {
 		this.board = board;
+		this.moveList = moveList;
 	}
-	
+
 	void addPawnPushes(int side) {
 		int[] offsets = { 8, 64 - 8 };
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
@@ -71,16 +75,18 @@ public class MoveGen {
 		}
 	}
 
-	void addRookMoves(int side){
-		
+	void addRookMoves(int side) {
+
 	}
-	void addBishopMoves(int side){
-		
+
+	void addBishopMoves(int side) {
+
 	}
-	void addQueenMoves(int side){
-		
+
+	void addQueenMoves(int side) {
+
 	}
-	
+
 	long circularLeftShift(long target, int shift) {
 		return target << shift | target >> (64 - shift);
 	}
@@ -93,4 +99,39 @@ public class MoveGen {
 		assert (target != 0);
 		return index64[(int) ((target ^ (target - 1)) * mask) >> 58];
 	}
+
+	void initialiseKnightLookupTable() {
+		for (int row = 0; row < 8; row++) {
+			for (int file = 0; file < 8; file++) {
+				int square = row * 8 + file;
+				long target = 0L;
+				if (file >= 2 && row <= 6) {
+					target |= 1 << (square + 6);
+				}
+				if (file >= 1 && row <= 5) {
+					target |= 1 << (square + 15);
+				}
+				if (file <= 6 && row <= 5) {
+					target |= 1 << (square + 17);
+				}
+				if (file <= 5 && row <= 6) {
+					target |= 1 << (square + 10);
+				}
+				if (file >= 2 && row >= 1) {
+					target |= 1 << (square - 10);
+				}
+				if (file >= 1 && row >= 2) {
+					target |= 1 << (square - 17);
+				}
+				if (file <= 6 && row >= 2) {
+					target |= 1 << (square - 15);
+				}
+				if (file <= 5 && row >= 1) {
+					target |= 1 << (square - 6);
+				}
+				Constants.KNIGHT_TABLE[square] = target;
+			}
+		}
+	}
+
 }
