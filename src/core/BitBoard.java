@@ -46,7 +46,9 @@ public class BitBoard {
 	long getBitboard(int type) {
 		return bitboards[type];
 	}
-
+	void printBoard(long board){
+		
+	}
 	class Flags {
 		byte castlingRights;
 		byte enPassantSquare;
