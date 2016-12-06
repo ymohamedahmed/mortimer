@@ -35,7 +35,7 @@ public class Constants {
 	public static final long FILE_E = 0x0101010101010101L << 4;
 	public static final long FILE_F = 0x0101010101010101L << 5;
 	public static final long FILE_G = 0x0101010101010101L << 6;
-	public static final long FILE_H = 0x0101010101010101L << 7;		
+	public static final long FILE_H = 0x0101010101010101L << 7;
 
 	// Castling
 	public static final byte WHITE_KINGSIDE = 1;
@@ -43,10 +43,12 @@ public class Constants {
 	public static final byte BLACK_KINGSIDE = 4;
 	public static final byte BLACK_QUEENSIDE = 8;
 	public static final byte FULL_CASTLING_RIGHTS = 1 | 2 | 4 | 8;
-	
-	//Lookup tables
-	public static final long KNIGHT_TABLE[] = new long[64];
-	public static  long KING_TABLE[] = new long[64];
 
+	// Lookup tables
+	public static long KNIGHT_TABLE[] = new long[64];
+	public static long KING_TABLE[] = new long[64];
+	public static long PAWN_TABLE[][] = new long[2][64];
+	public static long occupancyMaskRook[] = new long[64];
+	public static long occupancyMaskBishop[] = new long[64];
 
 }

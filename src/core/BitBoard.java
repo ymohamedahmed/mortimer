@@ -47,7 +47,7 @@ public class BitBoard {
 		return bitboards[type];
 	}
 	void printBoard(long board){
-		
+		System.out.println(board);
 	}
 	class Flags {
 		byte castlingRights;

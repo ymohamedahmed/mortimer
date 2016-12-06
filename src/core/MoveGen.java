@@ -53,28 +53,6 @@ public class MoveGen {
 		}
 	}
 
-	void addKnightMoves(int side) {
-		long knights = board.bitboards[Constants.KNIGHT | side];
-		long enemy = ~board.bitboards[side];
-		while (knights > 0) {
-			int from = bitScanForward(knights);
-			long targets = Constants.KNIGHT_TABLE[from] & enemy;
-			// add moves
-			knights &= knights - 1;
-		}
-	}
-
-	void addKingMoves(int side) {
-		long kings = board.bitboards[Constants.KING | side];
-		long enemy = ~board.bitboards[side];
-		while (kings > 0) {
-			int from = bitScanForward(kings);
-			long targets = Constants.KING_TABLE[from] & enemy;
-			// add moves
-			kings &= kings - 1;
-		}
-	}
-
 	void addRookMoves(int side) {
 
 	}
@@ -102,36 +80,72 @@ public class MoveGen {
 
 	void initialiseKnightLookupTable() {
 		for (int row = 0; row < 8; row++) {
-			for (int file = 0; file < 8; file++) {
-				int square = row * 8 + file;
+			for (int col = 0; col < 8; col++) {
+				int square = row * 8 + col;
 				long target = 0L;
-				if (file >= 2 && row <= 6) {
+				if (col >= 2 && row <= 6) {
 					target |= 1 << (square + 6);
 				}
-				if (file >= 1 && row <= 5) {
+				if (col >= 1 && row <= 5) {
 					target |= 1 << (square + 15);
 				}
-				if (file <= 6 && row <= 5) {
+				if (col <= 6 && row <= 5) {
 					target |= 1 << (square + 17);
 				}
-				if (file <= 5 && row <= 6) {
+				if (col <= 5 && row <= 6) {
 					target |= 1 << (square + 10);
 				}
-				if (file >= 2 && row >= 1) {
+				if (col >= 2 && row >= 1) {
 					target |= 1 << (square - 10);
 				}
-				if (file >= 1 && row >= 2) {
+				if (col >= 1 && row >= 2) {
 					target |= 1 << (square - 17);
 				}
-				if (file <= 6 && row >= 2) {
+				if (col <= 6 && row >= 2) {
 					target |= 1 << (square - 15);
 				}
-				if (file <= 5 && row >= 1) {
+				if (col <= 5 && row >= 1) {
 					target |= 1 << (square - 6);
 				}
 				Constants.KNIGHT_TABLE[square] = target;
 			}
 		}
 	}
+
+	void initialiseKingLookupTable() {
+		for (int row = 0; row < 8; row++) {
+			for (int col = 0; col < 8; col++) {
+				int square = (row * 8) + col;
+				long target = 0L;
+				if (col >= 1 && row <= 6) {
+					target |= 1 << (square + 7);
+				}
+				if (row <= 6) {
+					target |= 1 << (square + 8);
+				}
+				if (col <= 6 && row <= 6) {
+					target |= 1 << (square + 9);
+				}
+				if (col <= 6) {
+					target |= 1 << (square + 1);
+				}
+				if (col <= 6 && row >= 1) {
+					target |= 1 << (square - 7);
+				}
+				if (row >= 1) {
+					target |= 1 << (square - 8);
+				}
+				if (col >= 1 && row >= 1) {
+					target |= 1 << (square - 9);
+				}
+				if (col >= 1) {
+					target |= 1 << (square - 1);
+				}
+				Constants.KING_TABLE[square] = target;
+			}
+		}
+	}
+
+
 
 }
