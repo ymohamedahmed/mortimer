@@ -53,26 +53,42 @@ public class MoveGen {
 		}
 	}
 
-	void addRookMoves(int index, int side) {
+	long getRookMoves(int index, int side) {
 		int rivalIndex = littleEndianToRival(index);
 		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskRook[rivalIndex];
 		int lookupIndex = (int) (rookBlockers
 				* Constants.magicNumbersRook[rivalIndex]) >>> Constants.magicShiftRook[index];
 		long moveSquares = Constants.magicMovesRook[rivalIndex][lookupIndex] & ~board.bitboards[side];
+		return moveSquares;
 	}
 
-	void addBishopMoves(int index, int side) {
+	long getBishopMoves(int index, int side) {
 		int rivalIndex = littleEndianToRival(index);
 		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskBishop[rivalIndex];
 		int lookupIndex = (int) (bishopBlockers
 				* Constants.magicNumbersBishop[rivalIndex]) >>> Constants.magicShiftBishop[index];
 		long moveSquares = Constants.magicMovesBishop[rivalIndex][lookupIndex] & ~board.bitboards[side];
+		return moveSquares;
 	}
 
-	void addQueenMoves(int side) {
+	long addQueenMoves(int index, int side) {
+		return (getRookMoves(index, side) | getBishopMoves(index, side));
+	}
 
+	void occupancyVariation(boolean rook) {
+		for (int index = 0; index < 64; index++) {
+			long mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
+		}
+	}
+
+	// Based on
+	// https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation
+	long hammingWeight(long board) {
+		board = board - ((board >>> 1) & 0x55555555);
+		board = (board & 0x33333333) + ((board >>> 2) & 0x33333333);
+		return (((board + (board >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
 	}
 
 	int littleEndianToRival(int index) {
@@ -83,7 +99,7 @@ public class MoveGen {
 	}
 
 	long circularLeftShift(long target, int shift) {
-		return target << shift | target >> (64 - shift);
+		return target << shift | target >>> (64 - shift);
 	}
 
 	int bitScanForward(long target) {
@@ -92,7 +108,7 @@ public class MoveGen {
 				14, 33, 19, 30, 9, 24, 13, 18, 8, 12, 7, 6, 5, 63 };
 		long mask = 0x03f79d71b4cb0a89L;
 		assert (target != 0);
-		return index64[(int) ((target ^ (target - 1)) * mask) >> 58];
+		return index64[(int) ((target ^ (target - 1)) * mask) >>> 58];
 	}
 
 	void initialiseKnightLookupTable() {
