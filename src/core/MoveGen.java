@@ -53,16 +53,33 @@ public class MoveGen {
 		}
 	}
 
-	void addRookMoves(int side) {
-
+	void addRookMoves(int index, int side) {
+		int rivalIndex = littleEndianToRival(index);
+		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
+				& Constants.occupancyMaskRook[rivalIndex];
+		int lookupIndex = (int) (rookBlockers
+				* Constants.magicNumbersRook[rivalIndex]) >>> Constants.magicShiftRook[index];
+		long moveSquares = Constants.magicMovesRook[rivalIndex][lookupIndex] & ~board.bitboards[side];
 	}
 
-	void addBishopMoves(int side) {
-
+	void addBishopMoves(int index, int side) {
+		int rivalIndex = littleEndianToRival(index);
+		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
+				& Constants.occupancyMaskBishop[rivalIndex];
+		int lookupIndex = (int) (bishopBlockers
+				* Constants.magicNumbersBishop[rivalIndex]) >>> Constants.magicShiftBishop[index];
+		long moveSquares = Constants.magicMovesBishop[rivalIndex][lookupIndex] & ~board.bitboards[side];
 	}
 
 	void addQueenMoves(int side) {
 
+	}
+
+	int littleEndianToRival(int index) {
+		int row = (int) index / (int) 8;
+		int sumRivalLittleEndian = 7 + (row * 16);
+		int rivalIndex = sumRivalLittleEndian - index;
+		return rivalIndex;
 	}
 
 	long circularLeftShift(long target, int shift) {
@@ -145,7 +162,5 @@ public class MoveGen {
 			}
 		}
 	}
-
-
 
 }
