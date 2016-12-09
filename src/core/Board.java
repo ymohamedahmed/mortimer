@@ -6,15 +6,6 @@ import java.util.Random;
 public class Board {
     private static int[][] table = new int[64][12];
     private static boolean initialised = false;
-    public static ArrayList<Piece> updatePieceList(Move move, ArrayList<Piece> pieceList) {
-        for (Piece piece : pieceList) {
-            if (piece.getColor() == move.getPiece().getColor()
-                    && piece.getPieceType() == move.getPiece().getPieceType()) {
-                piece.setPosition(move.getPosition());
-            }
-        }
-        return pieceList;
-    }
 
     public static boolean isSquareEmpty(ArrayList<Piece> pieceList, Position position) {
         for (Piece piece : pieceList) {

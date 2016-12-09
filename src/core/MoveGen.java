@@ -77,10 +77,29 @@ public class MoveGen {
 		return (getRookMoves(index, side) | getBishopMoves(index, side));
 	}
 
+	// Based on tutorial from http://www.rivalchess.com/magic-bitboards/
 	void occupancyVariation(boolean rook) {
+		int[] bitCount = new int[64];
+		int i, j;
 		for (int index = 0; index < 64; index++) {
 			long mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
+			int[] setBits = getIndexSetBits(mask);
+			bitCount[index] = hammingWeight(mask);
+			int varCount = (int) (1L << bitCount[index]);
+			for (i = 0; i < varCount; i++) {
+				Constants.occupancyVariation[index][i] = 0;
+				int[] setBitsVariation = getIndexSetBits(i);
+				for (j = 0; setBitsVariation[j] != -1; j++) {
+					Constants.occupancyVariation[index][i] |= (1L << setBits[setBitsVariation[j]]);
+				}
+				if (rook) {
+					for (j = index + 8; j <= 55 && (Constants.occupancyVariation[index][i] & (1L << j)) == 0; j += 8) {
+						
+					}
+				} else {
 
+				}
+			}
 		}
 	}
 
@@ -93,13 +112,20 @@ public class MoveGen {
 	}
 
 	int[] getIndexSetBits(long board) {
-		int[] setBits = new int[hammingWeight(board)];
+		int size = hammingWeight(board);
+		int[] setBits = new int[size];
 		int i = 0;
-		while (board != 0) {
+		System.out.println(hammingWeight(board));
+		while (i < size) {
 			setBits[i] = bitScanForward(board);
-			
+			board &= board - 1;
+			i++;
 		}
-		return null;
+
+		for (int x : setBits) {
+			System.out.println(x);
+		}
+		return setBits;
 	}
 
 	int littleEndianToRival(int index) {
@@ -113,13 +139,9 @@ public class MoveGen {
 		return target << shift | target >>> (64 - shift);
 	}
 
-	int bitScanForward(long target) {
-		int index64[] = { 0, 47, 1, 56, 48, 27, 2, 60, 57, 49, 41, 37, 28, 16, 3, 61, 54, 58, 35, 52, 50, 42, 21, 44,
-				38, 32, 29, 23, 17, 11, 4, 62, 46, 55, 26, 59, 40, 36, 15, 53, 34, 51, 20, 43, 31, 22, 10, 45, 25, 39,
-				14, 33, 19, 30, 9, 24, 13, 18, 8, 12, 7, 6, 5, 63 };
-		long mask = 0x03f79d71b4cb0a89L;
-		assert (target != 0);
-		return index64[(int) ((target ^ (target - 1)) * mask) >>> 58];
+	int bitScanForward(long bb) {
+		int pos = Long.numberOfTrailingZeros(bb);
+		return pos == 64 ? -1 : pos;
 	}
 
 	void initialiseKnightLookupTable() {
