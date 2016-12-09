@@ -77,7 +77,8 @@ public class MoveGen {
 		return (getRookMoves(index, side) | getBishopMoves(index, side));
 	}
 
-	// Based on tutorial from http://www.rivalchess.com/magic-bitboards/
+	// Modified algorithm based on tutorial from
+	// http://www.rivalchess.com/magic-bitboards/
 	void occupancyVariation(boolean rook) {
 		int[] bitCount = new int[64];
 		int i, j;
@@ -92,13 +93,17 @@ public class MoveGen {
 				for (j = 0; setBitsVariation[j] != -1; j++) {
 					Constants.occupancyVariation[index][i] |= (1L << setBits[setBitsVariation[j]]);
 				}
-				if (rook) {
-					for (j = index + 8; j <= 55 && (Constants.occupancyVariation[index][i] & (1L << j)) == 0; j += 8) {
-						
-					}
-				} else {
+			}
+		}
+	}
 
-				}
+	void generateMoveDatabase(boolean rook) {
+		for (int index = 0; index < 64; index++) {
+			long bitCount = rook ? hammingWeight(Constants.occupancyMaskRook[index])
+					: hammingWeight(Constants.occupancyMaskBishop[index]);
+			long variations = (int)(1L << bitCount);
+			for(int i = 0; i < variations; i++){
+				
 			}
 		}
 	}
