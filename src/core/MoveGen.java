@@ -80,15 +80,26 @@ public class MoveGen {
 	void occupancyVariation(boolean rook) {
 		for (int index = 0; index < 64; index++) {
 			long mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
+
 		}
 	}
 
 	// Based on
 	// https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation
-	long hammingWeight(long board) {
+	byte hammingWeight(long board) {
 		board = board - ((board >>> 1) & 0x55555555);
 		board = (board & 0x33333333) + ((board >>> 2) & 0x33333333);
-		return (((board + (board >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
+		return (byte) ((((board + (board >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24);
+	}
+
+	int[] getIndexSetBits(long board) {
+		int[] setBits = new int[hammingWeight(board)];
+		int i = 0;
+		while (board != 0) {
+			setBits[i] = bitScanForward(board);
+			
+		}
+		return null;
 	}
 
 	int littleEndianToRival(int index) {
