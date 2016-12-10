@@ -114,5 +114,5 @@ public class Constants {
 			57, 57, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58, 59, 59, 59, 59, 59, 59, 58 };
 	public static long occupancyVariation[][] = new long[64][4096];
 	public static long magicMovesRook[][] = new long[64][4096];
-	public static long magicMovesBishop[][] = new long[64][512];
+	public static long magicMovesBishop[][] = new long[64][1024];
 }

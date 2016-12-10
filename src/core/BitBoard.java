@@ -66,6 +66,8 @@ public class BitBoard {
 		// Adding kings
 		board[0 + 4] = Constants.WHITE_KING;
 		board[56 + 4] = Constants.BLACK_KING;
+		bitboards[Constants.WHITE] = 0x0000_0000_0000_00FF_FFL;
+		// bitboards[Constants.BLACK] = 0xFFFF_0000_0000_0000_00L;
 
 	}
 
@@ -78,9 +80,26 @@ public class BitBoard {
 	}
 
 	void printBoard(long board) {
-		for (int shift = 0; shift <= 56; shift += 8) {
-			System.out.println((byte) ((board >>> shift) & 0xFF));
+		String result = "";
+		byte[] boardArr = new byte[64];
+		while (board > 0) {
+			boardArr[bitScanForward(board)] = 1;
+			board &= board - 1;
 		}
+		int square = 0;
+		for (int row = 7; row >= 0; row--) {
+			String line = "";
+			for (int col = 0; col <= 7; col++) {
+				line += boardArr[(8 * row) + col];
+			}
+			result += (line + "\n");
+		}
+		System.out.println(result);
+	}
+
+	int bitScanForward(long bb) {
+		int pos = Long.numberOfTrailingZeros(bb);
+		return pos == 64 ? -1 : pos;
 	}
 
 	class Flags {
