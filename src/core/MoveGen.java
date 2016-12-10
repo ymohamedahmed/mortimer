@@ -101,9 +101,69 @@ public class MoveGen {
 		for (int index = 0; index < 64; index++) {
 			long bitCount = rook ? hammingWeight(Constants.occupancyMaskRook[index])
 					: hammingWeight(Constants.occupancyMaskBishop[index]);
-			long variations = (int)(1L << bitCount);
-			for(int i = 0; i < variations; i++){
-				
+			long variations = (int) (1L << bitCount);
+			for (int i = 0; i < variations; i++) {
+				long validMoves = 0;
+				int j = 0;
+				int magicIndex = 0;
+				if (rook) {
+					magicIndex = (int) ((Constants.occupancyVariation[index][i]
+							* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
+					for (j = index + 9; j < 64; j += 8) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					for (j = index - 8; j >= 0; j -= 8) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					for (j = index + 1; j % 8 != 0; j++) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					for (j = index - 1; j % 8 != 7 && j >= 0; j--) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					Constants.magicMovesRook[index][magicIndex] = validMoves;
+				} else {
+					magicIndex = (int) ((Constants.occupancyVariation[index][i]
+							* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
+					for (j = index + 9; j % 8 != 0 && j < 64; j += 9) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					for (j = index - 9; j % 8 != 7 && j >= 0; j -= 9) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					for (j = index + 7; j % 8 != 7 && j < 64; j += 7) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					for (j = index - 8; j % 8 != 0 && j >= 0; j -= 7) {
+						validMoves |= (1L << j);
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+							break;
+						}
+					}
+					Constants.magicMovesBishop[index][magicIndex] = validMoves;
+
+				}
 			}
 		}
 	}
@@ -120,15 +180,10 @@ public class MoveGen {
 		int size = hammingWeight(board);
 		int[] setBits = new int[size];
 		int i = 0;
-		System.out.println(hammingWeight(board));
 		while (i < size) {
 			setBits[i] = bitScanForward(board);
 			board &= board - 1;
 			i++;
-		}
-
-		for (int x : setBits) {
-			System.out.println(x);
 		}
 		return setBits;
 	}
