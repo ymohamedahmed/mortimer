@@ -57,8 +57,9 @@ public class MoveGen {
 		int rivalIndex = littleEndianToRival(index);
 		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskRook[rivalIndex];
+
 		int lookupIndex = (int) (rookBlockers
-				* Constants.magicNumbersRook[rivalIndex]) >>> Constants.magicShiftRook[index];
+				* Constants.magicNumbersRook[rivalIndex]) >>> Constants.magicShiftRook[rivalIndex];
 		long moveSquares = Constants.magicMovesRook[rivalIndex][lookupIndex] & ~board.bitboards[side];
 		return moveSquares;
 	}
@@ -84,16 +85,16 @@ public class MoveGen {
 		int i, j;
 		for (int index = 0; index <= 63; index++) {
 			long mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
-			int[] setBits = new int[64];
-			int[] setBitsVariation = new int[64];
-			setBits = getIndexSetBits(setBits, mask);
+			int[] setBitsMask = new int[64];
+			int[] setBitsIndex = new int[64];
+			getIndexSetBits(setBitsMask, mask);
 			bitCount = hammingWeight(mask);
 			int varCount = (int) (1L << bitCount);
 			for (i = 0; i < varCount; i++) {
 				Constants.occupancyVariation[i] = 0;
-				 setBitsVariation = getIndexSetBits(setBitsVariation, i);
-				for (j = 0; setBitsVariation[j] != -1; j++) {
-					Constants.occupancyVariation[i] |= (1L << setBits[setBitsVariation[j]]);
+				getIndexSetBits(setBitsIndex, i);
+				for (j = 0; setBitsIndex[j] != -1; j++) {
+					Constants.occupancyVariation[i] |= (1L << setBitsMask[setBitsIndex[j]]);
 				}
 			}
 		}
@@ -178,7 +179,7 @@ public class MoveGen {
 		return (byte) ((((board + (board >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24);
 	}
 
-	int[] getIndexSetBits(int[] setBits, long board) {
+	void getIndexSetBits(int[] setBits, long board) {
 		int size = hammingWeight(board);
 		int[] setB = new int[size];
 		int i = 0;
@@ -194,7 +195,6 @@ public class MoveGen {
 				setBits[index] = -1;
 			}
 		}
-		return setBits;
 	}
 
 	int littleEndianToRival(int index) {
