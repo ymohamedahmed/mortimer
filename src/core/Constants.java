@@ -26,8 +26,8 @@ public class Constants {
 	public static final int NULL_SQUARE = 64;
 	public static final long ROW_1 = 0xFF << 0;
 	public static final long ROW_3 = 0xFF << 16;
-	public static final long ROW_6 = 0xFF << 40;
-	public static final long ROW_8 = 0xFF << 56;
+	public static final long ROW_6 = 0x0000_FF00_0000_0000L;
+	public static final long ROW_8 = 0xFF00_0000_0000_0000L;
 	public static final long FILE_A = 0x0101010101010101L << 0;
 	public static final long FILE_B = 0x0101010101010101L << 1;
 	public static final long FILE_C = 0x0101010101010101L << 2;

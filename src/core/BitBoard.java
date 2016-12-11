@@ -66,8 +66,9 @@ public class BitBoard {
 		// Adding kings
 		board[0 + 4] = Constants.WHITE_KING;
 		board[56 + 4] = Constants.BLACK_KING;
-		bitboards[Constants.WHITE] = 0x0000_0000_0000_00FF_FFL;
-		// bitboards[Constants.BLACK] = 0xFFFF_0000_0000_0000_00L;
+		bitboards[Constants.WHITE] = 0x0000_0000_0000_FFFFL;
+		bitboards[Constants.BLACK] = 0xFFFF_0000_0000_0000L;
+		
 
 	}
 
@@ -82,15 +83,15 @@ public class BitBoard {
 	void printBoard(long board) {
 		String result = "";
 		byte[] boardArr = new byte[64];
-		while (board > 0) {
-			boardArr[bitScanForward(board)] = 1;
+		while (board != 0) {
+			int index = bitScanForward(board);
+			boardArr[index] = 1;
 			board &= board - 1;
 		}
-		int square = 0;
 		for (int row = 7; row >= 0; row--) {
 			String line = "";
 			for (int col = 0; col <= 7; col++) {
-				line += boardArr[(8 * row) + col];
+				line += String.valueOf(boardArr[(8 * row) + col]);
 			}
 			result += (line + "\n");
 		}

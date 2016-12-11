@@ -205,71 +205,39 @@ public class MoveGen {
 	}
 
 	void initialiseKnightLookupTable() {
-		for (int row = 0; row < 8; row++) {
-			for (int col = 0; col < 8; col++) {
-				int square = row * 8 + col;
-				long target = 0L;
-				if (col >= 2 && row <= 6) {
-					target |= 1 << (square + 6);
-				}
-				if (col >= 1 && row <= 5) {
-					target |= 1 << (square + 15);
-				}
-				if (col <= 6 && row <= 5) {
-					target |= 1 << (square + 17);
-				}
-				if (col <= 5 && row <= 6) {
-					target |= 1 << (square + 10);
-				}
-				if (col >= 2 && row >= 1) {
-					target |= 1 << (square - 10);
-				}
-				if (col >= 1 && row >= 2) {
-					target |= 1 << (square - 17);
-				}
-				if (col <= 6 && row >= 2) {
-					target |= 1 << (square - 15);
-				}
-				if (col <= 5 && row >= 1) {
-					target |= 1 << (square - 6);
-				}
-				Constants.KNIGHT_TABLE[square] = target;
+		for (int square = 0; square < 64; square++) {
+			long target = (long) Math.pow(2, square);
+			if (square == 63) {
+				target = 0x8000_0000_0000_0000L;
 			}
+			long NNE = (target << 17) & ~Constants.FILE_A;
+			long NEE = (target << 10) & ~Constants.FILE_A & ~Constants.FILE_B;
+			long SEE = (target >>> 6) & ~Constants.FILE_A & ~Constants.FILE_B;
+			long SSE = (target >>> 15) & ~Constants.FILE_A;
+			long NNW = (target << 15) & ~Constants.FILE_H;
+			long NWW = (target << 6) & ~Constants.FILE_G & ~Constants.FILE_H;
+			long SWW = (target >>> 10) & ~Constants.FILE_G & ~Constants.FILE_H;
+			long SSW = (target >>> 17) & ~Constants.FILE_H;
+
+			Constants.KNIGHT_TABLE[square] = NNE | NEE | SEE | SSE | NNW | NWW | SWW | SSW;
 		}
 	}
 
 	void initialiseKingLookupTable() {
-		for (int row = 0; row < 8; row++) {
-			for (int col = 0; col < 8; col++) {
-				int square = (row * 8) + col;
-				long target = 0L;
-				if (col >= 1 && row <= 6) {
-					target |= 1 << (square + 7);
-				}
-				if (row <= 6) {
-					target |= 1 << (square + 8);
-				}
-				if (col <= 6 && row <= 6) {
-					target |= 1 << (square + 9);
-				}
-				if (col <= 6) {
-					target |= 1 << (square + 1);
-				}
-				if (col <= 6 && row >= 1) {
-					target |= 1 << (square - 7);
-				}
-				if (row >= 1) {
-					target |= 1 << (square - 8);
-				}
-				if (col >= 1 && row >= 1) {
-					target |= 1 << (square - 9);
-				}
-				if (col >= 1) {
-					target |= 1 << (square - 1);
-				}
-				Constants.KING_TABLE[square] = target;
+		for (int square = 0; square < 64; square++) {
+			long target = (long) Math.pow(2, square);
+			if (square == 63) {
+				target = 0x8000_0000_0000_0000L;
 			}
+			long N = (target << 8) & ~Constants.ROW_1;
+			long S = (target >>> 8) & ~Constants.ROW_8;
+			long E = (target << 1) & ~Constants.FILE_A;
+			long W = (target >>> 1) & ~Constants.FILE_H;
+			long NE = (target << 9) & ~Constants.FILE_A;
+			long NW = (target << 7) & ~Constants.FILE_H;
+			long SE = (target >>> 7) & ~Constants.FILE_A;
+			long SW = (target >>> 9) & ~Constants.FILE_H;
+			Constants.KING_TABLE[square] = N | S | E | W | NE | NW | SE | SW;
 		}
 	}
-
 }
