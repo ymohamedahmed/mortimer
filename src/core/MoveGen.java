@@ -80,18 +80,20 @@ public class MoveGen {
 	// Modified algorithm based on tutorial from
 	// http://www.rivalchess.com/magic-bitboards/
 	void occupancyVariation(boolean rook) {
-		int[] bitCount = new int[64];
+		int bitCount;
 		int i, j;
-		for (int index = 0; index < 64; index++) {
+		for (int index = 0; index <= 63; index++) {
 			long mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
-			int[] setBits = getIndexSetBits(mask);
-			bitCount[index] = hammingWeight(mask);
-			int varCount = (int) (1L << bitCount[index]);
+			int[] setBits = new int[64];
+			int[] setBitsVariation = new int[64];
+			setBits = getIndexSetBits(setBits, mask);
+			bitCount = hammingWeight(mask);
+			int varCount = (int) (1L << bitCount);
 			for (i = 0; i < varCount; i++) {
-				Constants.occupancyVariation[index][i] = 0;
-				int[] setBitsVariation = getIndexSetBits(i);
+				Constants.occupancyVariation[i] = 0;
+				 setBitsVariation = getIndexSetBits(setBitsVariation, i);
 				for (j = 0; setBitsVariation[j] != -1; j++) {
-					Constants.occupancyVariation[index][i] |= (1L << setBits[setBitsVariation[j]]);
+					Constants.occupancyVariation[i] |= (1L << setBits[setBitsVariation[j]]);
 				}
 			}
 		}
@@ -107,57 +109,57 @@ public class MoveGen {
 				int j = 0;
 				int magicIndex = 0;
 				if (rook) {
-					magicIndex = (int) ((Constants.occupancyVariation[index][i]
+					magicIndex = (int) ((Constants.occupancyVariation[i]
 							* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 					for (j = index + 9; j < 64; j += 8) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 8; j >= 0; j -= 8) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 1; j % 8 != 0; j++) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 1; j % 8 != 7 && j >= 0; j--) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					Constants.magicMovesRook[index][magicIndex] = validMoves;
 				} else {
-					magicIndex = (int) ((Constants.occupancyVariation[index][i]
+					magicIndex = (int) ((Constants.occupancyVariation[i]
 							* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 					for (j = index + 9; j % 8 != 0 && j < 64; j += 9) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 9; j % 8 != 7 && j >= 0; j -= 9) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 7; j % 8 != 7 && j < 64; j += 7) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 8; j % 8 != 0 && j >= 0; j -= 7) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
 						}
 					}
@@ -176,14 +178,21 @@ public class MoveGen {
 		return (byte) ((((board + (board >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24);
 	}
 
-	int[] getIndexSetBits(long board) {
+	int[] getIndexSetBits(int[] setBits, long board) {
 		int size = hammingWeight(board);
-		int[] setBits = new int[size];
+		int[] setB = new int[size];
 		int i = 0;
 		while (i < size) {
 			setBits[i] = bitScanForward(board);
 			board &= board - 1;
 			i++;
+		}
+		for (int index = 0; index <= 63; index++) {
+			if (index < size) {
+				setBits[index] = setB[index];
+			} else {
+				setBits[index] = -1;
+			}
 		}
 		return setBits;
 	}

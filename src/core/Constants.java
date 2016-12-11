@@ -112,7 +112,7 @@ public class Constants {
 	public static final long magicShiftBishop[] = { 58, 59, 59, 59, 59, 59, 59, 58, 59, 59, 59, 59, 59, 59, 59, 59, 59,
 			59, 57, 57, 57, 57, 59, 59, 59, 59, 57, 55, 55, 57, 59, 59, 59, 59, 57, 55, 55, 57, 59, 59, 59, 59, 57, 57,
 			57, 57, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58, 59, 59, 59, 59, 59, 59, 58 };
-	public static long occupancyVariation[][] = new long[64][4096];
+	public static long occupancyVariation[] = new long[4096];
 	public static long magicMovesRook[][] = new long[64][4096];
 	public static long magicMovesBishop[][] = new long[64][1024];
 }

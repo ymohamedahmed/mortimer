@@ -14,7 +14,7 @@ public class BitBoard {
 
 	void addPiece(byte piece, int square) {
 		board[square] = piece;
-		long bitboard = 1 << square;
+		long bitboard = 1L << square;
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
 	}
@@ -68,7 +68,18 @@ public class BitBoard {
 		board[56 + 4] = Constants.BLACK_KING;
 		bitboards[Constants.WHITE] = 0x0000_0000_0000_FFFFL;
 		bitboards[Constants.BLACK] = 0xFFFF_0000_0000_0000L;
-		
+		bitboards[Constants.WHITE_PAWN] = 0x0000_0000_0000_FF00L;
+		bitboards[Constants.WHITE_KNIGHT] = 0x0000_0000_0000_0042L;
+		bitboards[Constants.WHITE_BISHOP] = 0x0000_0000_0000_0024L;
+		bitboards[Constants.WHITE_ROOK] = 0x0000_0000_0000_0081L;
+		bitboards[Constants.WHITE_QUEEN] = 0x0000_0000_0000_0010L;
+		bitboards[Constants.WHITE_KING] = 0x0000_0000_0000_0008L;
+		bitboards[Constants.BLACK_PAWN] = 0x00FF_0000_0000_0000L;
+		bitboards[Constants.BLACK_KNIGHT] = 0x4200_0000_0000_0000L;
+		bitboards[Constants.BLACK_BISHOP] = 0x2400_0000_0000_0000L;
+		bitboards[Constants.BLACK_ROOK] = 0x8100_0000_0000_0000L;
+		bitboards[Constants.BLACK_QUEEN] = 0x1000_0000_0000_0000L;
+		bitboards[Constants.BLACK_KING] = 0x8000_0000_0000_0000L;
 
 	}
 
