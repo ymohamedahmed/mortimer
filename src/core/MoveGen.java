@@ -83,10 +83,10 @@ public class MoveGen {
 	void occupancyVariation(boolean rook) {
 		int bitCount;
 		int i, j;
-		for (int index = 0; index <= 63; index++) {
+		int[] setBitsMask = new int[64];
+		int[] setBitsIndex = new int[64];
+		for (int index = 0; index < 64; index++) {
 			long mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
-			int[] setBitsMask = new int[64];
-			int[] setBitsIndex = new int[64];
 			getIndexSetBits(setBitsMask, mask);
 			bitCount = hammingWeight(mask);
 			int varCount = (int) (1L << bitCount);
@@ -180,21 +180,12 @@ public class MoveGen {
 	}
 
 	void getIndexSetBits(int[] setBits, long board) {
-		int size = hammingWeight(board);
-		int[] setB = new int[size];
-		int i = 0;
-		while (i < size) {
-			setBits[i] = bitScanForward(board);
-			board &= board - 1;
-			i++;
+		int onBits = 0;
+		while(board != 0){
+			setBits[onBits] = Long.numberOfTrailingZeros(board);
+			board ^= (1L << setBits[onBits++]);
 		}
-		for (int index = 0; index <= 63; index++) {
-			if (index < size) {
-				setBits[index] = setB[index];
-			} else {
-				setBits[index] = -1;
-			}
-		}
+		setBits[onBits] = -1;
 	}
 
 	int littleEndianToRival(int index) {

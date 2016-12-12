@@ -14,10 +14,15 @@ public class MoveGenTest {
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();	
 		moveGen.occupancyVariation(true);
-		
+		moveGen.occupancyVariation(false);
 		moveGen.generateMoveDatabase(true);
 		
-	/*	System.out.println("KNIGHT");
+		moveGen.generateMoveDatabase(false);
+		
+	
+		
+		
+		System.out.println("KNIGHT");
 		board.printBoard(Constants.KNIGHT_TABLE[5]);
 		board.printBoard(Constants.KNIGHT_TABLE[33]);
 		board.printBoard(Constants.KNIGHT_TABLE[55]);
@@ -26,14 +31,20 @@ public class MoveGenTest {
 		board.printBoard(Constants.KING_TABLE[5]);
 		board.printBoard(Constants.KING_TABLE[33]);
 		board.printBoard(Constants.KING_TABLE[55]);
-		board.printBoard(Constants.KING_TABLE[63]);*/
+		board.printBoard(Constants.KING_TABLE[63]);
 		
 		//Testing magic bitboards
 		board.addPiece(Constants.WHITE_ROOK, 36);
 		board.removePiece(0);
 		board.printBoard(board.bitboards[Constants.WHITE_ROOK]);
-		board.printBoard(moveGen.getRookMoves(23, Constants.WHITE));
-
+		board.printBoard(moveGen.getRookMoves(36, Constants.WHITE));
+		
+		/*System.out.println("ROOK MOVE DATABASE");
+		for(long[] moves : Constants.magicMovesRook){
+			for(long move : moves){
+				board.printBoard(move);
+			}
+		}*/
 		assertEquals(4, moveGen.hammingWeight(0b0001010101));
 		assertEquals(2, moveGen.hammingWeight(0b11000));
 		assertEquals(5, moveGen.hammingWeight(0b00010101011));
