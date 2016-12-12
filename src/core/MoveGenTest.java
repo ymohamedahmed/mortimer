@@ -13,16 +13,9 @@ public class MoveGenTest {
 		MoveGen moveGen = new MoveGen(board, null);
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();	
-		moveGen.occupancyVariation(true);
-		moveGen.occupancyVariation(false);
 		moveGen.generateMoveDatabase(true);
-		
 		moveGen.generateMoveDatabase(false);
-		
-	
-		
-		
-		System.out.println("KNIGHT");
+	/*	System.out.println("KNIGHT");
 		board.printBoard(Constants.KNIGHT_TABLE[5]);
 		board.printBoard(Constants.KNIGHT_TABLE[33]);
 		board.printBoard(Constants.KNIGHT_TABLE[55]);
@@ -31,20 +24,24 @@ public class MoveGenTest {
 		board.printBoard(Constants.KING_TABLE[5]);
 		board.printBoard(Constants.KING_TABLE[33]);
 		board.printBoard(Constants.KING_TABLE[55]);
-		board.printBoard(Constants.KING_TABLE[63]);
+		board.printBoard(Constants.KING_TABLE[63]);*/
 		
 		//Testing magic bitboards
-		board.addPiece(Constants.WHITE_ROOK, 36);
-		board.removePiece(0);
-		board.printBoard(board.bitboards[Constants.WHITE_ROOK]);
+		System.out.println("ROOKS");
+		/*board.printBoard(Constants.occupancyMaskRook[20]);
+		board.printBoard(Constants.occupancyMaskRook[33]);*/
+		board.printBoard(moveGen.getRookMoves(20, Constants.WHITE));
 		board.printBoard(moveGen.getRookMoves(36, Constants.WHITE));
+		board.printBoard(moveGen.getRookMoves(41, Constants.WHITE));
 		
-		/*System.out.println("ROOK MOVE DATABASE");
-		for(long[] moves : Constants.magicMovesRook){
-			for(long move : moves){
-				board.printBoard(move);
-			}
-		}*/
+/*		System.out.println("BISHOPS");
+		board.printBoard(moveGen.getBishopMoves(20, Constants.WHITE));
+		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
+		board.printBoard(moveGen.getBishopMoves(41, Constants.WHITE));*/
+	
+		assertEquals(7, moveGen.littleEndianToRival(0));
+		assertEquals(41, moveGen.littleEndianToRival(46));
+		assertEquals(63, moveGen.littleEndianToRival(56));
 		assertEquals(4, moveGen.hammingWeight(0b0001010101));
 		assertEquals(2, moveGen.hammingWeight(0b11000));
 		assertEquals(5, moveGen.hammingWeight(0b00010101011));

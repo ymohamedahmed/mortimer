@@ -55,12 +55,17 @@ public class MoveGen {
 
 	long getRookMoves(int index, int side) {
 		int rivalIndex = littleEndianToRival(index);
+		System.out.println("OCCUPANCY MASK");
+		board.printBoard(Constants.occupancyMaskRook[index]);
 		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
-				& Constants.occupancyMaskRook[rivalIndex];
+				& Constants.occupancyMaskRook[index];
 
 		int lookupIndex = (int) (rookBlockers
 				* Constants.magicNumbersRook[rivalIndex]) >>> Constants.magicShiftRook[rivalIndex];
-		long moveSquares = Constants.magicMovesRook[rivalIndex][lookupIndex] & ~board.bitboards[side];
+		System.out.println("MOVE SQUARE PRE");
+		
+		board.printBoard(Constants.magicMovesRook[rivalIndex][lookupIndex]);
+		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
 		return moveSquares;
 	}
 
@@ -80,16 +85,25 @@ public class MoveGen {
 
 	// Modified algorithm based on tutorial from
 	// http://www.rivalchess.com/magic-bitboards/
-	void occupancyVariation(boolean rook) {
-		int bitCount;
-		int i, j;
+
+	void generateMoveDatabase(boolean rook) {
+		long validMoves = 0;
+		int variations;
+		int varCount;
+		int index, i, j;
+		long mask;
+		int magicIndex;
 		int[] setBitsMask = new int[64];
 		int[] setBitsIndex = new int[64];
-		for (int index = 0; index < 64; index++) {
-			long mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
+		int bitCount = 0;
+
+		for (index = 0; index < 64; index++) {
+
+			mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
 			getIndexSetBits(setBitsMask, mask);
-			bitCount = hammingWeight(mask);
-			int varCount = (int) (1L << bitCount);
+			bitCount =	Long.bitCount(mask);
+			varCount = (int) (1L << bitCount);
+
 			for (i = 0; i < varCount; i++) {
 				Constants.occupancyVariation[i] = 0;
 				getIndexSetBits(setBitsIndex, i);
@@ -97,22 +111,14 @@ public class MoveGen {
 					Constants.occupancyVariation[i] |= (1L << setBitsMask[setBitsIndex[j]]);
 				}
 			}
-		}
-	}
-
-	void generateMoveDatabase(boolean rook) {
-		for (int index = 0; index < 64; index++) {
-			long bitCount = rook ? hammingWeight(Constants.occupancyMaskRook[index])
-					: hammingWeight(Constants.occupancyMaskBishop[index]);
-			long variations = (int) (1L << bitCount);
-			for (int i = 0; i < variations; i++) {
-				long validMoves = 0;
-				int j = 0;
-				int magicIndex = 0;
+			
+			variations = (int) (1L << bitCount);
+			for (i = 0; i < variations; i++) {
+				validMoves = 0;
 				if (rook) {
 					magicIndex = (int) ((Constants.occupancyVariation[i]
 							* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
-					for (j = index + 9; j < 64; j += 8) {
+					for (j = index + 8; j < 64; j += 8) {
 						validMoves |= (1L << j);
 						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
@@ -158,7 +164,7 @@ public class MoveGen {
 							break;
 						}
 					}
-					for (j = index - 8; j % 8 != 0 && j >= 0; j -= 7) {
+					for (j = index - 7; j % 8 != 0 && j >= 0; j -= 7) {
 						validMoves |= (1L << j);
 						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
 							break;
@@ -181,7 +187,7 @@ public class MoveGen {
 
 	void getIndexSetBits(int[] setBits, long board) {
 		int onBits = 0;
-		while(board != 0){
+		while (board != 0) {
 			setBits[onBits] = Long.numberOfTrailingZeros(board);
 			board ^= (1L << setBits[onBits++]);
 		}
@@ -189,7 +195,7 @@ public class MoveGen {
 	}
 
 	int littleEndianToRival(int index) {
-		int row = (int) index / (int) 8;
+		int row = (int) Math.floor(index / 8);
 		int sumRivalLittleEndian = 7 + (row * 16);
 		int rivalIndex = sumRivalLittleEndian - index;
 		return rivalIndex;
