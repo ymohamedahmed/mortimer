@@ -7,15 +7,16 @@ import static org.junit.Assert.assertEquals;
 public class MoveGenTest {
 	@Test
 	public void testHammingWeight() {
-		
+
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
 		MoveGen moveGen = new MoveGen(board, null);
 		moveGen.initialiseKnightLookupTable();
-		moveGen.initialiseKingLookupTable();	
+		moveGen.initialiseKingLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
-	/*	System.out.println("KNIGHT");
+
+/*		System.out.println("KNIGHT");
 		board.printBoard(Constants.KNIGHT_TABLE[5]);
 		board.printBoard(Constants.KNIGHT_TABLE[33]);
 		board.printBoard(Constants.KNIGHT_TABLE[55]);
@@ -24,21 +25,23 @@ public class MoveGenTest {
 		board.printBoard(Constants.KING_TABLE[5]);
 		board.printBoard(Constants.KING_TABLE[33]);
 		board.printBoard(Constants.KING_TABLE[55]);
-		board.printBoard(Constants.KING_TABLE[63]);*/
-		
-		//Testing magic bitboards
+		board.printBoard(Constants.KING_TABLE[63]);
+
+		// Testing magic bitboards
 		System.out.println("ROOKS");
-		/*board.printBoard(Constants.occupancyMaskRook[20]);
-		board.printBoard(Constants.occupancyMaskRook[33]);*/
-		board.printBoard(moveGen.getRookMoves(20, Constants.WHITE));
+		board.printBoard(moveGen.getRookMoves(0, Constants.WHITE));
+		board.printBoard(moveGen.getRookMoves(17, Constants.WHITE));
+		board.printBoard(moveGen.getRookMoves(33, Constants.WHITE));
 		board.printBoard(moveGen.getRookMoves(36, Constants.WHITE));
 		board.printBoard(moveGen.getRookMoves(41, Constants.WHITE));
+
+		System.out.println("BISHOPS");
+		board.printBoard(moveGen.getBishopMoves(0, Constants.WHITE));
+		board.printBoard(moveGen.getBishopMoves(17, Constants.WHITE));
 		
-/*		System.out.println("BISHOPS");
-		board.printBoard(moveGen.getBishopMoves(20, Constants.WHITE));
 		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
 		board.printBoard(moveGen.getBishopMoves(41, Constants.WHITE));*/
-	
+		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
 		assertEquals(7, moveGen.littleEndianToRival(0));
 		assertEquals(41, moveGen.littleEndianToRival(46));
 		assertEquals(63, moveGen.littleEndianToRival(56));

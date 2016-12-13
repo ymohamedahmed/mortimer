@@ -54,17 +54,10 @@ public class MoveGen {
 	}
 
 	long getRookMoves(int index, int side) {
-		int rivalIndex = littleEndianToRival(index);
-		System.out.println("OCCUPANCY MASK");
-		board.printBoard(Constants.occupancyMaskRook[index]);
 		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskRook[index];
-
-		int lookupIndex = (int) (rookBlockers
-				* Constants.magicNumbersRook[rivalIndex]) >>> Constants.magicShiftRook[rivalIndex];
-		System.out.println("MOVE SQUARE PRE");
-		
-		board.printBoard(Constants.magicMovesRook[rivalIndex][lookupIndex]);
+		int lookupIndex = (int) ((rookBlockers
+				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
 		return moveSquares;
 	}
@@ -72,14 +65,16 @@ public class MoveGen {
 	long getBishopMoves(int index, int side) {
 		int rivalIndex = littleEndianToRival(index);
 		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
-				& Constants.occupancyMaskBishop[rivalIndex];
+				& Constants.occupancyMaskBishop[index];
 		int lookupIndex = (int) (bishopBlockers
-				* Constants.magicNumbersBishop[rivalIndex]) >>> Constants.magicShiftBishop[index];
-		long moveSquares = Constants.magicMovesBishop[rivalIndex][lookupIndex] & ~board.bitboards[side];
+				* Constants.magicNumbersBishop[rivalIndex]) >>> Constants.magicShiftBishop[rivalIndex];
+		System.out.println("MOVES PRE");
+		board.printBoard(Constants.magicMovesBishop[index][lookupIndex]);
+		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
 		return moveSquares;
 	}
 
-	long addQueenMoves(int index, int side) {
+	long getQueenMoves(int index, int side) {
 		return (getRookMoves(index, side) | getBishopMoves(index, side));
 	}
 
@@ -101,72 +96,72 @@ public class MoveGen {
 
 			mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
 			getIndexSetBits(setBitsMask, mask);
-			bitCount =	Long.bitCount(mask);
+			bitCount = Long.bitCount(mask);
 			varCount = (int) (1L << bitCount);
 
 			for (i = 0; i < varCount; i++) {
-				Constants.occupancyVariation[i] = 0;
+				Constants.occupancyVariation[index][i] = 0;
 				getIndexSetBits(setBitsIndex, i);
 				for (j = 0; setBitsIndex[j] != -1; j++) {
-					Constants.occupancyVariation[i] |= (1L << setBitsMask[setBitsIndex[j]]);
+					Constants.occupancyVariation[index][i] |= (1L << setBitsMask[setBitsIndex[j]]);
 				}
 			}
-			
+
 			variations = (int) (1L << bitCount);
 			for (i = 0; i < variations; i++) {
 				validMoves = 0;
 				if (rook) {
-					magicIndex = (int) ((Constants.occupancyVariation[i]
+					magicIndex = (int) ((Constants.occupancyVariation[index][i]
 							* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 					for (j = index + 8; j < 64; j += 8) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 8; j >= 0; j -= 8) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 1; j % 8 != 0; j++) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 1; j % 8 != 7 && j >= 0; j--) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					Constants.magicMovesRook[index][magicIndex] = validMoves;
 				} else {
-					magicIndex = (int) ((Constants.occupancyVariation[i]
+					magicIndex = (int) ((Constants.occupancyVariation[index][i]
 							* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 					for (j = index + 9; j % 8 != 0 && j < 64; j += 9) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 9; j % 8 != 7 && j >= 0; j -= 9) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 7; j % 8 != 7 && j < 64; j += 7) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 7; j % 8 != 0 && j >= 0; j -= 7) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[i] & (1L << j)) != 0) {
+						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
