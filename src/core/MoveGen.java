@@ -63,13 +63,10 @@ public class MoveGen {
 	}
 
 	long getBishopMoves(int index, int side) {
-		int rivalIndex = littleEndianToRival(index);
 		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskBishop[index];
-		int lookupIndex = (int) (bishopBlockers
-				* Constants.magicNumbersBishop[rivalIndex]) >>> Constants.magicShiftBishop[rivalIndex];
-		System.out.println("MOVES PRE");
-		board.printBoard(Constants.magicMovesBishop[index][lookupIndex]);
+		int lookupIndex = (int) ((bishopBlockers
+				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
 		return moveSquares;
 	}

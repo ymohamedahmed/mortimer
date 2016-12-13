@@ -16,7 +16,7 @@ public class MoveGenTest {
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 
-/*		System.out.println("KNIGHT");
+		System.out.println("KNIGHT");
 		board.printBoard(Constants.KNIGHT_TABLE[5]);
 		board.printBoard(Constants.KNIGHT_TABLE[33]);
 		board.printBoard(Constants.KNIGHT_TABLE[55]);
@@ -37,11 +37,10 @@ public class MoveGenTest {
 
 		System.out.println("BISHOPS");
 		board.printBoard(moveGen.getBishopMoves(0, Constants.WHITE));
-		board.printBoard(moveGen.getBishopMoves(17, Constants.WHITE));
+		board.printBoard(moveGen.getBishopMoves(17, Constants.WHITE));		
+		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
+		board.printBoard(moveGen.getBishopMoves(41, Constants.WHITE));
 		
-		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
-		board.printBoard(moveGen.getBishopMoves(41, Constants.WHITE));*/
-		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
 		assertEquals(7, moveGen.littleEndianToRival(0));
 		assertEquals(41, moveGen.littleEndianToRival(46));
 		assertEquals(63, moveGen.littleEndianToRival(56));

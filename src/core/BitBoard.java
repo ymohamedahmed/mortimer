@@ -66,20 +66,20 @@ public class BitBoard {
 		// Adding kings
 		board[0 + 4] = Constants.WHITE_KING;
 		board[56 + 4] = Constants.BLACK_KING;
-		bitboards[Constants.WHITE] = 0x0000_0000_0000_FFFFL;
-		bitboards[Constants.BLACK] = 0xFFFF_0000_0000_0000L;
-		bitboards[Constants.WHITE_PAWN] = 0x0000_0000_0000_FF00L;
-		bitboards[Constants.WHITE_KNIGHT] = 0x0000_0000_0000_0042L;
-		bitboards[Constants.WHITE_BISHOP] = 0x0000_0000_0000_0024L;
-		bitboards[Constants.WHITE_ROOK] = 0x0000_0000_0000_0081L;
-		bitboards[Constants.WHITE_QUEEN] = 0x0000_0000_0000_0010L;
-		bitboards[Constants.WHITE_KING] = 0x0000_0000_0000_0008L;
-		bitboards[Constants.BLACK_PAWN] = 0x00FF_0000_0000_0000L;
-		bitboards[Constants.BLACK_KNIGHT] = 0x4200_0000_0000_0000L;
-		bitboards[Constants.BLACK_BISHOP] = 0x2400_0000_0000_0000L;
-		bitboards[Constants.BLACK_ROOK] = 0x8100_0000_0000_0000L;
-		bitboards[Constants.BLACK_QUEEN] = 0x1000_0000_0000_0000L;
-		bitboards[Constants.BLACK_KING] = 0x8000_0000_0000_0000L;
+		bitboards[Constants.WHITE] = 0x000000000000_FFFFL;
+		bitboards[Constants.BLACK] = 0xFFFF000000000000L;
+		bitboards[Constants.WHITE_PAWN] = 0x000000000000FF00L;
+		bitboards[Constants.WHITE_KNIGHT] = 0x0000000000000042L;
+		bitboards[Constants.WHITE_BISHOP] = 0x0000000000000024L;
+		bitboards[Constants.WHITE_ROOK] = 0x0000000000000081L;
+		bitboards[Constants.WHITE_QUEEN] = 0x0000000000000010L;
+		bitboards[Constants.WHITE_KING] = 0x0000000000000008L;
+		bitboards[Constants.BLACK_PAWN] = 0x00FF000000000000L;
+		bitboards[Constants.BLACK_KNIGHT] = 0x4200000000000000L;
+		bitboards[Constants.BLACK_BISHOP] = 0x2400000000000000L;
+		bitboards[Constants.BLACK_ROOK] = 0x8100000000000000L;
+		bitboards[Constants.BLACK_QUEEN] = 0x1000000000000000L;
+		bitboards[Constants.BLACK_KING] = 0x8000000000000000L;
 
 	}
 
