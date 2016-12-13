@@ -66,7 +66,7 @@ public class BitBoard {
 		// Adding kings
 		board[0 + 4] = Constants.WHITE_KING;
 		board[56 + 4] = Constants.BLACK_KING;
-		bitboards[Constants.WHITE] = 0x000000000000_FFFFL;
+		bitboards[Constants.WHITE] = 0x000000000000FFFFL;
 		bitboards[Constants.BLACK] = 0xFFFF000000000000L;
 		bitboards[Constants.WHITE_PAWN] = 0x000000000000FF00L;
 		bitboards[Constants.WHITE_KNIGHT] = 0x0000000000000042L;

@@ -41,6 +41,10 @@ public class MoveGenTest {
 		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
 		board.printBoard(moveGen.getBishopMoves(41, Constants.WHITE));
 		
+		System.out.println("PAWNS");
+		moveGen.addPawnPushes(Constants.WHITE);
+		moveGen.addPawnAttacks(Constants.WHITE);
+		
 		assertEquals(7, moveGen.littleEndianToRival(0));
 		assertEquals(41, moveGen.littleEndianToRival(46));
 		assertEquals(63, moveGen.littleEndianToRival(56));

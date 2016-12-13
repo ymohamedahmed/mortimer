@@ -10,7 +10,9 @@ public class MoveGen {
 		this.board = board;
 		this.moveList = moveList;
 	}
-
+	void generateMoves(){
+		
+	}
 	void addPawnPushes(int side) {
 		int[] offsets = { 8, 64 - 8 };
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
@@ -20,18 +22,20 @@ public class MoveGen {
 		long emptySquares = ~(board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK]);
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
 		// add moves
-		double promotions = pushes & promotions_mask[side];
+		long promotions = pushes & promotions_mask[side];
 		// add moves
-		double doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
+		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
 		// add moves
+		board.printBoard(pushes | promotions | doublePushes);
 	}
 
 	void addPawnAttacks(int side) {
 		int offsets[][] = { { 7, 55 }, { 9, 57 } };
+		int enemySide = (side == 0) ? 1 : 0;
 		long promotions_mask[] = { Constants.ROW_8, Constants.ROW_1 };
 		long file_mask[] = { ~Constants.FILE_H, ~Constants.FILE_A };
 		long pawns = board.bitboards[side | Constants.PAWN];
-		long enemy = board.bitboards[~side];
+		long enemy = board.bitboards[enemySide];
 		for (int direction = 0; direction < 2; direction++) {
 			int offset = offsets[direction][side];
 			long targets = circularLeftShift(pawns, offset) & file_mask[direction];
@@ -41,6 +45,7 @@ public class MoveGen {
 			// add moves
 			long promotions = attacks & promotions_mask[side];
 			// add moves
+			board.printBoard(attacks | enPassantAttacks | promotions);
 		}
 	}
 
@@ -237,5 +242,9 @@ public class MoveGen {
 			long SW = (target >>> 9) & ~Constants.FILE_H;
 			Constants.KING_TABLE[square] = N | S | E | W | NE | NW | SE | SW;
 		}
+	}
+	
+	void initialisePawnLookupTable(){
+		
 	}
 }
