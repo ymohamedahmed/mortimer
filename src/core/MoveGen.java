@@ -29,7 +29,7 @@ public class MoveGen {
 		board.printBoard(pushes | promotions | doublePushes);
 	}
 
-	void addPawnAttacks(int side) {
+/*	void addPawnAttacks(int side) {
 		int offsets[][] = { { 7, 55 }, { 9, 57 } };
 		int enemySide = (side == 0) ? 1 : 0;
 		long promotions_mask[] = { Constants.ROW_8, Constants.ROW_1 };
@@ -47,6 +47,26 @@ public class MoveGen {
 			// add moves
 			board.printBoard(attacks | enPassantAttacks | promotions);
 		}
+	}*/
+	long getPawnEastAttacks(int side){
+		long result;
+		//WHITE
+		if(side == 0){
+			result = ((board.bitboards[Constants.WHITE_PAWN] << 9) & ~Constants.FILE_A) & board.bitboards[Constants.BLACK];
+		}else{
+			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 7) & ~Constants.FILE_A) & board.bitboards[Constants.WHITE];
+		}
+		return result;
+	}
+	long getPawnWestAttacks(int side){
+		long result;
+		//WHITE
+		if(side == 0){
+			result = ((board.bitboards[Constants.WHITE_PAWN] << 7) & ~Constants.FILE_H) & board.bitboards[Constants.BLACK];
+		}else{
+			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 9) & ~Constants.FILE_H) & board.bitboards[Constants.WHITE];
+		}
+		return result;
 	}
 
 	void addMovesWithOffset(int offset, long target, long flags) {

@@ -18,7 +18,9 @@ public class BitBoard {
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
 	}
-
+	void move(Move move){
+		
+	}
 	void removePiece(int square) {
 		byte piece = board[square];
 		board[square] = Constants.EMPTY;
