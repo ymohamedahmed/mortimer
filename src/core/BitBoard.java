@@ -41,7 +41,10 @@ public class BitBoard {
 		flags.sideToMove = Constants.WHITE;
 	}
 
-	void resetToInitialSetup() {
+	public void resetToInitialSetup() {
+		for(int index = 0; index < 64; index++){
+			board[index] = Constants.EMPTY;
+		}
 		// Adding pawns
 		for (int col = 0; col <= 7; col++) {
 			board[8 + col] = Constants.WHITE_PAWN;

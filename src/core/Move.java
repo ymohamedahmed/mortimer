@@ -13,8 +13,8 @@ public class Move {
 		return finalPosition;
 	}
 
-	public void setPosition(int position) {
-		this.finalPosition = position;
+	public void setPosition(int finalPosition) {
+		this.finalPosition = finalPosition;
 	}
 
 }

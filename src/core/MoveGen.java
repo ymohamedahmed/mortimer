@@ -10,72 +10,42 @@ public class MoveGen {
 		this.board = board;
 		this.moveList = moveList;
 	}
-	void generateMoves(){
-		
-	}
-	void addPawnPushes(int side) {
-		int[] offsets = { 8, 64 - 8 };
-		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
-		long[] startWithMask = { Constants.ROW_3, Constants.ROW_6 };
-		int offset = offsets[side];
-		long pawns = board.bitboards[side | Constants.PAWN];
-		long emptySquares = ~(board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK]);
-		long pushes = circularLeftShift(pawns, offset) & emptySquares;
-		// add moves
-		long promotions = pushes & promotions_mask[side];
-		// add moves
-		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
-		// add moves
-		board.printBoard(pushes | promotions | doublePushes);
+
+	void generateMoves() {
+
 	}
 
-/*	void addPawnAttacks(int side) {
-		int offsets[][] = { { 7, 55 }, { 9, 57 } };
-		int enemySide = (side == 0) ? 1 : 0;
-		long promotions_mask[] = { Constants.ROW_8, Constants.ROW_1 };
-		long file_mask[] = { ~Constants.FILE_H, ~Constants.FILE_A };
-		long pawns = board.bitboards[side | Constants.PAWN];
-		long enemy = board.bitboards[enemySide];
-		for (int direction = 0; direction < 2; direction++) {
-			int offset = offsets[direction][side];
-			long targets = circularLeftShift(pawns, offset) & file_mask[direction];
-			long attacks = enemy & targets;
-			// add moves
-			long enPassantAttacks = targets & (1 << board.flags.enPassantSquare);
-			// add moves
-			long promotions = attacks & promotions_mask[side];
-			// add moves
-			board.printBoard(attacks | enPassantAttacks | promotions);
+	void addMoves(int index, long moves, ArrayList<Move> moveList) {
+		while (moves != 0) {
+			moveList.add(new Move(index, bitScanForward(moves)));
+			moves &= moves - 1;
 		}
-	}*/
-	long getPawnEastAttacks(int side){
-		long result;
-		//WHITE
-		if(side == 0){
-			result = ((board.bitboards[Constants.WHITE_PAWN] << 9) & ~Constants.FILE_A) & board.bitboards[Constants.BLACK];
-		}else{
-			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 7) & ~Constants.FILE_A) & board.bitboards[Constants.WHITE];
-		}
-		return result;
 	}
-	long getPawnWestAttacks(int side){
+
+	long getPawnEastAttacks(int side) {
 		long result;
-		//WHITE
-		if(side == 0){
-			result = ((board.bitboards[Constants.WHITE_PAWN] << 7) & ~Constants.FILE_H) & board.bitboards[Constants.BLACK];
-		}else{
-			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 9) & ~Constants.FILE_H) & board.bitboards[Constants.WHITE];
+		// WHITE
+		if (side == 0) {
+			result = ((board.bitboards[Constants.WHITE_PAWN] << 9) & ~Constants.FILE_A)
+					& board.bitboards[Constants.BLACK];
+		} else {
+			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 7) & ~Constants.FILE_A)
+					& board.bitboards[Constants.WHITE];
 		}
 		return result;
 	}
 
-	void addMovesWithOffset(int offset, long target, long flags) {
-		while (target > 0) {
-			int to = bitScanForward(target);
-			int from = (to - offset) % 64;
-			int capture = board.board[to];
-			target &= target - 1;
+	long getPawnWestAttacks(int side) {
+		long result;
+		// WHITE
+		if (side == 0) {
+			result = ((board.bitboards[Constants.WHITE_PAWN] << 7) & ~Constants.FILE_H)
+					& board.bitboards[Constants.BLACK];
+		} else {
+			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 9) & ~Constants.FILE_H)
+					& board.bitboards[Constants.WHITE];
 		}
+		return result;
 	}
 
 	long getRookMoves(int index, int side) {
@@ -100,6 +70,17 @@ public class MoveGen {
 		return (getRookMoves(index, side) | getBishopMoves(index, side));
 	}
 
+	void getKnightMoves(int index, int side) {
+
+	}
+
+	void getPawnMoves(int index, int side) {
+
+	}
+
+	void getKingMoves(int index, int side) {
+
+	}
 	// Modified algorithm based on tutorial from
 	// http://www.rivalchess.com/magic-bitboards/
 
@@ -194,14 +175,6 @@ public class MoveGen {
 		}
 	}
 
-	// Based on
-	// https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation
-	byte hammingWeight(long board) {
-		board = board - ((board >>> 1) & 0x55555555);
-		board = (board & 0x33333333) + ((board >>> 2) & 0x33333333);
-		return (byte) ((((board + (board >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24);
-	}
-
 	void getIndexSetBits(int[] setBits, long board) {
 		int onBits = 0;
 		while (board != 0) {
@@ -209,17 +182,6 @@ public class MoveGen {
 			board ^= (1L << setBits[onBits++]);
 		}
 		setBits[onBits] = -1;
-	}
-
-	int littleEndianToRival(int index) {
-		int row = (int) Math.floor(index / 8);
-		int sumRivalLittleEndian = 7 + (row * 16);
-		int rivalIndex = sumRivalLittleEndian - index;
-		return rivalIndex;
-	}
-
-	long circularLeftShift(long target, int shift) {
-		return target << shift | target >>> (64 - shift);
 	}
 
 	int bitScanForward(long bb) {
@@ -263,8 +225,16 @@ public class MoveGen {
 			Constants.KING_TABLE[square] = N | S | E | W | NE | NW | SE | SW;
 		}
 	}
-	
-	void initialisePawnLookupTable(){
-		
+
+	void initialisePawnLookupTable() {
+		// Complete for white then use symmetry to complete for white
+		for (int index = 0; index < 64; index++) {
+			long board = (long) Math.pow(2, index);
+			if (index == 63) {
+				board = 0x8000_0000_0000_0000L;
+			}
+			long attacks = ((board << 9) & ~Constants.FILE_A) | ((board << 7) & ~Constants.FILE_H);
+		}
+
 	}
 }

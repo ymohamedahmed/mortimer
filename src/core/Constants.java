@@ -47,7 +47,8 @@ public class Constants {
 	// Lookup tables
 	public static long KNIGHT_TABLE[] = new long[64];
 	public static long KING_TABLE[] = new long[64];
-	public static long PAWN_TABLE[][] = new long[2][64];
+	public static long PAWN_ATTACKS_TABLE[][] = new long[2][64];
+	public static long PAWN_PUSHES_TABLE[][] = new long[2][64];
 
 	// Occupancy Mask
 	// Manipulated from http://www.rivalchess.com/magic-bitboards/ to match my
