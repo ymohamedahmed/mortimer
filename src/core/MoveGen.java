@@ -237,4 +237,9 @@ public class MoveGen {
 		}
 
 	}
+	int mirrorIndex(int index){
+		int row = Math.floorDiv(index, 8);
+		int offset = (index < 32) ? 56 - (16*row) : (16*row) - 56;
+		return index + offset;
+	}
 }

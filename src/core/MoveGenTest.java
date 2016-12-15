@@ -42,15 +42,11 @@ public class MoveGenTest {
 		board.printBoard(moveGen.getBishopMoves(41, Constants.WHITE));
 		
 		System.out.println("PAWNS");
-		moveGen.addPawnPushes(Constants.WHITE);
-		moveGen.addPawnAttacks(Constants.WHITE);
+	
+		assertEquals(56, moveGen.mirrorIndex(0));
+		assertEquals(63, moveGen.mirrorIndex(7));
+		assertEquals(48, moveGen.mirrorIndex(8));
+		assertEquals(40, moveGen.mirrorIndex(16));
 		
-		assertEquals(7, moveGen.littleEndianToRival(0));
-		assertEquals(41, moveGen.littleEndianToRival(46));
-		assertEquals(63, moveGen.littleEndianToRival(56));
-		assertEquals(4, moveGen.hammingWeight(0b0001010101));
-		assertEquals(2, moveGen.hammingWeight(0b11000));
-		assertEquals(5, moveGen.hammingWeight(0b00010101011));
-		assertEquals(0, moveGen.hammingWeight(0b0000000000));
 	}
 }
