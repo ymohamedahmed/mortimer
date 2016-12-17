@@ -37,18 +37,10 @@ public class Constants {
 	public static final long FILE_G = 0x0101010101010101L << 6;
 	public static final long FILE_H = 0x0101010101010101L << 7;
 
-	// Castling
-	public static final byte WHITE_KINGSIDE = 1;
-	public static final byte WHITE_QUEENSIDE = 2;
-	public static final byte BLACK_KINGSIDE = 4;
-	public static final byte BLACK_QUEENSIDE = 8;
-	public static final byte FULL_CASTLING_RIGHTS = 1 | 2 | 4 | 8;
-
 	// Lookup tables
 	public static long KNIGHT_TABLE[] = new long[64];
 	public static long KING_TABLE[] = new long[64];
 	public static long PAWN_ATTACKS_TABLE[][] = new long[2][64];
-	public static long PAWN_PUSHES_TABLE[][] = new long[2][64];
 
 	// Occupancy Mask
 	// Manipulated from http://www.rivalchess.com/magic-bitboards/ to match my

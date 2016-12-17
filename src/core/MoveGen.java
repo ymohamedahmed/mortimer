@@ -4,46 +4,48 @@ import java.util.ArrayList;
 
 public class MoveGen {
 	private BitBoard board;
-	private ArrayList<Move> moveList;
 
-	public MoveGen(BitBoard board, ArrayList<Move> moveList) {
+	public MoveGen(BitBoard board) {
 		this.board = board;
-		this.moveList = moveList;
 	}
 
-	void generateMoves() {
-
+	ArrayList<Move> generateMoves() {
+		ArrayList<Move> moves = new ArrayList<>();
+		return moves;
 	}
 
-	void addMoves(int index, long moves, ArrayList<Move> moveList) {
+	void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList, boolean enPassant, boolean capture,
+			boolean promotion, boolean castling) {
 		while (moves != 0) {
-			moveList.add(new Move(index, bitScanForward(moves)));
+			Move move = new Move(pieceType, index, bitScanForward(moves));
+			move.setCastling(castling);
+			move.setPromotion(promotion);
+			move.setEnPassant(enPassant);
+			move.setCapture(capture);
+			moveList.add(move);
 			moves &= moves - 1;
 		}
 	}
 
-	long getPawnEastAttacks(int side) {
+	long getPawnEastAttacks(long board, int side) {
 		long result;
 		// WHITE
 		if (side == 0) {
-			result = ((board.bitboards[Constants.WHITE_PAWN] << 9) & ~Constants.FILE_A)
-					& board.bitboards[Constants.BLACK];
+			result = ((board << 9) & ~Constants.FILE_A);
+
 		} else {
-			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 7) & ~Constants.FILE_A)
-					& board.bitboards[Constants.WHITE];
+			result = ((board >>> 7) & ~Constants.FILE_A);
 		}
 		return result;
 	}
 
-	long getPawnWestAttacks(int side) {
+	long getPawnWestAttacks(long board, int side) {
 		long result;
 		// WHITE
 		if (side == 0) {
-			result = ((board.bitboards[Constants.WHITE_PAWN] << 7) & ~Constants.FILE_H)
-					& board.bitboards[Constants.BLACK];
+			result = ((board << 7) & ~Constants.FILE_H);
 		} else {
-			result = ((board.bitboards[Constants.BLACK_PAWN] >>> 9) & ~Constants.FILE_H)
-					& board.bitboards[Constants.WHITE];
+			result = ((board >>> 9) & ~Constants.FILE_H);
 		}
 		return result;
 	}
@@ -74,8 +76,39 @@ public class MoveGen {
 
 	}
 
-	void getPawnMoves(int index, int side) {
+	void addPawnPushes(int side) {
+		int[] offsets = { 8, 56 };
+		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
+		long[] startWithMask = { Constants.ROW_3, Constants.ROW_6 };
+		int offset = offsets[side];
+		long pawns = board.bitboards[side | Constants.PAWN];
+		long emptySquares = ~(board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK]);
+		long pushes = circularLeftShift(pawns, offset) & emptySquares;
+		// add moves
+		long promotions = pushes & promotions_mask[side];
+		// add moves
+		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
+		// add moves
+		board.printBoard(pushes | promotions | doublePushes);
+		// Calculate pawn pushes
 
+		// return (attacks | pushes) & ~board.bitboards[side];
+	}
+
+	void getPawnAttacks(ArrayList<Move> moveList, int index, int side) {
+		int enemy = (side == 0) ? 1 : 0;
+		int pawnType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
+		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
+		long attacks = Constants.PAWN_ATTACKS_TABLE[side][index] & board.bitboards[enemy];
+		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, true, false, false);
+		long promotions = attacks & promotions_mask[side];
+		addMoves(pawnType, index, promotions, moveList, false, true, true, false);
+		long enPassant = attacks & board.flags.enPassantSquares;
+		addMoves(pawnType, index, enPassant, moveList, true, false, false, false);
+	}
+
+	long circularLeftShift(long target, int shift) {
+		return target << shift | target >>> (64 - shift);
 	}
 
 	void getKingMoves(int index, int side) {
@@ -228,18 +261,23 @@ public class MoveGen {
 
 	void initialisePawnLookupTable() {
 		// Complete for white then use symmetry to complete for white
-		for (int index = 0; index < 64; index++) {
-			long board = (long) Math.pow(2, index);
-			if (index == 63) {
-				board = 0x8000_0000_0000_0000L;
+		for (int side = 0; side <= 1; side++) {
+			for (int index = 0; index < 64; index++) {
+				long board = (long) Math.pow(2, index);
+				if (index == 63) {
+					board = 0x8000_0000_0000_0000L;
+				}
+				long attacks = ((board << 9) & ~Constants.FILE_A) | ((board << 7) & ~Constants.FILE_H);
+				Constants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(board, side)
+						| getPawnWestAttacks(board, side);
 			}
-			long attacks = ((board << 9) & ~Constants.FILE_A) | ((board << 7) & ~Constants.FILE_H);
 		}
 
 	}
-	int mirrorIndex(int index){
+
+	int mirrorIndex(int index) {
 		int row = Math.floorDiv(index, 8);
-		int offset = (index < 32) ? 56 - (16*row) : (16*row) - 56;
+		int offset = (index < 32) ? 56 - (16 * row) : (16 * row) - 56;
 		return index + offset;
 	}
 }

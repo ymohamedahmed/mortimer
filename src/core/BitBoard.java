@@ -1,12 +1,15 @@
 package core;
 
+import java.util.ArrayList;
+
 /**
  * Created by yousuf on 11/22/16.
  */
 public class BitBoard {
 	public long[] bitboards = new long[14];
 	public byte[] board = new byte[64];
-	Flags flags = new Flags();
+	public Flags flags = new Flags();
+	private History history = new History();
 
 	boolean isEmpty() {
 		return 0 == ~(bitboards[Constants.WHITE] | bitboards[Constants.BLACK]);
@@ -18,9 +21,89 @@ public class BitBoard {
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
 	}
-	void move(Move move){
-		
+
+	void move(Move move) {
+		int finalIndex = move.getFinalPos();
+		int oldIndex = move.getOldPos();
+		byte piece = board[oldIndex];
+		boolean capture = board[finalIndex] != Constants.EMPTY;
+		// update rook castling flag
+		if (piece == Constants.WHITE_ROOK) {
+			flags.wrookqueensidemoved = (flags.wrookqueensidemoved) ? true : (oldIndex == 0);
+			flags.wrookkingsidemoved = (flags.wrookkingsidemoved) ? true : (oldIndex == 7);
+		}
+		if (piece == Constants.BLACK_ROOK) {
+			flags.wrookqueensidemoved = (flags.brookqueensidemoved) ? true : (oldIndex == 56);
+			flags.wrookkingsidemoved = (flags.brookkingsidemoved) ? true : (oldIndex == 63);
+		}
+		if (capture) {
+			history.capturedPiece = (capture) ? board[finalIndex] : Constants.EMPTY;
+			removePiece(finalIndex);
+		}
+		addPiece(piece, finalIndex);
+		removePiece(oldIndex);
+		updateCastlingFlags(move);
+		history.flags = flags;
+		//TODO update en passant flags
+
 	}
+
+	void undo(Move move) {
+		int finalIndex = move.getFinalPos();
+		int oldIndex = move.getOldPos();
+		byte piece = board[finalIndex];
+		addPiece(piece, oldIndex);
+		removePiece(finalIndex);
+		flags = history.flags;
+		addPiece(history.capturedPiece, finalIndex);
+	}
+
+	void updateCastlingFlags(Move move) {
+		if (!flags.wkingmoved) {
+			if (move.getPieceType() == Constants.WHITE_KING) {
+				flags.wqueenside = false;
+				flags.wkingside = false;
+				flags.wkingmoved = true;
+			} else {
+				// Consider queenside
+				if (!flags.wrookqueensidemoved) {
+					boolean condition1 = board[0] == Constants.WHITE_ROOK;
+					boolean condition2 = board[1] == Constants.EMPTY;
+					boolean condition3 = board[2] == Constants.EMPTY;
+					boolean condition4 = board[3] == Constants.EMPTY;
+					boolean condition5 = board[4] == Constants.WHITE_KING;
+					boolean condition6 = !flags.wrookqueensidemoved;
+
+					// Now test whether king would be in check (more expensive
+					// calculation)
+					if (condition1 && condition2 && condition3 && condition4 && condition5 && condition6) {
+						move(new Move(Constants.WHITE_KING, ))
+					}
+				} else {
+					flags.wqueenside = false;
+				}
+
+				// Consider kingside
+			}
+		}
+		if (move.getPieceType() == Constants.BLACK_KING) {
+			flags.bqueenside = false;
+			flags.bkingside = false;
+		}
+
+	}
+
+	boolean check(int side, ArrayList<Move> moves) {
+		int kingIndex = (side == Constants.WHITE) ? bitScanForward(bitboards[Constants.WHITE_KING])
+				: bitScanForward(bitboards[Constants.BLACK_KING]);
+		for (Move move : moves) {
+			if (move.getFinalPos() == kingIndex) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void removePiece(int square) {
 		byte piece = board[square];
 		board[square] = Constants.EMPTY;
@@ -36,13 +119,16 @@ public class BitBoard {
 		for (int i = 0; i < 14; i++) {
 			bitboards[i] = 0;
 		}
-		flags.castlingRights = Constants.FULL_CASTLING_RIGHTS;
-		flags.enPassantSquare = Constants.NULL_SQUARE;
-		flags.sideToMove = Constants.WHITE;
+
+		flags.toMove = Constants.WHITE;
+		flags.wqueenside = false;
+		flags.wkingside = false;
+		flags.bqueenside = false;
+		flags.bkingside = false;
 	}
 
 	public void resetToInitialSetup() {
-		for(int index = 0; index < 64; index++){
+		for (int index = 0; index < 64; index++) {
 			board[index] = Constants.EMPTY;
 		}
 		// Adding pawns
@@ -119,9 +205,25 @@ public class BitBoard {
 		return pos == 64 ? -1 : pos;
 	}
 
-	class Flags {
-		byte castlingRights;
-		byte enPassantSquare;
-		byte sideToMove;
+	class Flags {		
+		boolean wqueenside;
+		boolean wkingside;
+		boolean bqueenside;
+		boolean bkingside;
+		// Whether or not pieces have moved
+		boolean wkingmoved;
+		boolean bkingmoved;
+		boolean wrookqueensidemoved;
+		boolean wrookkingsidemoved;
+		boolean brookqueensidemoved;
+		boolean brookkingsidemoved;
+		// Next side to play
+		int toMove;
+		long enPassantSquares;
+	}
+
+	class History {
+		byte capturedPiece;
+		Flags flags;
 	}
 }
