@@ -45,6 +45,7 @@ public class BitBoard {
 		updateCastlingFlags(move);
 		history.flags = flags;
 		//TODO update en passant flags
+		//TODO move rook during castling
 
 	}
 

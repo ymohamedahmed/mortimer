@@ -14,21 +14,20 @@ public class MoveGen {
 		return moves;
 	}
 
-	void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList, boolean enPassant, boolean capture,
-			boolean promotion, boolean castling) {
+	void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList, boolean enPassant, boolean promotion,
+			byte castling) {
 		while (moves != 0) {
 			Move move = new Move(pieceType, index, bitScanForward(moves));
 			move.setCastling(castling);
 			move.setPromotion(promotion);
 			move.setEnPassant(enPassant);
-			move.setCapture(capture);
 			moveList.add(move);
 			moves &= moves - 1;
 		}
 	}
 
-	void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList, boolean enPassant, boolean capture,
-			boolean promotion, boolean castling, int offset) {
+	void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList, boolean enPassant, boolean promotion,
+			byte castling, int offset) {
 		while (moves != 0) {
 			int to = bitScanForward(moves);
 			int from = (to - offset) % 64;
@@ -36,45 +35,75 @@ public class MoveGen {
 			move.setCastling(castling);
 			move.setPromotion(promotion);
 			move.setEnPassant(enPassant);
-			move.setCapture(capture);
 			moveList.add(move);
 			moves &= moves - 1;
 		}
 	}
 
-	long getRookMoves(int index, int side) {
+	void addRookMoves(ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK;
 		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskRook[index];
 		int lookupIndex = (int) ((rookBlockers
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
-		return moveSquares;
+		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
-	long getBishopMoves(int index, int side) {
+	void addBishopMoves(ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? Constants.WHITE_BISHOP : Constants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskBishop[index];
 		int lookupIndex = (int) ((bishopBlockers
 				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
-		return moveSquares;
+		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
-	long getQueenMoves(int index, int side) {
-		return (getRookMoves(index, side) | getBishopMoves(index, side));
+	void addQueenMoves(ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? Constants.WHITE_QUEEN : Constants.BLACK_QUEEN;
+		// Or of the rook moves and bishop moves are the queen moves
+		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
+				& Constants.occupancyMaskRook[index];
+		int lookupIndexRook = (int) ((rookBlockers
+				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
+		long moveSquaresRook = Constants.magicMovesRook[index][lookupIndexRook] & ~board.bitboards[side];
+		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
+				& Constants.occupancyMaskBishop[index];
+		int lookupIndexBishop = (int) ((bishopBlockers
+				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
+		long moveSquaresBishop = Constants.magicMovesRook[index][lookupIndexBishop] & ~board.bitboards[side];
+
+		long queenMoves = moveSquaresRook | moveSquaresBishop;
+		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
 	}
 
-	long getKnightMoves(int index, int side) {
-		return (Constants.KNIGHT_TABLE[index] & ~board.bitboards[side]);
+	void addKnightMoves(ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? Constants.WHITE_KNIGHT : Constants.BLACK_KNIGHT;
+		long knightMoves = Constants.KNIGHT_TABLE[index] & ~board.bitboards[side];
+		addMoves(pieceType, index, knightMoves, moveList, false, false, Constants.noCastle);
 	}
 
-	long getKingMoves(int index, int side) {
+	void addKingMoves(ArrayList<Move> moveList, int index, int side) {
+		long moves = Constants.KING_TABLE[index] & ~board.bitboards[side];
+		int pieceType = (side == 0) ? Constants.WHITE_KING : Constants.BLACK_KING;
+		addMoves(pieceType, index, moves, moveList, false, false, Constants.noCastle);
+		// Check for castling moves
 		if (side == Constants.WHITE) {
-			
+			if (board.flags.wqueenside) {
+				addMoves(pieceType, index, Constants.wqueenside, moveList, false, false, Constants.wQSide);
+			}
+			if (board.flags.wkingside) {
+				addMoves(pieceType, index, Constants.wkingside, moveList, false, false, Constants.wKSide);
+			}
 		} else {
-
+			if (board.flags.bqueenside) {
+				addMoves(pieceType, index, Constants.bqueenside, moveList, false, false, Constants.bQSide);
+			}
+			if (board.flags.bkingside) {
+				addMoves(pieceType, index, Constants.bkingside, moveList, false, false, Constants.bKSide);
+			}
 		}
-		return (Constants.KING_TABLE[index] & ~board.bitboards[side]);
 	}
 
 	void addPawnPushes(ArrayList<Move> moveList, int side) {
@@ -86,11 +115,12 @@ public class MoveGen {
 		long pawns = board.bitboards[side | Constants.PAWN];
 		long emptySquares = ~(board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK]);
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
-		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false, false, false, offset);
+		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false, Constants.noCastle,
+				offset);
 		long promotions = pushes & promotions_mask[side];
-		addMovesWithOffset(pieceType, promotions, moveList, false, false, true, false, offset);
+		addMovesWithOffset(pieceType, promotions, moveList, false, true, Constants.noCastle, offset);
 		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
-		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, false, false, offset);
+		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, Constants.noCastle, offset);
 	}
 
 	void addPawnAttacks(ArrayList<Move> moveList, int index, int side) {
@@ -98,11 +128,11 @@ public class MoveGen {
 		int pawnType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
 		long attacks = Constants.PAWN_ATTACKS_TABLE[side][index] & board.bitboards[enemy];
-		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, true, false, false);
+		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, false, Constants.noCastle);
 		long promotions = attacks & promotions_mask[side];
-		addMoves(pawnType, index, promotions, moveList, false, true, true, false);
+		addMoves(pawnType, index, promotions, moveList, false, true, Constants.noCastle);
 		long enPassant = attacks & board.flags.enPassantSquares;
-		addMoves(pawnType, index, enPassant, moveList, true, false, false, false);
+		addMoves(pawnType, index, enPassant, moveList, true, false, Constants.noCastle);
 	}
 
 	long getPawnEastAttacks(long board, int side) {

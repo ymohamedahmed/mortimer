@@ -4,10 +4,9 @@ public class Move {
 	private int oldPosition;
 	private int finalPosition;
 	private int pieceType;
-	private boolean castling;
+	private byte castling;
 	private boolean promotion;
 	private boolean enPassant;
-	private boolean capture;
 
 	public Move(int pieceType, int oldPosition, int finalPosition) {
 		this.oldPosition = oldPosition;
@@ -27,7 +26,7 @@ public class Move {
 		return oldPosition;
 	}
 
-	public boolean isCastling() {
+	public byte getCastlingFlag() {
 		return castling;
 	}
 
@@ -39,11 +38,7 @@ public class Move {
 		return enPassant;
 	}
 
-	public boolean isCapture() {
-		return capture;
-	}
-
-	public void setCastling(boolean castling) {
+	public void setCastling(byte castling) {
 		this.castling = castling;
 	}
 
@@ -53,10 +48,6 @@ public class Move {
 
 	public void setEnPassant(boolean enPassant) {
 		this.enPassant = enPassant;
-	}
-
-	public void setCapture(boolean capture) {
-		this.capture = capture;
 	}
 
 }
