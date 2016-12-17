@@ -1,8 +1,10 @@
 package core;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
+import org.junit.Test;
 
 public class MoveGenTest {
 	@Test
@@ -10,13 +12,13 @@ public class MoveGenTest {
 
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
-		MoveGen moveGen = new MoveGen(board, null);
+		MoveGen moveGen = new MoveGen(board);
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 
-		System.out.println("KNIGHT");
+	/*	System.out.println("KNIGHT");
 		board.printBoard(Constants.KNIGHT_TABLE[5]);
 		board.printBoard(Constants.KNIGHT_TABLE[33]);
 		board.printBoard(Constants.KNIGHT_TABLE[55]);
@@ -25,24 +27,11 @@ public class MoveGenTest {
 		board.printBoard(Constants.KING_TABLE[5]);
 		board.printBoard(Constants.KING_TABLE[33]);
 		board.printBoard(Constants.KING_TABLE[55]);
-		board.printBoard(Constants.KING_TABLE[63]);
-
-		// Testing magic bitboards
-		System.out.println("ROOKS");
-		board.printBoard(moveGen.getRookMoves(0, Constants.WHITE));
-		board.printBoard(moveGen.getRookMoves(17, Constants.WHITE));
-		board.printBoard(moveGen.getRookMoves(33, Constants.WHITE));
-		board.printBoard(moveGen.getRookMoves(36, Constants.WHITE));
-		board.printBoard(moveGen.getRookMoves(41, Constants.WHITE));
-
-		System.out.println("BISHOPS");
-		board.printBoard(moveGen.getBishopMoves(0, Constants.WHITE));
-		board.printBoard(moveGen.getBishopMoves(17, Constants.WHITE));		
-		board.printBoard(moveGen.getBishopMoves(36, Constants.WHITE));
-		board.printBoard(moveGen.getBishopMoves(41, Constants.WHITE));
+		board.printBoard(Constants.KING_TABLE[63]);*/
 		
-		System.out.println("PAWNS");
-	
+		ArrayList<Move> moves = moveGen.generateMoves(0);
+		System.out.println("SIZE : " + moves.size());
+		moveGen.printMoveList(moves);
 		assertEquals(56, moveGen.mirrorIndex(0));
 		assertEquals(63, moveGen.mirrorIndex(7));
 		assertEquals(48, moveGen.mirrorIndex(8));

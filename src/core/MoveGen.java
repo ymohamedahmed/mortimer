@@ -9,8 +9,40 @@ public class MoveGen {
 		this.board = board;
 	}
 
-	ArrayList<Move> generateMoves() {
+	ArrayList<Move> generateMoves(int side) {
 		ArrayList<Move> moves = new ArrayList<>();
+		// Add pawn moves first
+		addPawnPushes(moves, side);
+		long pawnBoard = board.bitboards[side + 2];
+		while (pawnBoard != 0) {
+			addPawnAttacks(moves, bitScanForward(pawnBoard), side);
+			pawnBoard &= pawnBoard - 1;
+		}
+		long knightBoard = board.bitboards[side + 4];
+		while (knightBoard != 0) {
+			addKnightMoves(moves, bitScanForward(knightBoard), side);
+			knightBoard &= knightBoard - 1;
+		}
+		long rookBoard = board.bitboards[side + 6];
+		while (rookBoard != 0) {
+			addRookMoves(moves, bitScanForward(rookBoard), side);
+			rookBoard &= rookBoard - 1;
+		}
+		long bishopBoard = board.bitboards[side + 8];
+		while (bishopBoard != 0) {
+			addBishopMoves(moves, bitScanForward(bishopBoard), side);
+			bishopBoard &= bishopBoard - 1;
+		}
+		long queenBoard = board.bitboards[side + 10];
+		while (queenBoard != 0) {
+			addQueenMoves(moves, bitScanForward(queenBoard), side);
+			queenBoard &= queenBoard - 1;
+		}
+		long kingBoard = board.bitboards[side + 12];
+		while (kingBoard != 0) {
+			addKingMoves(moves, bitScanForward(kingBoard), side);
+			kingBoard &= kingBoard - 1;
+		}
 		return moves;
 	}
 
@@ -47,6 +79,8 @@ public class MoveGen {
 		int lookupIndex = (int) ((rookBlockers
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
+		System.out.println("ROOK MOVES");
+		board.printBoard(moveSquares);
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -57,6 +91,8 @@ public class MoveGen {
 		int lookupIndex = (int) ((bishopBlockers
 				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
+		System.out.println("BISHOP MOVES");
+		board.printBoard(moveSquares);
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -68,13 +104,18 @@ public class MoveGen {
 		int lookupIndexRook = (int) ((rookBlockers
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquaresRook = Constants.magicMovesRook[index][lookupIndexRook] & ~board.bitboards[side];
+		
 		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskBishop[index];
 		int lookupIndexBishop = (int) ((bishopBlockers
 				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
-		long moveSquaresBishop = Constants.magicMovesRook[index][lookupIndexBishop] & ~board.bitboards[side];
-
-		long queenMoves = moveSquaresRook | moveSquaresBishop;
+		long moveSquaresBishop = Constants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
+		
+		long queenMoves = moveSquaresRook ^ moveSquaresBishop;
+		System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
+		board.printBoard(moveSquaresBishop);
+		board.printBoard(moveSquaresRook);
+		board.printBoard(queenMoves);
 		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
 	}
 
@@ -327,5 +368,12 @@ public class MoveGen {
 		int row = Math.floorDiv(index, 8);
 		int offset = (index < 32) ? 56 - (16 * row) : (16 * row) - 56;
 		return index + offset;
+	}
+	
+	//For Debugging
+	void printMoveList(ArrayList<Move> moves){
+		for(Move move : moves){
+			System.out.println(move.getFinalPos());
+		}
 	}
 }
