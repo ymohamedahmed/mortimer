@@ -1,7 +1,7 @@
 package core;
 
 public class Constants {
-	// constants
+	// Constants
 	public static final byte WHITE_PAWN = 2;
 	public static final byte BLACK_PAWN = 3;
 	public static final byte WHITE_KNIGHT = 4;
@@ -36,6 +36,18 @@ public class Constants {
 	public static final long FILE_F = 0x0101010101010101L << 5;
 	public static final long FILE_G = 0x0101010101010101L << 6;
 	public static final long FILE_H = 0x0101010101010101L << 7;
+
+	// Castling moves
+	public static final long wqueenside;
+	public static final long bqueenside;
+	public static final long wkingside;
+	public static final long bkingside;
+	
+	//Castling flags
+	public static byte wQSide = 0;
+	public static byte wKSide = 1;
+	public static byte bQSide = 2;
+	public static byte bKSide = 4;
 
 	// Lookup tables
 	public static long KNIGHT_TABLE[] = new long[64];

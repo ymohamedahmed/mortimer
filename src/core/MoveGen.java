@@ -27,27 +27,19 @@ public class MoveGen {
 		}
 	}
 
-	long getPawnEastAttacks(long board, int side) {
-		long result;
-		// WHITE
-		if (side == 0) {
-			result = ((board << 9) & ~Constants.FILE_A);
-
-		} else {
-			result = ((board >>> 7) & ~Constants.FILE_A);
+	void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList, boolean enPassant, boolean capture,
+			boolean promotion, boolean castling, int offset) {
+		while (moves != 0) {
+			int to = bitScanForward(moves);
+			int from = (to - offset) % 64;
+			Move move = new Move(pieceType, from, to);
+			move.setCastling(castling);
+			move.setPromotion(promotion);
+			move.setEnPassant(enPassant);
+			move.setCapture(capture);
+			moveList.add(move);
+			moves &= moves - 1;
 		}
-		return result;
-	}
-
-	long getPawnWestAttacks(long board, int side) {
-		long result;
-		// WHITE
-		if (side == 0) {
-			result = ((board << 7) & ~Constants.FILE_H);
-		} else {
-			result = ((board >>> 9) & ~Constants.FILE_H);
-		}
-		return result;
 	}
 
 	long getRookMoves(int index, int side) {
@@ -72,11 +64,21 @@ public class MoveGen {
 		return (getRookMoves(index, side) | getBishopMoves(index, side));
 	}
 
-	void getKnightMoves(int index, int side) {
-
+	long getKnightMoves(int index, int side) {
+		return (Constants.KNIGHT_TABLE[index] & ~board.bitboards[side]);
 	}
 
-	void addPawnPushes(int side) {
+	long getKingMoves(int index, int side) {
+		if (side == Constants.WHITE) {
+			
+		} else {
+
+		}
+		return (Constants.KING_TABLE[index] & ~board.bitboards[side]);
+	}
+
+	void addPawnPushes(ArrayList<Move> moveList, int side) {
+		int pieceType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
 		int[] offsets = { 8, 56 };
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
 		long[] startWithMask = { Constants.ROW_3, Constants.ROW_6 };
@@ -84,18 +86,14 @@ public class MoveGen {
 		long pawns = board.bitboards[side | Constants.PAWN];
 		long emptySquares = ~(board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK]);
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
-		// add moves
+		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false, false, false, offset);
 		long promotions = pushes & promotions_mask[side];
-		// add moves
+		addMovesWithOffset(pieceType, promotions, moveList, false, false, true, false, offset);
 		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
-		// add moves
-		board.printBoard(pushes | promotions | doublePushes);
-		// Calculate pawn pushes
-
-		// return (attacks | pushes) & ~board.bitboards[side];
+		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, false, false, offset);
 	}
 
-	void getPawnAttacks(ArrayList<Move> moveList, int index, int side) {
+	void addPawnAttacks(ArrayList<Move> moveList, int index, int side) {
 		int enemy = (side == 0) ? 1 : 0;
 		int pawnType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
@@ -107,13 +105,33 @@ public class MoveGen {
 		addMoves(pawnType, index, enPassant, moveList, true, false, false, false);
 	}
 
+	long getPawnEastAttacks(long board, int side) {
+		long result;
+		// WHITE
+		if (side == 0) {
+			result = ((board << 9) & ~Constants.FILE_A);
+
+		} else {
+			result = ((board >>> 7) & ~Constants.FILE_A);
+		}
+		return result;
+	}
+
+	long getPawnWestAttacks(long board, int side) {
+		long result;
+		// WHITE
+		if (side == 0) {
+			result = ((board << 7) & ~Constants.FILE_H);
+		} else {
+			result = ((board >>> 9) & ~Constants.FILE_H);
+		}
+		return result;
+	}
+
 	long circularLeftShift(long target, int shift) {
 		return target << shift | target >>> (64 - shift);
 	}
 
-	void getKingMoves(int index, int side) {
-
-	}
 	// Modified algorithm based on tutorial from
 	// http://www.rivalchess.com/magic-bitboards/
 
