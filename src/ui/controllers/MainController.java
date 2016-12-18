@@ -64,11 +64,13 @@ public class MainController {
 
 		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
-				System.out.println("VAL: " +"/images/" + String.valueOf(board.board[(8 * row) + col]) + ".png");
-				Image image = new Image(MainController.class
-						.getResource("/images/" + Constants.FILE_NAMES[(8 * row) + col] + ".png")
-						.toExternalForm());
-				g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
+				byte piece = board.board[(row * 8) + col];
+				if (piece != Constants.EMPTY) {
+					Image image = new Image(MainController.class
+							.getResource("/images/" + Constants.FILE_NAMES[board.board[(row * 8) + col]] + ".png")
+							.toExternalForm());
+					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
+				}
 			}
 
 		}
@@ -78,6 +80,7 @@ public class MainController {
 	private void playGame() {
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
+		moveList = getMoves(board, true, 0);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
 	}
@@ -108,7 +111,7 @@ public class MainController {
 		// Clicks square with piece in it
 		if (piece != Constants.EMPTY && !pieceMoved) {
 			// Get its available moves
-			ArrayList<Move> moves = getMovesPiece(piece, moveList);
+			ArrayList<Move> moves = getMovesPiece(oldPos, moveList);
 			oldPos = (8 * row) + column;
 			// Clear the canvas and then repaint it
 			clearCanvas();
@@ -132,10 +135,10 @@ public class MainController {
 		}
 	}
 
-	private ArrayList<Move> getMovesPiece(byte piece, ArrayList<Move> moveList) {
+	private ArrayList<Move> getMovesPiece(int oldPos, ArrayList<Move> moveList) {
 		ArrayList<Move> result = new ArrayList<>();
 		for (Move move : moveList) {
-			if (move.getPieceType() == piece) {
+			if (move.getOldPos() == oldPos) {
 				result.add(move);
 			}
 		}

@@ -145,8 +145,6 @@ public class MoveGen {
 		int lookupIndex = (int) ((rookBlockers
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
-		System.out.println("ROOK MOVES");
-		board.printBoard(moveSquares);
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -157,8 +155,6 @@ public class MoveGen {
 		int lookupIndex = (int) ((bishopBlockers
 				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
-		System.out.println("BISHOP MOVES");
-		board.printBoard(moveSquares);
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -178,10 +174,6 @@ public class MoveGen {
 		long moveSquaresBishop = Constants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
 
 		long queenMoves = moveSquaresRook | moveSquaresBishop;
-		System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
-		board.printBoard(moveSquaresBishop);
-		board.printBoard(moveSquaresRook);
-		board.printBoard(queenMoves);
 		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
 	}
 
