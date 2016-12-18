@@ -26,6 +26,7 @@ public class BitBoard {
 		int finalIndex = move.getFinalPos();
 		int oldIndex = move.getOldPos();
 		byte piece = board[oldIndex];
+		int side = piece % 2;
 		boolean capture = board[finalIndex] != Constants.EMPTY;
 		// update rook castling flag
 		if (piece == Constants.WHITE_ROOK) {
@@ -44,8 +45,42 @@ public class BitBoard {
 		removePiece(oldIndex);
 		updateCastlingFlags(move);
 		history.flags = flags;
-		//TODO update en passant flags
-		//TODO move rook during castling
+		flags.enPassantSquares[side] = 0;
+		if (piece == Constants.WHITE_PAWN) {
+			if (finalIndex - oldIndex == 16) {
+				flags.enPassantSquares[side] = (long) Math.pow(2, oldIndex + 8);
+			}
+		} else if (piece == Constants.BLACK_PAWN) {
+			if (finalIndex - oldIndex == -16) {
+				flags.enPassantSquares[side] = (long) Math.pow(2, oldIndex - 8);
+			}
+		}
+		// TODO move rook during castling
+		byte castle = move.getCastlingFlag();
+		if (castle != 0) {
+			int rookOldIndex = 0;
+			int rookFinalIndex = 0;
+			switch (castle) {
+			case 1:
+				rookOldIndex = 0;
+				rookFinalIndex = 3;
+				break;
+			case 2:
+				rookOldIndex = 7;
+				rookFinalIndex = 5;
+				break;
+			case 3:
+				rookOldIndex = 56;
+				rookFinalIndex = 59;
+				break;
+			case 4:
+				rookOldIndex = 63;
+				rookFinalIndex = 61;
+				break;
+			}
+			removePiece(rookOldIndex);
+			addPiece((castle <= 2) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, rookFinalIndex);
+		}
 
 	}
 
@@ -78,7 +113,15 @@ public class BitBoard {
 					// Now test whether king would be in check (more expensive
 					// calculation)
 					if (condition1 && condition2 && condition3 && condition4 && condition5 && condition6) {
-						move(new Move(Constants.WHITE_KING, ))
+						move(new Move(Constants.WHITE_KING, 4, 3));
+						boolean check = check(Constants.WHITE, new MoveGen(this).generateMoves(Constants.BLACK, true));
+						if (check) {
+							flags.wqueenside = false;
+						}
+						if (!check) {
+
+						}
+
 					}
 				} else {
 					flags.wqueenside = false;
@@ -206,7 +249,7 @@ public class BitBoard {
 		return pos == 64 ? -1 : pos;
 	}
 
-	class Flags {		
+	class Flags {
 		boolean wqueenside;
 		boolean wkingside;
 		boolean bqueenside;
@@ -220,7 +263,7 @@ public class BitBoard {
 		boolean brookkingsidemoved;
 		// Next side to play
 		int toMove;
-		long enPassantSquares;
+		long[] enPassantSquares = new long[2];
 	}
 
 	class History {

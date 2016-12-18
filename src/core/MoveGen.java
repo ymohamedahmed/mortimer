@@ -9,7 +9,7 @@ public class MoveGen {
 		this.board = board;
 	}
 
-	ArrayList<Move> generateMoves(int side) {
+	ArrayList<Move> generateMoves(int side, boolean legal) {
 		ArrayList<Move> moves = new ArrayList<>();
 		// Add pawn moves first
 		addPawnPushes(moves, side);
@@ -43,7 +43,20 @@ public class MoveGen {
 			addKingMoves(moves, bitScanForward(kingBoard), side);
 			kingBoard &= kingBoard - 1;
 		}
-		return moves;
+		
+		return (legal) ? removeCheckMoves(moves, side) : moves;
+	}
+
+	ArrayList<Move> removeCheckMoves(ArrayList<Move> moveList, int side) {
+		for (Move move : moveList) {
+			board.move(move);
+			boolean check = board.check(side, generateMoves((side == 0) ? 1 : 0, true));
+			board.undo(move);
+			if (check) {
+				moveList.remove(move);
+			}
+		}
+		return moveList;
 	}
 
 	void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList, boolean enPassant, boolean promotion,
@@ -104,14 +117,14 @@ public class MoveGen {
 		int lookupIndexRook = (int) ((rookBlockers
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquaresRook = Constants.magicMovesRook[index][lookupIndexRook] & ~board.bitboards[side];
-		
+
 		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskBishop[index];
 		int lookupIndexBishop = (int) ((bishopBlockers
 				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 		long moveSquaresBishop = Constants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
-		
-		long queenMoves = moveSquaresRook ^ moveSquaresBishop;
+
+		long queenMoves = moveSquaresRook | moveSquaresBishop;
 		System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
 		board.printBoard(moveSquaresBishop);
 		board.printBoard(moveSquaresRook);
@@ -172,7 +185,7 @@ public class MoveGen {
 		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, false, Constants.noCastle);
 		long promotions = attacks & promotions_mask[side];
 		addMoves(pawnType, index, promotions, moveList, false, true, Constants.noCastle);
-		long enPassant = attacks & board.flags.enPassantSquares;
+		long enPassant = attacks & board.flags.enPassantSquares[enemy];
 		addMoves(pawnType, index, enPassant, moveList, true, false, Constants.noCastle);
 	}
 
@@ -369,10 +382,10 @@ public class MoveGen {
 		int offset = (index < 32) ? 56 - (16 * row) : (16 * row) - 56;
 		return index + offset;
 	}
-	
-	//For Debugging
-	void printMoveList(ArrayList<Move> moves){
-		for(Move move : moves){
+
+	// For Debugging
+	void printMoveList(ArrayList<Move> moves) {
+		for (Move move : moves) {
 			System.out.println(move.getFinalPos());
 		}
 	}
