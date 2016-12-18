@@ -97,6 +97,7 @@ public class MoveGen {
 	}
 
 	ArrayList<Move> removeCheckMoves(ArrayList<Move> moveList, int side) {
+
 		// Iterator has to be used to avoid concurrent modification exception
 		// i.e. so that we can remove from the arraylist as we loop through it
 		Iterator<Move> iter = moveList.iterator();
@@ -145,6 +146,8 @@ public class MoveGen {
 		int lookupIndex = (int) ((rookBlockers
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
+	/*	System.out.println("ROOK MOVES");
+		board.printBoard(moveSquares);*/
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -155,6 +158,8 @@ public class MoveGen {
 		int lookupIndex = (int) ((bishopBlockers
 				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
+		/*System.out.println("BISHOP MOVES");
+		board.printBoard(moveSquares);*/
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -174,6 +179,10 @@ public class MoveGen {
 		long moveSquaresBishop = Constants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
 
 		long queenMoves = moveSquaresRook | moveSquaresBishop;
+/*		System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
+		board.printBoard(moveSquaresBishop);
+		board.printBoard(moveSquaresRook);
+		board.printBoard(queenMoves);*/
 		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
 	}
 
@@ -219,7 +228,7 @@ public class MoveGen {
 		long promotions = pushes & promotions_mask[side];
 		addMovesWithOffset(pieceType, promotions, moveList, false, true, Constants.noCastle, offset);
 		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
-		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, Constants.noCastle, offset);
+		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, Constants.noCastle, offset+offset);
 	}
 
 	void addPawnAttacks(ArrayList<Move> moveList, int index, int side) {
@@ -264,7 +273,7 @@ public class MoveGen {
 	// Modified algorithm based on tutorial from
 	// http://www.rivalchess.com/magic-bitboards/
 
-	void generateMoveDatabase(boolean rook) {
+	public void generateMoveDatabase(boolean rook) {
 		long validMoves = 0;
 		int variations;
 		int varCount;
@@ -369,7 +378,7 @@ public class MoveGen {
 		return pos == 64 ? -1 : pos;
 	}
 
-	void initialiseKnightLookupTable() {
+	public void initialiseKnightLookupTable() {
 		for (int square = 0; square < 64; square++) {
 			long target = (long) Math.pow(2, square);
 			if (square == 63) {
@@ -388,7 +397,7 @@ public class MoveGen {
 		}
 	}
 
-	void initialiseKingLookupTable() {
+	public void initialiseKingLookupTable() {
 		for (int square = 0; square < 64; square++) {
 			long target = (long) Math.pow(2, square);
 			if (square == 63) {
@@ -406,7 +415,7 @@ public class MoveGen {
 		}
 	}
 
-	void initialisePawnLookupTable() {
+	public void initialisePawnLookupTable() {
 		// Complete for white then use symmetry to complete for white
 		for (int side = 0; side <= 1; side++) {
 			for (int index = 0; index < 64; index++) {
@@ -429,9 +438,9 @@ public class MoveGen {
 	}
 
 	// For Debugging
-	void printMoveList(ArrayList<Move> moves) {
+	public void printMoveList(ArrayList<Move> moves) {
 		for (Move move : moves) {
-			System.out.println(move.getFinalPos());
+			System.out.println(move.getOldPos() + " TO " + move.getFinalPos());
 		}
 	}
 }

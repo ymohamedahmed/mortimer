@@ -30,6 +30,7 @@ public class MainController {
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
+	private MoveGen moveGen;
 
 	// DEBUGGING
 	private int noOfMovesAnalyzed = 0;
@@ -80,6 +81,12 @@ public class MainController {
 	private void playGame() {
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
+		moveGen = new MoveGen(board);
+		moveGen.initialiseKnightLookupTable();
+		moveGen.initialiseKingLookupTable();
+		moveGen.initialisePawnLookupTable();
+		moveGen.generateMoveDatabase(true);
+		moveGen.generateMoveDatabase(false);
 		moveList = getMoves(board, true, 0);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
@@ -101,7 +108,7 @@ public class MainController {
 
 		for (int square : blueSquares) {
 			if (square == index) {
-				board.move(new Move(piece, oldPos, index));
+				move(board,new Move(piece, oldPos, index),true);
 				blueSquares.clear();
 				pieceMoved = true;
 				break;
@@ -111,8 +118,8 @@ public class MainController {
 		// Clicks square with piece in it
 		if (piece != Constants.EMPTY && !pieceMoved) {
 			// Get its available moves
-			ArrayList<Move> moves = getMovesPiece(oldPos, moveList);
-			oldPos = (8 * row) + column;
+			ArrayList<Move> moves = getMovesPiece(index, moveList);
+			oldPos = index;
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
@@ -121,7 +128,7 @@ public class MainController {
 			blueSquares.clear();
 			for (Move move : moves) {
 				int rowMove = Math.floorDiv(move.getFinalPos(), 8);
-				int colMove = move.getFinalPos() - (rowMove * 8);
+				int colMove = move.getFinalPos()%8;
 				if (board.board[move.getFinalPos()] == Constants.EMPTY) {
 					g.setFill(Color.BLUE);
 					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
@@ -179,12 +186,13 @@ public class MainController {
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
-			moveList = getMoves(board, true, enemy);
+			moveList = getMoves(board, true, colorMoved);
+			moveGen.printMoveList(moveList);
 		}
 	}
 
 	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck, int side) {
-		return (new MoveGen(board).generateMoves(side, removeCheck));
+		return moveGen.generateMoves(side, removeCheck);
 	}
 
 	private void displayPawnPromotionDialog(int pawnOldPos, int side, BitBoard board) {
