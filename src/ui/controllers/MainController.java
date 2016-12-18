@@ -68,7 +68,7 @@ public class MainController {
 				byte piece = board.board[(row * 8) + col];
 				if (piece != Constants.EMPTY) {
 					Image image = new Image(MainController.class
-							.getResource("/images/" + Constants.FILE_NAMES[board.board[(row * 8) + col]] + ".png")
+							.getResource("/images/" + Constants.FILE_NAMES[piece] + ".png")
 							.toExternalForm());
 					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
 				}
@@ -130,7 +130,7 @@ public class MainController {
 				int rowMove = Math.floorDiv(move.getFinalPos(), 8);
 				int colMove = move.getFinalPos()%8;
 				if (board.board[move.getFinalPos()] == Constants.EMPTY) {
-					g.setFill(Color.BLUE);
+					g.setFill(Color.	BLUE);
 					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
 				} else {
 					g.setFill(Color.RED);
