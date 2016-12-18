@@ -1,7 +1,10 @@
 package core;
 
 public class Constants {
-	// Constants
+	// Image filenames
+	public static final String[] FILE_NAMES = { null, null, null, "wp", "bp", "wn", "bn", "wr", "br", "wb", "bb", "wq",
+			"bq", "wk", "bk" };
+
 	public static final byte WHITE_PAWN = 2;
 	public static final byte BLACK_PAWN = 3;
 	public static final byte WHITE_KNIGHT = 4;

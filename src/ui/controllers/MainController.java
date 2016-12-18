@@ -2,24 +2,13 @@ package ui.controllers;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import core.Bishop;
 import core.BitBoard;
-import core.Board;
-import core.King;
-import core.Knight;
+import core.Constants;
 import core.Move;
-import core.Pawn;
-import core.Piece;
-import core.PieceColor;
-import core.PieceType;
-import core.Position;
-import core.Queen;
-import core.Rook;
-import dme.Evaluation;
+import core.MoveGen;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ChoiceDialog;
@@ -30,15 +19,16 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public class MainController {
-	private final PieceColor PLAYER_COLOR = PieceColor.BLACK;
+	private final int PLAYER_COLOR = Constants.BLACK;
+	private final int AI_COLOR = Constants.WHITE;
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
 	public StackPane stackPane;
 	public Canvas chessPane;
 	public BorderPane borderPane;
-	private ArrayList<Position> blueSquares = new ArrayList<>();
-	private Position oldPos;
-	private PieceColor AI_COLOR = PieceColor.WHITE;
+	private ArrayList<Integer> blueSquares = new ArrayList<>();
+	private int oldPos;
+	private ArrayList<Move> moveList = new ArrayList<>();
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
 
 	// DEBUGGING
@@ -73,11 +63,12 @@ public class MainController {
 		}
 
 		for (int row = 0; row < 8; row++) {
-			for (int col = 0; col < 8; col++) {			
+			for (int col = 0; col < 8; col++) {
+				System.out.println("VAL: " +"/images/" + String.valueOf(board.board[(8 * row) + col]) + ".png");
 				Image image = new Image(MainController.class
-						.getResource("/images/" + String.valueOf(board.board[(8*row)+col]) + ".png").toExternalForm());
-				g.drawImage(image, col * cellSize,
-                        (7 - row) * cellSize, cellSize, cellSize);
+						.getResource("/images/" + Constants.FILE_NAMES[(8 * row) + col] + ".png")
+						.toExternalForm());
+				g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
 			}
 
 		}
@@ -89,9 +80,6 @@ public class MainController {
 		board.resetToInitialSetup();
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
-		if (AI_COLOR == PieceColor.WHITE) {
-			moveAI(board);
-		}
 	}
 
 	private void clearCanvas() {
@@ -105,12 +93,12 @@ public class MainController {
 		int row = 7 - (int) Math.floor(evt.getY() / cellSize);
 		boolean pieceMoved = false;
 		// Get the piece that was clicked
-		Piece piece = Board.getPiece(pieceList, new Position(row, column));
+		int index = (8 * row) + column;
+		byte piece = board.board[index];
 
-		for (Position square : blueSquares) {
-			if (square.getRow() == row && square.getCol() == column) {
-				move(pieceList, getMove(Board.getPiece(pieceList, oldPos).getMovesList(), new Position(row, column)),
-						true);
+		for (int square : blueSquares) {
+			if (square == index) {
+				board.move(new Move(piece, oldPos, index));
 				blueSquares.clear();
 				pieceMoved = true;
 				break;
@@ -118,136 +106,40 @@ public class MainController {
 		}
 
 		// Clicks square with piece in it
-		if (piece != null && !pieceMoved) {
+		if (piece != Constants.EMPTY && !pieceMoved) {
 			// Get its available moves
-			ArrayList<Move> moves = piece.getMovesList();
-			oldPos = piece.getPos();
+			ArrayList<Move> moves = getMovesPiece(piece, moveList);
+			oldPos = (8 * row) + column;
 			// Clear the canvas and then repaint it
 			clearCanvas();
-			paintChessBoard(pieceList);
+			paintChessBoard(board);
 			GraphicsContext g = chessPane.getGraphicsContext2D();
 			// Show available moves by painting a blue circle in the cells
 			blueSquares.clear();
 			for (Move move : moves) {
-				if (!move.isCapture()) {
+				int rowMove = Math.floorDiv(move.getFinalPos(), 8);
+				int colMove = move.getFinalPos() - (rowMove * 8);
+				if (board.board[move.getFinalPos()] == Constants.EMPTY) {
 					g.setFill(Color.BLUE);
-					g.fillOval((move.getPosition().getCol()) * cellSize, (7 - move.getPosition().getRow()) * cellSize,
-							cellSize, cellSize);
+					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
 				} else {
 					g.setFill(Color.RED);
-					g.fillOval((move.getPosition().getCol()) * cellSize, (7 - move.getPosition().getRow()) * cellSize,
-							cellSize / 5, cellSize / 5);
+					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5, cellSize / 5);
 				}
-				blueSquares.add(move.getPosition());
+				blueSquares.add(move.getFinalPos());
 			}
 
 		}
 	}
 
-	private Move rootNegamax(ArrayList<Piece> pieceList, PieceColor color) {
-		int depth = 2;
-		double maxScore = Double.NEGATIVE_INFINITY;
-		Move bestMove = null;
-		ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, color);
-		double startTime = System.currentTimeMillis();
-		noOfMovesAnalyzed = 0;
-		noOfMovesAnalyzed += possibleMoves.size();
-		for (Move move : possibleMoves) {
-			ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
-			pieceListTemp = move(pieceListTemp, move, false);
-			updateMoveList(pieceListTemp, false);
-			double score = negamax(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, pieceListTemp, depth,
-					color.getColorFactor());
-			System.out.println("SCORE: " + score);
-			if (score > maxScore) {
-				maxScore = score;
-				bestMove = move;
+	private ArrayList<Move> getMovesPiece(byte piece, ArrayList<Move> moveList) {
+		ArrayList<Move> result = new ArrayList<>();
+		for (Move move : moveList) {
+			if (move.getPieceType() == piece) {
+				result.add(move);
 			}
 		}
-		double endTime = System.currentTimeMillis();
-		// DEBUGGING
-		System.out.println("TIME TO SELECT: " + (endTime - startTime));
-		// System.out.println("NUMBER OF MOVES ANALYZED " + noOfMovesAnalyzed);
-		System.out.println("CLONE AVG: " + (cloneTime / iClone));
-		System.out.println("UPDATE AVG: " + (updateTime / iUpdate));
-		System.out.println("CLONE TIME: " + cloneTime);
-		System.out.println("UPDATE TIME: " + updateTime);
-		System.out.println("SIZE HASH TABLE : " + hashtable.size());
-		for (int i = 0; i <= 5; i++) {
-			System.out.println("AVG TIME " + i + " : " + (updateTimeArr[i] / iUpdateArr[i]));
-			System.out.println("TOTAL TIME " + i + " : " + updateTimeArr[i]);
-		}
-		return bestMove;
-	}
-
-	private double negamax(double alpha, double beta, ArrayList<Piece> pieceList, int depth, int colorFactor) {
-		double alphaOrig = alpha;
-		TranspositionEntry transpositionEntry = new TranspositionEntry();
-		// Checking the transposition table
-		transpositionEntry = hashtable.get(Board.hash(pieceList));
-
-		if (transpositionEntry != null) {
-			if (transpositionEntry.getDepth() >= depth) {
-				if (transpositionEntry.getFlag() == TranspositionFlag.EXACT) {
-					return transpositionEntry.getScore();
-				} else if (transpositionEntry.getFlag() == TranspositionFlag.LOWERBOUND) {
-					alpha = Math.max(alpha, transpositionEntry.getScore());
-				} else if (transpositionEntry.getFlag() == TranspositionFlag.UPPERBOUND) {
-					beta = Math.min(beta, transpositionEntry.getScore());
-				}
-			}
-		}
-
-		if (depth == 0) {
-			return colorFactor
-					* (new Evaluation().totalEvaluation(pieceList, PieceColor.getColorByFactor(colorFactor)));
-		}
-		double bestValue = Double.NEGATIVE_INFINITY;
-		ArrayList<Move> possibleMoves = getAllMovesColor(pieceList, PieceColor.getColorByFactor(colorFactor));
-		possibleMoves = sortMoves(pieceList, possibleMoves);
-		noOfMovesAnalyzed += possibleMoves.size();
-		for (Move move : possibleMoves) {
-			ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
-			pieceListTemp = move(pieceListTemp, move, false);
-			updateMoveList(pieceListTemp, false);
-			double v = -negamax(-beta, -alpha, pieceListTemp, depth - 1, -1 * colorFactor);
-			bestValue = Math.max(bestValue, v);
-			alpha = Math.max(alpha, v);
-			if (alpha >= beta) {
-				break;
-			}
-		}
-
-		TranspositionEntry transpositionEntryFinal = new TranspositionEntry();
-		transpositionEntryFinal.setScore(bestValue);
-		if (bestValue <= alphaOrig) {
-			transpositionEntryFinal.setFlag(TranspositionFlag.UPPERBOUND);
-		} else if (bestValue >= beta) {
-			transpositionEntryFinal.setFlag(TranspositionFlag.LOWERBOUND);
-		} else {
-			transpositionEntryFinal.setFlag(TranspositionFlag.EXACT);
-		}
-		transpositionEntryFinal.setDepth(depth);
-		transpositionEntryFinal.setValid(true);
-		hashtable.put(Board.hash(pieceList), transpositionEntryFinal);
-
-		return bestValue;
-	}
-
-	private ArrayList<Move> sortMoves(ArrayList<Piece> pieceList, ArrayList<Move> possibleMoves) {
-		// Calculating score for each move
-		ArrayList<Move> sortedMoves = new ArrayList<>();
-		ArrayList<MoveScore> movesScore = new ArrayList<>();
-		for (Move move : possibleMoves) {
-			ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
-			move(pieceListTemp, move, false);
-			MoveScore moveScore = new MoveScore(move,
-					new Evaluation().totalEvaluation(pieceListTemp, move.getPiece().getColor()));
-			movesScore.add(moveScore);
-		}
-		ArrayList<MoveScore> sorted = quickSort(movesScore);
-		sorted.forEach(e -> sortedMoves.add(e.getMove()));
-		return sortedMoves;
+		return result;
 	}
 
 	private ArrayList<MoveScore> quickSort(ArrayList<MoveScore> moves) {
@@ -276,252 +168,23 @@ public class MainController {
 		return moves;
 	}
 
-	private ArrayList<Move> getAllMovesColor(ArrayList<Piece> pieceList, PieceColor color) {
-		ArrayList<Move> possibleMoves = new ArrayList<>();
-		for (Piece piece : pieceList) {
-			if (piece.getColor() == color) {
-				possibleMoves.addAll(piece.getMovesList());
-			}
-		}
-		return possibleMoves;
-	}
-
-	public ArrayList<Piece> move(ArrayList<Piece> pieceList, Move move, boolean repaint) {
-		Piece pieceCaptured = null;
-		PieceColor colorMoved = null;
-		try {
-			Piece piece = Board.getPiece(pieceList,
-					new Position(move.getPiece().getPos().getRow(), move.getPiece().getPos().getCol()));
-			colorMoved = move.getPiece().getColor();
-			// Checks if the move selected is a castling move
-			// If so changes the position of the rook based on whether
-			// it is Queenside or Kingside castling
-			if (move.isCastling()) {
-				Position rookNewPosition = null;
-				Position rookOldPosition = null;
-				if (move.getPosition().getCol() == 6) {
-					rookNewPosition = new Position(move.getPosition().getRow(), 5);
-					rookOldPosition = (piece.getColor() == PieceColor.WHITE) ? new Position(0, 7) : new Position(7, 7);
-				} else if (move.getPosition().getCol() == 2) {
-					rookNewPosition = new Position(move.getPosition().getRow(), 3);
-					rookOldPosition = (piece.getColor() == PieceColor.WHITE) ? new Position(0, 0) : new Position(7, 0);
-				}
-				Piece rook = Board.getPiece(pieceList, rookOldPosition);
-				rook.setPosition(rookNewPosition);
-
-				((King) piece).setNoOfCastleMoves(((King) piece).getNoOfCastleMoves() + 1);
-			}
-			// If the move results in pawn promotion display the pawn promotion
-			// dialog
-			if (piece.getPieceType() == PieceType.PAWN) {
-				if (((Pawn) piece).pawnPromotion(move.getPosition(), pieceList)) {
-					if (piece.getColor() == AI_COLOR && repaint) {
-						Position newPiecePosition = new Position(
-								piece.getPos().getRow() + piece.getColor().getColorFactor(), piece.getPos().getCol());
-						pieceList.add(new Queen(newPiecePosition, piece.getColor(), piece.getNumberOfMoves()));
-						pieceList.remove(piece);
-					} else if (piece.getColor() == PLAYER_COLOR && repaint) {
-						displayPawnPromotionDialog(piece, pieceList);
-					}
-				}
-			}
-			// If it is a capture move, the piece to be captured is found
-			if (move.isCapture()) {
-				pieceCaptured = Board.getPiece(pieceList, move.getPosition());
-			}
-			// Finds the piece captured during en passant
-			if (move.isEnPassant()) {
-				pieceCaptured = Board.getPiece(pieceList, new Position(
-						move.getPosition().getRow() - piece.getColor().getColorFactor(), move.getPosition().getCol()));
-			}
-
-			pieceList.remove(pieceCaptured);
-			piece.setNumberOfMoves(piece.getNumberOfMoves() + 1);
-			piece.setPosition(move.getPosition());
-
-		} catch (NullPointerException e) {
-		}
+	public void move(BitBoard board, Move move, boolean repaint) {
+		int colorMoved = move.getPieceType() % 2;
+		int enemy = (colorMoved == 0) ? 1 : 0;
+		board.move(move);
 		if (repaint) {
 			// Clear the canvas and then repaint it
 			clearCanvas();
-			paintChessBoard(pieceList);
-			updateMoveList(pieceList, true);
+			paintChessBoard(board);
+			moveList = getMoves(board, true, enemy);
 		}
-		if (colorMoved == PLAYER_COLOR && colorMoved != null && repaint) {
-			moveAI(pieceList);
-		}
-		return pieceList;
 	}
 
-	private Move getMove(ArrayList<Move> moves, Position finalPosition) {
-		Move moveFound = null;
-		for (Move move : moves) {
-			if (move.getPosition().getRow() == finalPosition.getRow()
-					&& move.getPosition().getCol() == finalPosition.getCol()) {
-				moveFound = move;
-			}
-		}
-		return moveFound;
+	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck, int side) {
+		return (new MoveGen(board).generateMoves(side, removeCheck));
 	}
 
-	private void moveAI(BitBoard board) {
-		updateMoveList(pieceList, true);
-		Move moveSelected = rootNegamax(pieceList, AI_COLOR);
-		System.out.println("COLOR AI MOVE: " + moveSelected.getPiece().getColor());
-		System.out.println("AI MOVE : " + moveSelected.getPiece().getPieceType() + " "
-				+ moveSelected.getPiece().getColor() + " to (" + moveSelected.getPosition().getRow() + " , "
-				+ moveSelected.getPosition().getCol() + " )");
-		move(pieceList, moveSelected, true);
-	}
-
-	public void updateMoveList(ArrayList<Piece> pieceList, boolean removeCheck) {
-		double before = System.currentTimeMillis();
-
-		for (Piece piece : pieceList) {
-			piece.setMovesList(getMoves(piece, pieceList, removeCheck));
-		}
-		updateTime += (System.currentTimeMillis() - before);
-		iUpdate++;
-	}
-
-	private ArrayList<Move> getMoves(Piece piece, ArrayList<Piece> pieceList, boolean removeCheck) {
-		ArrayList<Move> legalMoves = new ArrayList<Move>();
-		PieceType type = piece.getPieceType();
-		double before = System.currentTimeMillis();
-		if (type == PieceType.PAWN) {
-			legalMoves = ((Pawn) piece).getLegalMoves(pieceList);
-			updateTimeArr[0] += (System.currentTimeMillis() - before);
-			iUpdateArr[0]++;
-		} else if (type == PieceType.KNIGHT) {
-			legalMoves = ((Knight) piece).getLegalMoves(pieceList);
-			updateTimeArr[1] += (System.currentTimeMillis() - before);
-			iUpdateArr[1]++;
-		} else if (type == PieceType.BISHOP) {
-			legalMoves = ((Bishop) piece).getLegalMoves(pieceList);
-			updateTimeArr[2] += (System.currentTimeMillis() - before);
-			iUpdateArr[2]++;
-		} else if (type == PieceType.ROOK) {
-			legalMoves = ((Rook) piece).getLegalMoves(pieceList);
-			updateTimeArr[3] += (System.currentTimeMillis() - before);
-			iUpdateArr[3]++;
-		} else if (type == PieceType.QUEEN) {
-			legalMoves = ((Queen) piece).getLegalMoves(pieceList);
-			updateTimeArr[4] += (System.currentTimeMillis() - before);
-			iUpdateArr[4]++;
-		} else if (type == PieceType.KING) {
-			legalMoves = ((King) piece).getLegalMoves(pieceList);
-			updateTimeArr[5] += (System.currentTimeMillis() - before);
-			iUpdateArr[5]++;
-		}
-		ArrayList<Move> captureRecognised = recogniseCaptureMoves(piece, pieceList, legalMoves);
-		return removeCheck ? removeIllegalMoves(piece, pieceList, piece.getColor(), captureRecognised)
-				: removePositionsOffBoard(captureRecognised);
-	}
-
-	private ArrayList<Move> removeIllegalMoves(Piece piece, ArrayList<Piece> pieceList, core.PieceColor color,
-			ArrayList<Move> possibleMoves) {
-		ArrayList<Move> intermediate = removeMovesToKing(pieceList, removePositionsOffBoard(possibleMoves));
-		return removeCheckMoves(piece, pieceList, color, intermediate);
-	}
-
-	private ArrayList<Move> removePositionsOffBoard(ArrayList<Move> moves) {
-		// Iterator has to be used to avoid concurrent modification exception
-		// i.e. so that we can remove from the arraylist as we loop through it
-		Iterator<Move> iter = moves.iterator();
-		while (iter.hasNext()) {
-			Move move = iter.next();
-			if (move.getPosition().getRow() > 7 || move.getPosition().getRow() < 0 || move.getPosition().getCol() > 7
-					|| move.getPosition().getCol() < 0) {
-				iter.remove();
-			}
-		}
-		return moves;
-	}
-
-	private ArrayList<Move> removeMovesToKing(ArrayList<Piece> pieceList, ArrayList<Move> moves) {
-		// Iterator has to be used to avoid concurrent modification exception
-		// i.e. so that we can remove from the arraylist as we loop through it
-		Iterator<Move> iter = moves.iterator();
-		while (iter.hasNext()) {
-			Move move = iter.next();
-			try {
-				Piece piece = Board.getPiece(pieceList, move.getPosition());
-				if (piece.getPieceType() == PieceType.KING) {
-					iter.remove();
-				}
-			} catch (NullPointerException e) {
-			}
-		}
-		return moves;
-	}
-
-	private ArrayList<Move> removeCheckMoves(Piece piece, ArrayList<Piece> pieceList, core.PieceColor color,
-			ArrayList<Move> possibleMoves) {
-		Piece king = null;
-
-		// Iterator has to be used to avoid concurrent modification exception
-		// i.e. so that we can remove from the arraylist as we loop through it
-		Iterator<Move> moveIterator = possibleMoves.iterator();
-		Position oldPosition = piece.getPos();
-
-		// Extracting the King from the array of pieces
-		for (Piece pieceLoop : pieceList) {
-			if (pieceLoop.getPieceType() == PieceType.KING && pieceLoop.getColor() == color) {
-				king = pieceLoop;
-			}
-		}
-		// Consider the case when the piece variable is the king in check
-		boolean kingInCheck = piece.getPieceType() == PieceType.KING && piece.getColor() == color;
-
-		// Loop through moves available to a piece
-		// If any of the moves result in check remove them
-		while (moveIterator.hasNext()) {
-			Move move = moveIterator.next();
-			ArrayList<Piece> pieceListTemp = clonePieceList(pieceList);
-			Piece pieceTemp = Board.getPiece(pieceListTemp, piece.getPos());
-			if (move.isCapture()) {
-				Piece capPiece = Board.getPiece(pieceListTemp, move.getPosition());
-				pieceListTemp.remove(capPiece);
-			}
-			pieceTemp.setPosition(move.getPosition());
-			pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() + 1);
-			updateMoveList(pieceListTemp, false);
-			if (((King) king).check(pieceListTemp, (kingInCheck) ? move.getPosition() : king.getPos())) {
-				moveIterator.remove();
-			}
-			pieceTemp.setPosition(oldPosition);
-			pieceTemp.setNumberOfMoves(piece.getNumberOfMoves() - 1);
-		}
-
-		return possibleMoves;
-
-	}
-
-	private ArrayList<Piece> clonePieceList(ArrayList<Piece> pieceList) {
-		double before = System.currentTimeMillis();
-		ArrayList<Piece> clonedList = new ArrayList<>();
-		for (Piece piece : pieceList) {
-			PieceType type = piece.getPieceType();
-			if (type == PieceType.PAWN) {
-				clonedList.add(new Pawn(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
-			} else if (type == PieceType.KNIGHT) {
-				clonedList.add(new Knight(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
-			} else if (type == PieceType.BISHOP) {
-				clonedList.add(new Bishop(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
-			} else if (type == PieceType.ROOK) {
-				clonedList.add(new Rook(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
-			} else if (type == PieceType.QUEEN) {
-				clonedList.add(new Queen(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
-			} else if (type == PieceType.KING) {
-				clonedList.add(new King(piece.getPos(), piece.getColor(), piece.getNumberOfMoves()));
-			}
-		}
-		cloneTime += (System.currentTimeMillis() - before);
-		iClone++;
-		return clonedList;
-	}
-
-	private void displayPawnPromotionDialog(Piece pawn, ArrayList<Piece> pieceList) {
+	private void displayPawnPromotionDialog(int pawnOldPos, int side, BitBoard board) {
 		String choice = new String();
 		List<String> choices = new ArrayList<>();
 		choices.add("Queen");
@@ -538,45 +201,26 @@ public class MainController {
 		if (result.isPresent()) {
 			choice = result.get();
 		} else {
-			displayPawnPromotionDialog(pawn, pieceList);
+			displayPawnPromotionDialog(pawnOldPos, side, board);
 		}
-		Position newPosition = new Position(pawn.getPos().getRow() + pawn.getColor().getColorFactor(),
-				pawn.getPos().getCol());
+
+		int colorFactor = (side == 0) ? 1 : -1;
+		int newPos = pawnOldPos + (colorFactor * 8);
 		switch (choice) {
 		case "Queen":
-			pieceList.add(new Queen(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+			board.addPiece((side == 0) ? Constants.WHITE_QUEEN : Constants.BLACK_QUEEN, newPos);
 			break;
 		case "Rook":
-			pieceList.add(new Rook(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+			board.addPiece((side == 0) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, newPos);
 			break;
 		case "Bishop":
-			pieceList.add(new Bishop(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+			board.addPiece((side == 0) ? Constants.WHITE_BISHOP : Constants.BLACK_BISHOP, newPos);
 			break;
 		case "Knight":
-			pieceList.add(new Knight(newPosition, pawn.getColor(), pawn.getNumberOfMoves()));
+			board.addPiece((side == 0) ? Constants.WHITE_KNIGHT : Constants.BLACK_KNIGHT, newPos);
 			break;
 		}
-		pieceList.remove(pawn);
-	}
-
-	private ArrayList<Move> recogniseCaptureMoves(Piece piece, ArrayList<Piece> pieceList, ArrayList<Move> moves) {
-		for (Move move : moves) {
-			try {
-				Piece capturePiece = Board.getPiece(pieceList, move.getPosition());
-				if (capturePiece.getColor() != piece.getColor() && capturePiece.getPieceType() != PieceType.KING) {
-					move.setCapture(true);
-				} else {
-					move.setCapture(false);
-				}
-
-			} catch (NullPointerException e) {
-				move.setCapture(false);
-			}
-
-		}
-
-		return moves;
-
+		board.removePiece(pawnOldPos);
 	}
 
 	private enum TranspositionFlag {

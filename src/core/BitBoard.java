@@ -15,14 +15,14 @@ public class BitBoard {
 		return 0 == ~(bitboards[Constants.WHITE] | bitboards[Constants.BLACK]);
 	}
 
-	void addPiece(byte piece, int square) {
+	public void addPiece(byte piece, int square) {
 		board[square] = piece;
 		long bitboard = 1L << square;
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
 	}
 
-	void move(Move move) {
+	public void move(Move move) {
 		int finalIndex = move.getFinalPos();
 		int oldIndex = move.getOldPos();
 		byte piece = board[oldIndex];
@@ -88,7 +88,7 @@ public class BitBoard {
 
 	}
 
-	void undo(Move move) {
+	public void undo(Move move) {
 		int finalIndex = move.getFinalPos();
 		int oldIndex = move.getOldPos();
 		byte piece = board[finalIndex];
@@ -181,7 +181,7 @@ public class BitBoard {
 		return false;
 	}
 
-	void removePiece(int square) {
+	public void removePiece(int square) {
 		byte piece = board[square];
 		board[square] = Constants.EMPTY;
 		long bitboard = ~(1 << square);
@@ -297,7 +297,7 @@ public class BitBoard {
 		// Next side to play
 		int toMove;
 		long[] enPassantSquares = new long[2];
-		long[] castlingAttackedSquare = new long[4];
+		long[] castlingAttackedSquare = new long[5];
 	}
 
 	class History {

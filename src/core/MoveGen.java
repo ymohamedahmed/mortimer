@@ -1,6 +1,7 @@
 package core;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MoveGen {
 	private BitBoard board;
@@ -9,7 +10,7 @@ public class MoveGen {
 		this.board = board;
 	}
 
-	ArrayList<Move> generateMoves(int side, boolean legal) {
+	public ArrayList<Move> generateMoves(int side, boolean legal) {
 		ArrayList<Move> moves = new ArrayList<>();
 		// Add pawn moves first
 		addPawnPushes(moves, side);
@@ -96,12 +97,16 @@ public class MoveGen {
 	}
 
 	ArrayList<Move> removeCheckMoves(ArrayList<Move> moveList, int side) {
-		for (Move move : moveList) {
+		// Iterator has to be used to avoid concurrent modification exception
+		// i.e. so that we can remove from the arraylist as we loop through it
+		Iterator<Move> iter = moveList.iterator();
+		while (iter.hasNext()) {
+			Move move = iter.next();
 			board.move(move);
-			boolean check = board.check(side, generateMoves((side == 0) ? 1 : 0, true));
+			boolean check = board.check(side, generateMoves((side == 0) ? 1 : 0, false));
 			board.undo(move);
 			if (check) {
-				moveList.remove(move);
+				iter.remove();
 			}
 		}
 		return moveList;
@@ -123,7 +128,7 @@ public class MoveGen {
 			byte castling, int offset) {
 		while (moves != 0) {
 			int to = bitScanForward(moves);
-			int from = (to - offset) % 64;
+			int from = Math.abs(to - offset) % 64;
 			Move move = new Move(pieceType, from, to);
 			move.setCastling(castling);
 			move.setPromotion(promotion);
