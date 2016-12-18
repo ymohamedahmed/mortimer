@@ -43,7 +43,55 @@ public class MoveGen {
 			addKingMoves(moves, bitScanForward(kingBoard), side);
 			kingBoard &= kingBoard - 1;
 		}
-		
+		int enemy = (side == 0) ? 1 : 0;
+		if (side == 0) {
+			for (Move move : moves) {
+				int finalIndex = move.getFinalPos();
+				if (finalIndex == 57) {
+					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b1000;
+				}
+				if (finalIndex == 58) {
+					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b0100;
+				}
+				if (finalIndex == 59) {
+					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b0010;
+				}
+				if (finalIndex == 60) {
+					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b0001;
+					board.flags.castlingAttackedSquare[Constants.bKSide] |= 0b100;
+				}
+				if (finalIndex == 61) {
+					board.flags.castlingAttackedSquare[Constants.bKSide] |= 0b010;
+				}
+				if (finalIndex == 62) {
+					board.flags.castlingAttackedSquare[Constants.bKSide] |= 0b001;
+				}
+			}
+		} else {
+			for (Move move : moves) {
+				int finalIndex = move.getFinalPos();
+				if (finalIndex == 1) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b1000;
+				}
+				if (finalIndex == 2) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0100;
+				}
+				if (finalIndex == 3) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0010;
+				}
+				if (finalIndex == 4) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0001;
+					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b100;
+				}
+				if (finalIndex == 5) {
+					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b010;
+				}
+				if (finalIndex == 6) {
+					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b001;
+				}
+			}
+		}
+
 		return (legal) ? removeCheckMoves(moves, side) : moves;
 	}
 

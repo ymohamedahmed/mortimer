@@ -27,15 +27,19 @@ public class BitBoard {
 		int oldIndex = move.getOldPos();
 		byte piece = board[oldIndex];
 		int side = piece % 2;
+		int enemy = (piece == 0) ? 1 : 0;
 		boolean capture = board[finalIndex] != Constants.EMPTY;
 		// update rook castling flag
 		if (piece == Constants.WHITE_ROOK) {
 			flags.wrookqueensidemoved = (flags.wrookqueensidemoved) ? true : (oldIndex == 0);
 			flags.wrookkingsidemoved = (flags.wrookkingsidemoved) ? true : (oldIndex == 7);
-		}
-		if (piece == Constants.BLACK_ROOK) {
+		} else if (piece == Constants.BLACK_ROOK) {
 			flags.wrookqueensidemoved = (flags.brookqueensidemoved) ? true : (oldIndex == 56);
 			flags.wrookkingsidemoved = (flags.brookkingsidemoved) ? true : (oldIndex == 63);
+		} else if (piece == Constants.WHITE_KING) {
+			flags.wkingmoved = (flags.wkingmoved) ? true : (oldIndex == 4);
+		} else if (piece == Constants.BLACK_KING) {
+			flags.bkingmoved = (flags.bkingmoved) ? true : (oldIndex == 60);
 		}
 		if (capture) {
 			history.capturedPiece = (capture) ? board[finalIndex] : Constants.EMPTY;
@@ -43,7 +47,7 @@ public class BitBoard {
 		}
 		addPiece(piece, finalIndex);
 		removePiece(oldIndex);
-		updateCastlingFlags(move);
+		updateCastlingFlags(enemy);
 		history.flags = flags;
 		flags.enPassantSquares[side] = 0;
 		if (piece == Constants.WHITE_PAWN) {
@@ -94,47 +98,76 @@ public class BitBoard {
 		addPiece(history.capturedPiece, finalIndex);
 	}
 
-	void updateCastlingFlags(Move move) {
-		if (!flags.wkingmoved) {
-			if (move.getPieceType() == Constants.WHITE_KING) {
-				flags.wqueenside = false;
-				flags.wkingside = false;
-				flags.wkingmoved = true;
+	void updateCastlingFlags(int side) {
+		if (side == 0) {
+			// Consider queenside(conditions required for castling denoted by c)
+			boolean c1 = board[0] == Constants.WHITE_ROOK;
+			boolean c2 = board[1] == Constants.EMPTY;
+			boolean c3 = board[2] == Constants.EMPTY;
+			boolean c4 = board[3] == Constants.EMPTY;
+			boolean c5 = board[4] == Constants.WHITE_KING;
+			boolean c6 = !flags.wrookqueensidemoved;
+			boolean c7 = !flags.wkingmoved;
+			boolean c8 = (flags.castlingAttackedSquare[Constants.wQSide] & 1) == 0;
+
+			// Now test whether king would be in check (more expensive
+			// calculation)
+			if (c1 && c2 && c3 && c4 && c5 && c6 && c7 && c8) {
+				flags.wqueenside = true;
 			} else {
-				// Consider queenside
-				if (!flags.wrookqueensidemoved) {
-					boolean condition1 = board[0] == Constants.WHITE_ROOK;
-					boolean condition2 = board[1] == Constants.EMPTY;
-					boolean condition3 = board[2] == Constants.EMPTY;
-					boolean condition4 = board[3] == Constants.EMPTY;
-					boolean condition5 = board[4] == Constants.WHITE_KING;
-					boolean condition6 = !flags.wrookqueensidemoved;
+				flags.wqueenside = false;
+			}
+			// Consider kingside
+			boolean c9 = board[7] == Constants.WHITE_ROOK;
+			boolean c10 = board[6] == Constants.EMPTY;
+			boolean c11 = board[5] == Constants.EMPTY;
+			boolean c12 = board[4] == Constants.WHITE_KING;
+			boolean c13 = !flags.wrookkingsidemoved;
+			boolean c14 = !flags.wkingmoved;
+			boolean c15 = (flags.castlingAttackedSquare[Constants.wKSide] & 1) == 0;
 
-					// Now test whether king would be in check (more expensive
-					// calculation)
-					if (condition1 && condition2 && condition3 && condition4 && condition5 && condition6) {
-						move(new Move(Constants.WHITE_KING, 4, 3));
-						boolean check = check(Constants.WHITE, new MoveGen(this).generateMoves(Constants.BLACK, true));
-						if (check) {
-							flags.wqueenside = false;
-						}
-						if (!check) {
+			// Now test whether king would be in check (more expensive
+			// calculation)
+			if (c9 && c10 && c11 && c12 && c13 && c14 && c15) {
+				flags.wkingside = true;
+			} else {
+				flags.wkingside = false;
+			}
+		} else {
+			// Consider queenside(conditions required for castling denoted by c)
+			boolean c1 = board[56] == Constants.BLACK_ROOK;
+			boolean c2 = board[57] == Constants.EMPTY;
+			boolean c3 = board[58] == Constants.EMPTY;
+			boolean c4 = board[59] == Constants.EMPTY;
+			boolean c5 = board[60] == Constants.BLACK_KING;
+			boolean c6 = !flags.brookqueensidemoved;
+			boolean c7 = !flags.bkingmoved;
+			boolean c8 = (flags.castlingAttackedSquare[Constants.bQSide] & 1) == 0;
 
-						}
+			// Now test whether king would be in check (more expensive
+			// calculation)
+			if (c1 && c2 && c3 && c4 && c5 && c6 && c7 && c8) {
+				flags.bqueenside = true;
+			} else {
+				flags.bqueenside = false;
+			}
+			// Consider kingside
+			boolean c9 = board[63] == Constants.WHITE_ROOK;
+			boolean c10 = board[62] == Constants.EMPTY;
+			boolean c11 = board[61] == Constants.EMPTY;
+			boolean c12 = board[60] == Constants.WHITE_KING;
+			boolean c13 = !flags.brookkingsidemoved;
+			boolean c14 = !flags.bkingmoved;
+			boolean c15 = (flags.castlingAttackedSquare[Constants.bKSide] & 1) == 0;
 
-					}
-				} else {
-					flags.wqueenside = false;
-				}
-
-				// Consider kingside
+			// Now test whether king would be in check (more expensive
+			// calculation)
+			if (c9 && c10 && c11 && c12 && c13 && c14 && c15) {
+				flags.wkingside = true;
+			} else {
+				flags.wkingside = false;
 			}
 		}
-		if (move.getPieceType() == Constants.BLACK_KING) {
-			flags.bqueenside = false;
-			flags.bkingside = false;
-		}
-
 	}
 
 	boolean check(int side, ArrayList<Move> moves) {
@@ -264,6 +297,7 @@ public class BitBoard {
 		// Next side to play
 		int toMove;
 		long[] enPassantSquares = new long[2];
+		long[] castlingAttackedSquare = new long[4];
 	}
 
 	class History {
