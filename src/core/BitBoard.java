@@ -18,8 +18,21 @@ public class BitBoard {
 	public void addPiece(byte piece, int square) {
 		board[square] = piece;
 		long bitboard = 1L << square;
+		System.out.println("BITBOARD ADD PIECE");
+		// printBoard(bitboard);
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
+	}
+
+	public void printBoardArray(byte[] board) {
+		String line = "";
+		for (int row = 56; row >= 0; row -= 8) {
+			for (int col = 0; col < 8; col++) {
+				line += " " + board[row + col];
+			}
+			System.out.println(line);
+			line = "";
+		}
 	}
 
 	public void move(Move move) {
@@ -45,8 +58,8 @@ public class BitBoard {
 			history.capturedPiece = (capture) ? board[finalIndex] : Constants.EMPTY;
 			removePiece(finalIndex);
 		}
-		addPiece(piece, finalIndex);
 		removePiece(oldIndex);
+		addPiece(piece, finalIndex);
 		updateCastlingFlags(enemy);
 		history.flags = flags;
 		flags.enPassantSquares[side] = 0;
@@ -241,7 +254,7 @@ public class BitBoard {
 		bitboards[Constants.WHITE_BISHOP] = 0x0000000000000024L;
 		bitboards[Constants.WHITE_ROOK] = 0x0000000000000081L;
 		bitboards[Constants.WHITE_QUEEN] = 0x0000000000000010L;
-		bitboards[Constants.WHITE_KING] = 0x0000000000000008L;
+		bitboards[Constants.WHITE_KING] = 0x0000000000000010L;
 		bitboards[Constants.BLACK_PAWN] = 0x00FF000000000000L;
 		bitboards[Constants.BLACK_KNIGHT] = 0x4200000000000000L;
 		bitboards[Constants.BLACK_BISHOP] = 0x2400000000000000L;

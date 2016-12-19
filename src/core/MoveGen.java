@@ -146,8 +146,9 @@ public class MoveGen {
 		int lookupIndex = (int) ((rookBlockers
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
-	/*	System.out.println("ROOK MOVES");
-		board.printBoard(moveSquares);*/
+		/*
+		 * System.out.println("ROOK MOVES"); board.printBoard(moveSquares);
+		 */
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -158,8 +159,9 @@ public class MoveGen {
 		int lookupIndex = (int) ((bishopBlockers
 				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
 		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
-		/*System.out.println("BISHOP MOVES");
-		board.printBoard(moveSquares);*/
+		/*
+		 * System.out.println("BISHOP MOVES"); board.printBoard(moveSquares);
+		 */
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
@@ -179,10 +181,11 @@ public class MoveGen {
 		long moveSquaresBishop = Constants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
 
 		long queenMoves = moveSquaresRook | moveSquaresBishop;
-/*		System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
-		board.printBoard(moveSquaresBishop);
-		board.printBoard(moveSquaresRook);
-		board.printBoard(queenMoves);*/
+		/*
+		 * System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
+		 * board.printBoard(moveSquaresBishop);
+		 * board.printBoard(moveSquaresRook); board.printBoard(queenMoves);
+		 */
 		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
 	}
 
@@ -194,6 +197,8 @@ public class MoveGen {
 
 	void addKingMoves(ArrayList<Move> moveList, int index, int side) {
 		long moves = Constants.KING_TABLE[index] & ~board.bitboards[side];
+		System.out.println("KING MOVES");
+		board.printBoard(Constants.KING_TABLE[index]);
 		int pieceType = (side == 0) ? Constants.WHITE_KING : Constants.BLACK_KING;
 		addMoves(pieceType, index, moves, moveList, false, false, Constants.noCastle);
 		// Check for castling moves
@@ -228,7 +233,7 @@ public class MoveGen {
 		long promotions = pushes & promotions_mask[side];
 		addMovesWithOffset(pieceType, promotions, moveList, false, true, Constants.noCastle, offset);
 		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
-		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, Constants.noCastle, offset+offset);
+		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, Constants.noCastle, offset + offset);
 	}
 
 	void addPawnAttacks(ArrayList<Move> moveList, int index, int side) {

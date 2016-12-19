@@ -68,8 +68,7 @@ public class MainController {
 				byte piece = board.board[(row * 8) + col];
 				if (piece != Constants.EMPTY) {
 					Image image = new Image(MainController.class
-							.getResource("/images/" + Constants.FILE_NAMES[piece] + ".png")
-							.toExternalForm());
+							.getResource("/images/" + Constants.FILE_NAMES[piece] + ".png").toExternalForm());
 					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
 				}
 			}
@@ -87,7 +86,7 @@ public class MainController {
 		moveGen.initialisePawnLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
-		moveList = getMoves(board, true, 0);
+		moveList = getMoves(board, false, 0);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
 	}
@@ -108,7 +107,7 @@ public class MainController {
 
 		for (int square : blueSquares) {
 			if (square == index) {
-				move(board,new Move(piece, oldPos, index),true);
+				move(board, new Move(piece, oldPos, index), true);
 				blueSquares.clear();
 				pieceMoved = true;
 				break;
@@ -119,6 +118,8 @@ public class MainController {
 		if (piece != Constants.EMPTY && !pieceMoved) {
 			// Get its available moves
 			ArrayList<Move> moves = getMovesPiece(index, moveList);
+			System.out.println("MOVE BY PIECE");
+			moveGen.printMoveList(moves);
 			oldPos = index;
 			// Clear the canvas and then repaint it
 			clearCanvas();
@@ -128,9 +129,9 @@ public class MainController {
 			blueSquares.clear();
 			for (Move move : moves) {
 				int rowMove = Math.floorDiv(move.getFinalPos(), 8);
-				int colMove = move.getFinalPos()%8;
+				int colMove = move.getFinalPos() % 8;
 				if (board.board[move.getFinalPos()] == Constants.EMPTY) {
-					g.setFill(Color.	BLUE);
+					g.setFill(Color.BLUE);
 					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
 				} else {
 					g.setFill(Color.RED);
@@ -140,6 +141,7 @@ public class MainController {
 			}
 
 		}
+		System.out.println("PIECE CLICKED: " + piece);
 	}
 
 	private ArrayList<Move> getMovesPiece(int oldPos, ArrayList<Move> moveList) {
@@ -179,6 +181,8 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
+		System.out.println("BOARD ARRAY BEFORE");
+		board.printBoardArray(board.board);
 		int colorMoved = move.getPieceType() % 2;
 		int enemy = (colorMoved == 0) ? 1 : 0;
 		board.move(move);
@@ -186,9 +190,10 @@ public class MainController {
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
-			moveList = getMoves(board, true, colorMoved);
-			moveGen.printMoveList(moveList);
+			moveList = getMoves(board, false, colorMoved);
 		}
+		System.out.println("BOARD ARRAY AFTER");
+		board.printBoardArray(board.board);
 	}
 
 	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck, int side) {

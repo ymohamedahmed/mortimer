@@ -30,12 +30,12 @@ public class MoveGenTest {
 		board.printBoard(Constants.KING_TABLE[55]);
 		board.printBoard(Constants.KING_TABLE[63]);*/
 		
-		ArrayList<Move> moves = moveGen.generateMoves(0, true);
+		ArrayList<Move> moves = moveGen.generateMoves(0, false);
 		System.out.println("SIZE : " + moves.size());
 		moveGen.printMoveList(moves);
 		System.out.println("PAWN MOVED");
 		board.move(new Move(Constants.WHITE_PAWN,8,24));
-		moves = moveGen.generateMoves(0, true);
+		moves = moveGen.generateMoves(0, false);
 		board.printBoard(board.bitboards[Constants.WHITE_PAWN]);
 		moveGen.printMoveList(moves);
 		assertEquals(56, moveGen.mirrorIndex(0));
