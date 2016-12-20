@@ -17,7 +17,10 @@ public class BitBoard {
 
 	public void addPiece(byte piece, int square) {
 		board[square] = piece;
-		long bitboard = 1L << square;
+		long bitboard = (long) Math.pow(2, square);
+		if (square == 63) {
+			bitboard = 0x8000_0000_0000_0000L;
+		}
 		System.out.println("BITBOARD ADD PIECE");
 		// printBoard(bitboard);
 		bitboards[piece & 1] |= bitboard;
@@ -197,7 +200,7 @@ public class BitBoard {
 	public void removePiece(int square) {
 		byte piece = board[square];
 		board[square] = Constants.EMPTY;
-		long bitboard = ~(1 << square);
+		long bitboard = ~((square == 63) ?0x8000_0000_0000_0000L : (long) Math.pow(2, square) );
 		bitboards[piece & 1] &= bitboard;
 		bitboards[piece] &= bitboard;
 	}
@@ -253,7 +256,7 @@ public class BitBoard {
 		bitboards[Constants.WHITE_KNIGHT] = 0x0000000000000042L;
 		bitboards[Constants.WHITE_BISHOP] = 0x0000000000000024L;
 		bitboards[Constants.WHITE_ROOK] = 0x0000000000000081L;
-		bitboards[Constants.WHITE_QUEEN] = 0x0000000000000010L;
+		bitboards[Constants.WHITE_QUEEN] = 0x0000000000000008L;
 		bitboards[Constants.WHITE_KING] = 0x0000000000000010L;
 		bitboards[Constants.BLACK_PAWN] = 0x00FF000000000000L;
 		bitboards[Constants.BLACK_KNIGHT] = 0x4200000000000000L;
