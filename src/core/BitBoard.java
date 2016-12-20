@@ -21,7 +21,6 @@ public class BitBoard {
 		if (square == 63) {
 			bitboard = 0x8000_0000_0000_0000L;
 		}
-		System.out.println("BITBOARD ADD PIECE");
 		// printBoard(bitboard);
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
@@ -186,11 +185,11 @@ public class BitBoard {
 		}
 	}
 
-	boolean check(int side, ArrayList<Move> moves) {
+	boolean check(int side, ArrayList<Move> enemyMoves) {
 		int kingIndex = (side == Constants.WHITE) ? bitScanForward(bitboards[Constants.WHITE_KING])
 				: bitScanForward(bitboards[Constants.BLACK_KING]);
-		for (Move move : moves) {
-			if (move.getFinalPos() == kingIndex) {
+		for (Move move : enemyMoves) {
+			if (move.getFinalPos() == kingIndex && move.getPieceType() % 2 != side) {
 				return true;
 			}
 		}
@@ -200,7 +199,7 @@ public class BitBoard {
 	public void removePiece(int square) {
 		byte piece = board[square];
 		board[square] = Constants.EMPTY;
-		long bitboard = ~((square == 63) ?0x8000_0000_0000_0000L : (long) Math.pow(2, square) );
+		long bitboard = ~((square == 63) ? 0x8000_0000_0000_0000L : (long) Math.pow(2, square));
 		bitboards[piece & 1] &= bitboard;
 		bitboards[piece] &= bitboard;
 	}

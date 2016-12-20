@@ -7,41 +7,44 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 public class MoveGenTest {
+	BitBoard board = new BitBoard();
+	MoveGen moveGen = new MoveGen(board);
+
 	@Test
 	public void testHammingWeight() {
-
-		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
-		MoveGen moveGen = new MoveGen(board);
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 
-	/*	System.out.println("KNIGHT");
-		board.printBoard(Constants.KNIGHT_TABLE[5]);
-		board.printBoard(Constants.KNIGHT_TABLE[33]);
-		board.printBoard(Constants.KNIGHT_TABLE[55]);
-		board.printBoard(Constants.KNIGHT_TABLE[63]);
-		System.out.println("KING");
-		board.printBoard(Constants.KING_TABLE[5]);
-		board.printBoard(Constants.KING_TABLE[33]);
-		board.printBoard(Constants.KING_TABLE[55]);
-		board.printBoard(Constants.KING_TABLE[63]);*/
-		
 		ArrayList<Move> moves = moveGen.generateMoves(0, false);
 		System.out.println("SIZE : " + moves.size());
-		moveGen.printMoveList(moves);
 		System.out.println("PAWN MOVED");
-		board.move(new Move(Constants.WHITE_PAWN,8,24));
 		moves = moveGen.generateMoves(0, false);
-		board.printBoard(board.bitboards[Constants.WHITE_PAWN]);
-		moveGen.printMoveList(moves);
+		System.out.println("perft 1 : " + perft(1));
+		System.out.println("perft 2 : " + perft(2));
+		System.out.println("perft 3 : " + perft(3));
 		assertEquals(56, moveGen.mirrorIndex(0));
 		assertEquals(63, moveGen.mirrorIndex(7));
 		assertEquals(48, moveGen.mirrorIndex(8));
 		assertEquals(40, moveGen.mirrorIndex(16));
-		
+	}
+
+	public long perft(int depth) {
+		if (depth == 0) {
+			return 1;
+		}
+		ArrayList<Move> moveList = moveGen.generateMoves(0, false);
+		int nMoves = moveList.size();
+		System.out.println(nMoves);
+		long nodes = 0;
+		for (int i = 0; i < nMoves; i++) {
+			board.move(moveList.get(i));
+			nodes += perft(depth - 1);
+			board.undo(moveList.get(i));
+		}
+		return nodes;
 	}
 }
