@@ -8,6 +8,7 @@ import org.junit.Test;
 
 public class MoveGenTest {
 	BitBoard board = new BitBoard();
+	int toMove = Constants.WHITE;
 
 	@Test
 	public void testHammingWeight() {
@@ -20,10 +21,10 @@ public class MoveGenTest {
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 
-		ArrayList<Move> moves = moveGen.generateMoves(0, false);
+		ArrayList<Move> moves = moveGen.generateMoves(0, true);
 		System.out.println("SIZE : " + moves.size());
 		System.out.println("PAWN MOVED");
-		moves = moveGen.generateMoves(0, false);
+		moves = moveGen.generateMoves(0, true);
 		System.out.println("perft 1 : " + perft(moveGen, 1));
 		System.out.println("perft 2 : " + perft(moveGen, 2));
 		System.out.println("perft 3 : " + perft(moveGen, 3));
@@ -34,12 +35,14 @@ public class MoveGenTest {
 	}
 
 	public long perft(MoveGen moveGen, int depth) {
+		long nodes = 0;
 		if (depth == 0) {
 			return 1;
 		}
-		ArrayList<Move> moveList = moveGen.generateMoves(0, false);
+		ArrayList<Move> moveList = moveGen.generateMoves(toMove, true);
+		toMove = (toMove == 0) ? 1 : 0;
 		int nMoves = moveList.size();
-		long nodes = 0;
+
 		for (int i = 0; i < nMoves; i++) {
 			board.move(moveList.get(i));
 			nodes += perft(moveGen, depth - 1);

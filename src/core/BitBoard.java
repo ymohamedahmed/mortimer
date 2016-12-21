@@ -38,6 +38,7 @@ public class BitBoard {
 	}
 
 	public void move(Move move) {
+		history = new History();
 		int finalIndex = move.getFinalPos();
 		int oldIndex = move.getOldPos();
 		byte piece = board[oldIndex];
@@ -57,7 +58,7 @@ public class BitBoard {
 			flags.bkingmoved = (flags.bkingmoved) ? true : (oldIndex == 60);
 		}
 		if (capture) {
-			history.capturedPiece = (capture) ? board[finalIndex] : Constants.EMPTY;
+			history.capturedPiece = board[finalIndex];
 			removePiece(finalIndex);
 		}
 		removePiece(oldIndex);
@@ -109,7 +110,7 @@ public class BitBoard {
 		byte piece = board[finalIndex];
 		addPiece(piece, oldIndex);
 		removePiece(finalIndex);
-		flags = history.flags;
+		// flags = history.flags;
 		if (history.capturedPiece != Constants.EMPTY) {
 			addPiece(history.capturedPiece, finalIndex);
 		}
@@ -191,13 +192,13 @@ public class BitBoard {
 	boolean check(int side) {
 		int kingIndex = (side == Constants.WHITE) ? bitScanForward(bitboards[Constants.WHITE_KING])
 				: bitScanForward(bitboards[Constants.BLACK_KING]);
-		long enemyPawns = bitboards[side + 2];
-		long enemyKnights = bitboards[side + 4];
-		long enemyRookQueen = bitboards[side + 10];
+		long enemyPawns = bitboards[3 - side];
+		long enemyKnights = bitboards[5 - side];
+		long enemyRookQueen = bitboards[11 - side];
 		long enemyBishopQueen = enemyRookQueen;
 		long occupiedBoard = bitboards[Constants.WHITE] | bitboards[Constants.BLACK];
-		enemyRookQueen |= bitboards[side + 6];
-		enemyBishopQueen |= bitboards[side + 8];
+		enemyRookQueen |= bitboards[7 - side];
+		enemyBishopQueen |= bitboards[9 - side];
 		long result = (Constants.PAWN_ATTACKS_TABLE[side][kingIndex] & enemyPawns)
 				| (Constants.KNIGHT_TABLE[kingIndex] & enemyKnights)
 				| (bishopAttacks(occupiedBoard, kingIndex, side) & enemyBishopQueen)

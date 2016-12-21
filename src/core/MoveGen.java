@@ -97,7 +97,13 @@ public class MoveGen {
 				}
 			}
 		}
-
+		Iterator<Move> iter = moves.iterator();
+		while(iter.hasNext()){
+			Move move = iter.next();
+			if(board.board[move.getFinalPos()] == Constants.WHITE_KING || board.board[move.getFinalPos()] == Constants.BLACK_KING){
+				iter.remove();
+			}
+		}
 		return (legal) ? removeCheckMoves(moves, side) : moves;
 	}
 
