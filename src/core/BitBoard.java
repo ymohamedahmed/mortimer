@@ -11,6 +11,33 @@ public class BitBoard {
 	public Flags flags = new Flags();
 	private History history = new History();
 	public int toMove = Constants.WHITE;
+	int moveNumber = 0;
+	// History arrays
+	long[] moveHistory;
+	long[] whiteHistory;
+	long[] blackHistory;
+	long[][] pawnHistory;
+	long[][] rookHistory;
+	long[][] queenHistory;
+	long[][] bishopHistory;
+	long[][] knightHistory;
+	long[][] kingHistory;
+	long[] flagsHistory;
+	byte[][] boardHistory;
+
+	public BitBoard() {
+		moveHistory = new long[Constants.MAX_MOVES];
+		whiteHistory = new long[Constants.MAX_MOVES];
+		blackHistory = new long[Constants.MAX_MOVES];
+		pawnHistory = new long[2][Constants.MAX_MOVES];
+		rookHistory = new long[2][Constants.MAX_MOVES];
+		queenHistory = new long[2][Constants.MAX_MOVES];
+		bishopHistory = new long[2][Constants.MAX_MOVES];
+		knightHistory = new long[2][Constants.MAX_MOVES];
+		kingHistory = new long[2][Constants.MAX_MOVES];
+		flagsHistory = new long[Constants.MAX_MOVES];
+		boardHistory = new byte[Constants.MAX_MOVES][1];
+	}
 
 	boolean isEmpty() {
 		return 0 == ~(bitboards[Constants.WHITE] | bitboards[Constants.BLACK]);
@@ -40,8 +67,10 @@ public class BitBoard {
 
 	public void move(Move move) {
 		toMove = (toMove == 0) ? 1 : 0;
-		/*history.flags = new Flags();
-		copyFlags(flags, history.flags);*/
+		moveNumber++;
+		/*
+		 * history.flags = new Flags(); copyFlags(flags, history.flags);
+		 */
 
 		int finalIndex = move.getFinalPos();
 		int oldIndex = move.getOldPos();
@@ -49,7 +78,8 @@ public class BitBoard {
 		int side = piece % 2;
 		int enemy = (piece == 0) ? 1 : 0;
 		boolean capture = board[finalIndex] != Constants.EMPTY;
-	/*	// update rook castling flag
+
+		// update rook castling flag
 		if (piece == Constants.WHITE_ROOK) {
 			flags.wrookqueensidemoved = (flags.wrookqueensidemoved) ? true : (oldIndex == 0);
 			flags.wrookkingsidemoved = (flags.wrookkingsidemoved) ? true : (oldIndex == 7);
@@ -60,15 +90,17 @@ public class BitBoard {
 			flags.wkingmoved = (flags.wkingmoved) ? true : (oldIndex == 4);
 		} else if (piece == Constants.BLACK_KING) {
 			flags.bkingmoved = (flags.bkingmoved) ? true : (oldIndex == 60);
-		}*/
+		}
+
 		if (capture) {
 			history.capturedPiece = board[finalIndex];
 			removePiece(finalIndex);
 		}
+
 		removePiece(oldIndex);
 		addPiece(piece, finalIndex);
-	/*	updateCastlingFlags(enemy);
 
+		updateCastlingFlags(enemy);
 		flags.enPassantSquares[side] = 0;
 		if (piece == Constants.WHITE_PAWN) {
 			if (finalIndex - oldIndex == 16) {
@@ -103,9 +135,9 @@ public class BitBoard {
 				break;
 			}
 			removePiece(rookOldIndex);
-			addPiece((castle <= 2) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, rookFinalIndex);*/
+			addPiece((castle <= 2) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, rookFinalIndex);
 		}
-	
+	}
 
 	public void copyFlags(Flags from, Flags to) {
 		to = new Flags();
@@ -123,19 +155,42 @@ public class BitBoard {
 		to.castlingAttackedSquare = from.castlingAttackedSquare.clone();
 	}
 
-	public void undo(Move move) {
-		int finalIndex = move.getFinalPos();
-		int oldIndex = move.getOldPos();
-		byte piece = board[finalIndex];
-		/*addPiece(piece, oldIndex);
-		removePiece(finalIndex);*/
-		toMove = (toMove == 0) ? 1 : 0;
-		move(new Move(piece, finalIndex, oldIndex));
-/*		if (history.capturedPiece != Constants.EMPTY) {
-			addPiece(history.capturedPiece, finalIndex);
-		}
-		copyFlags(history.flags, flags);*/
-		
+	public void storeHistory() {
+		whiteHistory[moveNumber] = bitboards[0];
+		blackHistory[moveNumber] = bitboards[1];
+		pawnHistory[0][moveNumber] = bitboards[2];
+		pawnHistory[1][moveNumber] = bitboards[3];
+		knightHistory[0][moveNumber] = bitboards[4];
+		knightHistory[1][moveNumber] = bitboards[5];
+		rookHistory[0][moveNumber] = bitboards[6];
+		rookHistory[1][moveNumber] = bitboards[7];
+		bishopHistory[0][moveNumber] = bitboards[8];
+		bishopHistory[1][moveNumber] = bitboards[9];
+		queenHistory[0][moveNumber] = bitboards[10];
+		queenHistory[1][moveNumber] = bitboards[11];
+		kingHistory[0][moveNumber] = bitboards[12];
+		kingHistory[1][moveNumber] = bitboards[13];
+		boardHistory[moveNumber] = board.clone();
+	}
+
+	public void undo() {
+		moveNumber--;
+		bitboards[0] = whiteHistory[moveNumber];
+		bitboards[1] = blackHistory[moveNumber];
+		bitboards[2] = pawnHistory[0][moveNumber];
+		bitboards[3] = pawnHistory[1][moveNumber];
+		bitboards[4] = knightHistory[0][moveNumber];
+		bitboards[5] = knightHistory[1][moveNumber];
+		bitboards[6] = rookHistory[0][moveNumber];
+		bitboards[7] = rookHistory[1][moveNumber];
+		bitboards[8] = bishopHistory[0][moveNumber];
+		bitboards[9] = bishopHistory[1][moveNumber];
+		bitboards[10] = queenHistory[0][moveNumber];
+		bitboards[11] = queenHistory[1][moveNumber];
+		bitboards[12] = kingHistory[0][moveNumber];
+		bitboards[13] = kingHistory[1][moveNumber];
+		board = boardHistory[moveNumber].clone();
+
 	}
 
 	void updateCastlingFlags(int side) {

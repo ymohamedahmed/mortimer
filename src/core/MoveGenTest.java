@@ -48,7 +48,7 @@ public class MoveGenTest {
 		for (int i = 0; i < nMoves; i++) {
 			board.move(moveList.get(i));
 			nodes += perft(moveGen, depth - 1);
-			board.undo(moveList.get(i));
+			board.undo();
 		}
 		return nodes;
 	}

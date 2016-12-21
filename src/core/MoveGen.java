@@ -121,7 +121,7 @@ public class MoveGen {
 			if (pieceSide == side) {
 				board.move(move);
 				boolean check = board.check(side);
-				board.undo(move);
+				board.undo();
 				if (check) {
 					iter.remove();
 				}
