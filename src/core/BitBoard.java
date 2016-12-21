@@ -36,7 +36,7 @@ public class BitBoard {
 		knightHistory = new long[2][Constants.MAX_MOVES];
 		kingHistory = new long[2][Constants.MAX_MOVES];
 		flagsHistory = new long[Constants.MAX_MOVES];
-		boardHistory = new byte[Constants.MAX_MOVES][1];
+		boardHistory = new byte[Constants.MAX_MOVES][64];
 	}
 
 	boolean isEmpty() {
@@ -66,8 +66,10 @@ public class BitBoard {
 	}
 
 	public void move(Move move) {
-		toMove = (toMove == 0) ? 1 : 0;
+		storeHistory();
 		moveNumber++;
+		toMove = (toMove == 0) ? 1 : 0;
+		
 		/*
 		 * history.flags = new Flags(); copyFlags(flags, history.flags);
 		 */
@@ -137,6 +139,7 @@ public class BitBoard {
 			removePiece(rookOldIndex);
 			addPiece((castle <= 2) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, rookFinalIndex);
 		}
+		
 	}
 
 	public void copyFlags(Flags from, Flags to) {
@@ -190,6 +193,7 @@ public class BitBoard {
 		bitboards[12] = kingHistory[0][moveNumber];
 		bitboards[13] = kingHistory[1][moveNumber];
 		board = boardHistory[moveNumber].clone();
+		toMove = (toMove == 0) ? 1 : 0;
 
 	}
 
