@@ -190,7 +190,7 @@ public class MainController {
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
-			moveList = getMoves(board, false, colorMoved);
+			moveList = getMoves(board, true, colorMoved);
 		}
 		System.out.println("BOARD ARRAY AFTER");
 		board.printBoardArray(board.board);

@@ -110,7 +110,9 @@ public class BitBoard {
 		addPiece(piece, oldIndex);
 		removePiece(finalIndex);
 		flags = history.flags;
-		addPiece(history.capturedPiece, finalIndex);
+		if (history.capturedPiece != Constants.EMPTY) {
+			addPiece(history.capturedPiece, finalIndex);
+		}
 	}
 
 	void updateCastlingFlags(int side) {

@@ -8,11 +8,12 @@ import org.junit.Test;
 
 public class MoveGenTest {
 	BitBoard board = new BitBoard();
-	MoveGen moveGen = new MoveGen(board);
 
 	@Test
 	public void testHammingWeight() {
+
 		board.resetToInitialSetup();
+		MoveGen moveGen = new MoveGen(board);
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
@@ -23,26 +24,25 @@ public class MoveGenTest {
 		System.out.println("SIZE : " + moves.size());
 		System.out.println("PAWN MOVED");
 		moves = moveGen.generateMoves(0, false);
-		System.out.println("perft 1 : " + perft(1));
-		System.out.println("perft 2 : " + perft(2));
-		System.out.println("perft 3 : " + perft(3));
+		System.out.println("perft 1 : " + perft(moveGen, 1));
+		System.out.println("perft 2 : " + perft(moveGen, 2));
+		System.out.println("perft 3 : " + perft(moveGen, 3));
 		assertEquals(56, moveGen.mirrorIndex(0));
 		assertEquals(63, moveGen.mirrorIndex(7));
 		assertEquals(48, moveGen.mirrorIndex(8));
 		assertEquals(40, moveGen.mirrorIndex(16));
 	}
 
-	public long perft(int depth) {
+	public long perft(MoveGen moveGen, int depth) {
 		if (depth == 0) {
 			return 1;
 		}
 		ArrayList<Move> moveList = moveGen.generateMoves(0, false);
 		int nMoves = moveList.size();
-		System.out.println(nMoves);
 		long nodes = 0;
 		for (int i = 0; i < nMoves; i++) {
 			board.move(moveList.get(i));
-			nodes += perft(depth - 1);
+			nodes += perft(moveGen, depth - 1);
 			board.undo(moveList.get(i));
 		}
 		return nodes;
