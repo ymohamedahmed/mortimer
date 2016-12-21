@@ -8,26 +8,29 @@ import org.junit.Test;
 
 public class MoveGenTest {
 	BitBoard board = new BitBoard();
-	int toMove = Constants.WHITE;
 
 	@Test
 	public void testHammingWeight() {
 
 		board.resetToInitialSetup();
-		MoveGen moveGen = new MoveGen(board);
+		MoveGen moveGen = new MoveGen();
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 
-		ArrayList<Move> moves = moveGen.generateMoves(0, true);
+		ArrayList<Move> moves = moveGen.generateMoves(board, true);
 		System.out.println("SIZE : " + moves.size());
 		System.out.println("PAWN MOVED");
-		moves = moveGen.generateMoves(0, true);
+		moves = moveGen.generateMoves(board, true);
 		System.out.println("perft 1 : " + perft(moveGen, 1));
+		board.resetToInitialSetup();
 		System.out.println("perft 2 : " + perft(moveGen, 2));
+		board.resetToInitialSetup();
 		System.out.println("perft 3 : " + perft(moveGen, 3));
+		board.resetToInitialSetup();
+		System.out.println("perft 4 : " + perft(moveGen, 4));
 		assertEquals(56, moveGen.mirrorIndex(0));
 		assertEquals(63, moveGen.mirrorIndex(7));
 		assertEquals(48, moveGen.mirrorIndex(8));
@@ -39,8 +42,7 @@ public class MoveGenTest {
 		if (depth == 0) {
 			return 1;
 		}
-		ArrayList<Move> moveList = moveGen.generateMoves(toMove, true);
-		toMove = (toMove == 0) ? 1 : 0;
+		ArrayList<Move> moveList = moveGen.generateMoves(board, true);
 		int nMoves = moveList.size();
 
 		for (int i = 0; i < nMoves; i++) {

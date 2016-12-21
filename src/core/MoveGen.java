@@ -4,39 +4,38 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class MoveGen {
-	private BitBoard board;
 
-	public MoveGen(BitBoard board) {
-		this.board = board;
+	public MoveGen() {
 	}
 
-	public ArrayList<Move> generateMoves(int side, boolean legal) {
+	public ArrayList<Move> generateMoves(BitBoard board, boolean legal) {
 		ArrayList<Move> moves = new ArrayList<>();
 		// Add pawn moves first
-		addPawnPushes(moves, side);
+		int side = board.toMove;
+		addPawnPushes(board, moves, side);
 		long pawnBoard = board.bitboards[side + 2];
 		while (pawnBoard != 0) {
-			addPawnAttacks(moves, bitScanForward(pawnBoard), side);
+			addPawnAttacks(board, moves, bitScanForward(pawnBoard), side);
 			pawnBoard &= pawnBoard - 1;
 		}
 		long knightBoard = board.bitboards[side + 4];
 		while (knightBoard != 0) {
-			addKnightMoves(moves, bitScanForward(knightBoard), side);
+			addKnightMoves(board, moves, bitScanForward(knightBoard), side);
 			knightBoard &= knightBoard - 1;
 		}
 		long rookBoard = board.bitboards[side + 6];
 		while (rookBoard != 0) {
-			addRookMoves(moves, bitScanForward(rookBoard), side);
+			addRookMoves(board, moves, bitScanForward(rookBoard), side);
 			rookBoard &= rookBoard - 1;
 		}
 		long bishopBoard = board.bitboards[side + 8];
 		while (bishopBoard != 0) {
-			addBishopMoves(moves, bitScanForward(bishopBoard), side);
+			addBishopMoves(board, moves, bitScanForward(bishopBoard), side);
 			bishopBoard &= bishopBoard - 1;
 		}
 		long queenBoard = board.bitboards[side + 10];
 		while (queenBoard != 0) {
-			addQueenMoves(moves, bitScanForward(queenBoard), side);
+			addQueenMoves(board, moves, bitScanForward(queenBoard), side);
 			queenBoard &= queenBoard - 1;
 		}
 		long kingBoard = board.bitboards[side + 12];
@@ -44,15 +43,36 @@ public class MoveGen {
 		 * System.out.println("KING BOARD: "); board.printBoard(kingBoard);
 		 */
 		while (kingBoard != 0) {
-			addKingMoves(moves, bitScanForward(kingBoard), side);
-			// System.out.println("KING INDEX: " + bitScanForward(kingBoard));
+			addKingMoves(board, moves, bitScanForward(kingBoard), side);
+			// System.out.println("KING INDEX: " +
+			// bitScanForward(kingBoard));
 			kingBoard &= kingBoard - 1;
 		}
 
-		int enemy = (side == 0) ? 1 : 0;
-		if (side == 0) {
-			for (Move move : moves) {
-				int finalIndex = move.getFinalPos();
+		for (Move move : moves) {
+			int finalIndex = move.getFinalPos();
+
+			if (side == 1) {
+				if (finalIndex == 1) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b1000;
+				}
+				if (finalIndex == 2) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0100;
+				}
+				if (finalIndex == 3) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0010;
+				}
+				if (finalIndex == 4) {
+					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0001;
+					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b100;
+				}
+				if (finalIndex == 5) {
+					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b010;
+				}
+				if (finalIndex == 6) {
+					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b001;
+				}
+			} else {
 				if (finalIndex == 57) {
 					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b1000;
 				}
@@ -73,52 +93,38 @@ public class MoveGen {
 					board.flags.castlingAttackedSquare[Constants.bKSide] |= 0b001;
 				}
 			}
-		} else {
-			for (Move move : moves) {
-				int finalIndex = move.getFinalPos();
-				if (finalIndex == 1) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b1000;
-				}
-				if (finalIndex == 2) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0100;
-				}
-				if (finalIndex == 3) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0010;
-				}
-				if (finalIndex == 4) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0001;
-					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b100;
-				}
-				if (finalIndex == 5) {
-					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b010;
-				}
-				if (finalIndex == 6) {
-					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b001;
-				}
-			}
 		}
+
 		Iterator<Move> iter = moves.iterator();
-		while(iter.hasNext()){
+		while (iter.hasNext()) {
 			Move move = iter.next();
-			if(board.board[move.getFinalPos()] == Constants.WHITE_KING || board.board[move.getFinalPos()] == Constants.BLACK_KING){
+			if (board.board[move.getFinalPos()] == Constants.WHITE_KING
+					|| board.board[move.getFinalPos()] == Constants.BLACK_KING) {
 				iter.remove();
 			}
 		}
-		return (legal) ? removeCheckMoves(moves, side) : moves;
+		if (legal) {
+			moves = removeCheckMoves(board, moves, 0);
+			moves = removeCheckMoves(board, moves, 1);
+		}
+		return moves;
 	}
 
-	ArrayList<Move> removeCheckMoves(ArrayList<Move> moveList, int side) {
+	ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
 
 		// Iterator has to be used to avoid concurrent modification exception
 		// i.e. so that we can remove from the arraylist as we loop through it
 		Iterator<Move> iter = moveList.iterator();
 		while (iter.hasNext()) {
 			Move move = iter.next();
-			board.move(move);
-			boolean check = board.check(side);
-			board.undo(move);
-			if (check) {
-				iter.remove();
+			int pieceSide = move.getPieceType() % 2;
+			if (pieceSide == side) {
+				board.move(move);
+				boolean check = board.check(side);
+				board.undo(move);
+				if (check) {
+					iter.remove();
+				}
 			}
 		}
 		return moveList;
@@ -140,7 +146,10 @@ public class MoveGen {
 			byte castling, int offset) {
 		while (moves != 0) {
 			int to = bitScanForward(moves);
-			int from = Math.abs(to - offset) % 64;
+			int from = (to - offset) % 64;
+			if (from < 0) {
+				from = 64 + from;
+			}
 			Move move = new Move(pieceType, from, to);
 			move.setCastling(castling);
 			move.setPromotion(promotion);
@@ -150,7 +159,7 @@ public class MoveGen {
 		}
 	}
 
-	void addRookMoves(ArrayList<Move> moveList, int index, int side) {
+	void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK;
 		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskRook[index];
@@ -165,7 +174,7 @@ public class MoveGen {
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
-	void addBishopMoves(ArrayList<Move> moveList, int index, int side) {
+	void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? Constants.WHITE_BISHOP : Constants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
 				& Constants.occupancyMaskBishop[index];
@@ -178,7 +187,7 @@ public class MoveGen {
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
 
-	void addQueenMoves(ArrayList<Move> moveList, int index, int side) {
+	void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? Constants.WHITE_QUEEN : Constants.BLACK_QUEEN;
 		// Or of the rook moves and bishop moves are the queen moves
 		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
@@ -204,13 +213,13 @@ public class MoveGen {
 		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
 	}
 
-	void addKnightMoves(ArrayList<Move> moveList, int index, int side) {
+	void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? Constants.WHITE_KNIGHT : Constants.BLACK_KNIGHT;
 		long knightMoves = Constants.KNIGHT_TABLE[index] & ~board.bitboards[side];
 		addMoves(pieceType, index, knightMoves, moveList, false, false, Constants.noCastle);
 	}
 
-	void addKingMoves(ArrayList<Move> moveList, int index, int side) {
+	void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		long moves = Constants.KING_TABLE[index] & ~board.bitboards[side];
 		/*
 		 * System.out.println("KING MOVES");
@@ -236,7 +245,7 @@ public class MoveGen {
 		}
 	}
 
-	void addPawnPushes(ArrayList<Move> moveList, int side) {
+	void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
 		int pieceType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
 		int[] offsets = { 8, 56 };
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
@@ -253,7 +262,7 @@ public class MoveGen {
 		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, Constants.noCastle, offset + offset);
 	}
 
-	void addPawnAttacks(ArrayList<Move> moveList, int index, int side) {
+	void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int enemy = (side == 0) ? 1 : 0;
 		int pawnType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
 		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };

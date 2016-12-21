@@ -71,13 +71,13 @@ public class MainController {
 	private void playGame() {
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
-		moveGen = new MoveGen(board);
+		moveGen = new MoveGen();
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
-		moveList = getMoves(board, false, 0);
+		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
 	}
@@ -91,6 +91,7 @@ public class MainController {
 		// Get the position clicked in terms of the board
 		int column = (int) Math.floor(evt.getX() / cellSize);
 		int row = 7 - (int) Math.floor(evt.getY() / cellSize);
+		System.out.println("CLICK AT (" + row + "," + column + ")");
 		boolean pieceMoved = false;
 		// Get the piece that was clicked
 		int index = (8 * row) + column;
@@ -174,21 +175,20 @@ public class MainController {
 	public void move(BitBoard board, Move move, boolean repaint) {
 		System.out.println("BOARD ARRAY BEFORE");
 		board.printBoardArray(board.board);
-		int colorMoved = move.getPieceType() % 2;
-		int enemy = (colorMoved == 0) ? 1 : 0;
 		board.move(move);
 		if (repaint) {
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
-			moveList = getMoves(board, true, colorMoved);
+			moveList = getMoves(board, true);
+			System.out.println("SIZE: " + moveList.size());
 		}
 		System.out.println("BOARD ARRAY AFTER");
 		board.printBoardArray(board.board);
 	}
 
-	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck, int side) {
-		return moveGen.generateMoves(side, removeCheck);
+	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck) {
+		return moveGen.generateMoves(board, removeCheck);
 	}
 
 	private void displayPawnPromotionDialog(int pawnOldPos, int side, BitBoard board) {

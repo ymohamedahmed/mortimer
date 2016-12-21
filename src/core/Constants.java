@@ -41,10 +41,10 @@ public class Constants {
 	public static final long FILE_H = 0x0101010101010101L << 7;
 
 	// Castling moves
-	public static final long wqueenside = 0x2000_0000_0000_0000L;
-	public static final long wkingside = 0x0200_0000_0000_0000L;
-	public static final long bqueenside = 0x0000_0000_0000_0020L;
-	public static final long bkingside = 0x0000_0000_0000_0002L;
+	public static final long bqueenside = 0x2000_0000_0000_0000L;
+	public static final long bkingside = 0x0200_0000_0000_0000L;
+	public static final long wqueenside = 0x0000_0000_0000_0020L;
+	public static final long wkingside = 0x0000_0000_0000_0002L;
 
 	// Castling flags
 	public static byte noCastle = 0;
