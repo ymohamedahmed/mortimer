@@ -69,10 +69,6 @@ public class BitBoard {
 		storeHistory();
 		moveNumber++;
 		toMove = (toMove == 0) ? 1 : 0;
-		
-		/*
-		 * history.flags = new Flags(); copyFlags(flags, history.flags);
-		 */
 
 		int finalIndex = move.getFinalPos();
 		int oldIndex = move.getOldPos();
@@ -142,21 +138,6 @@ public class BitBoard {
 		
 	}
 
-	public void copyFlags(Flags from, Flags to) {
-		to = new Flags();
-		to.wqueenside = from.wqueenside;
-		to.wkingside = from.wkingside;
-		to.bqueenside = from.bqueenside;
-		to.bkingside = from.bkingside;
-		to.wkingmoved = from.wkingmoved;
-		to.bkingmoved = from.bkingmoved;
-		to.wrookqueensidemoved = from.wrookqueensidemoved;
-		to.wrookkingsidemoved = from.wrookkingsidemoved;
-		to.brookqueensidemoved = from.brookqueensidemoved;
-		to.brookkingsidemoved = from.brookkingsidemoved;
-		to.enPassantSquares = from.enPassantSquares.clone();
-		to.castlingAttackedSquare = from.castlingAttackedSquare.clone();
-	}
 
 	public void storeHistory() {
 		whiteHistory[moveNumber] = bitboards[0];
