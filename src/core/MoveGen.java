@@ -40,11 +40,12 @@ public class MoveGen {
 			queenBoard &= queenBoard - 1;
 		}
 		long kingBoard = board.bitboards[side + 12];
-		/*System.out.println("KING BOARD: ");
-		board.printBoard(kingBoard);*/
+		/*
+		 * System.out.println("KING BOARD: "); board.printBoard(kingBoard);
+		 */
 		while (kingBoard != 0) {
 			addKingMoves(moves, bitScanForward(kingBoard), side);
-			//System.out.println("KING INDEX: " + bitScanForward(kingBoard));
+			// System.out.println("KING INDEX: " + bitScanForward(kingBoard));
 			kingBoard &= kingBoard - 1;
 		}
 
@@ -108,7 +109,7 @@ public class MoveGen {
 		while (iter.hasNext()) {
 			Move move = iter.next();
 			board.move(move);
-			boolean check = board.check(side, generateMoves((side == 0) ? 1 : 0, false));
+			boolean check = board.check(side);
 			board.undo(move);
 			if (check) {
 				iter.remove();
@@ -151,8 +152,9 @@ public class MoveGen {
 				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
 		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
 
-		/*System.out.println("ROOK MOVES");
-		board.printBoard(moveSquares);*/
+		/*
+		 * System.out.println("ROOK MOVES"); board.printBoard(moveSquares);
+		 */
 
 		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
 	}
@@ -187,10 +189,11 @@ public class MoveGen {
 
 		long queenMoves = moveSquaresRook | moveSquaresBishop;
 
-		/*System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
-		board.printBoard(moveSquaresBishop);
-		board.printBoard(moveSquaresRook);
-		board.printBoard(queenMoves);*/
+		/*
+		 * System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
+		 * board.printBoard(moveSquaresBishop);
+		 * board.printBoard(moveSquaresRook); board.printBoard(queenMoves);
+		 */
 
 		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
 	}
@@ -203,8 +206,10 @@ public class MoveGen {
 
 	void addKingMoves(ArrayList<Move> moveList, int index, int side) {
 		long moves = Constants.KING_TABLE[index] & ~board.bitboards[side];
-		/*System.out.println("KING MOVES");
-		board.printBoard(Constants.KING_TABLE[index]);*/
+		/*
+		 * System.out.println("KING MOVES");
+		 * board.printBoard(Constants.KING_TABLE[index]);
+		 */
 		int pieceType = (side == 0) ? Constants.WHITE_KING : Constants.BLACK_KING;
 		addMoves(pieceType, index, moves, moveList, false, false, Constants.noCastle);
 		// Check for castling moves

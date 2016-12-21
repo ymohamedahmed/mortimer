@@ -32,15 +32,6 @@ public class MainController {
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
 	private MoveGen moveGen;
 
-	// DEBUGGING
-	private int noOfMovesAnalyzed = 0;
-	private double cloneTime = 0;
-	private double updateTime = 0;
-	private int iClone = 0;
-	private int iUpdate = 0;
-	private double[] updateTimeArr = new double[6];
-	private int[] iUpdateArr = new int[6];
-
 	public void initialize() {
 		playGame();
 	}

@@ -187,15 +187,39 @@ public class BitBoard {
 		}
 	}
 
-	boolean check(int side, ArrayList<Move> enemyMoves) {
+	// https://chessprogramming.wikispaces.com/Checks+and+Pinned+Pieces+(Bitboards)
+	boolean check(int side) {
 		int kingIndex = (side == Constants.WHITE) ? bitScanForward(bitboards[Constants.WHITE_KING])
 				: bitScanForward(bitboards[Constants.BLACK_KING]);
-		for (Move move : enemyMoves) {
-			if (move.getFinalPos() == kingIndex && move.getPieceType() % 2 != side) {
-				return true;
-			}
-		}
-		return false;
+		long enemyPawns = bitboards[side + 2];
+		long enemyKnights = bitboards[side + 4];
+		long enemyRookQueen = bitboards[side + 10];
+		long enemyBishopQueen = enemyRookQueen;
+		long occupiedBoard = bitboards[Constants.WHITE] | bitboards[Constants.BLACK];
+		enemyRookQueen |= bitboards[side + 6];
+		enemyBishopQueen |= bitboards[side + 8];
+		long result = (Constants.PAWN_ATTACKS_TABLE[side][kingIndex] & enemyPawns)
+				| (Constants.KNIGHT_TABLE[kingIndex] & enemyKnights)
+				| (bishopAttacks(occupiedBoard, kingIndex, side) & enemyBishopQueen)
+				| (rookAttacks(occupiedBoard, kingIndex, side) & enemyRookQueen);
+		return (bitScanForward(result) != -1);
+	}
+
+	// Bishop and Rook attacks for purpose of determing status of check
+	long bishopAttacks(long occupiedBoard, int index, int side) {
+		long bishopBlockers = (occupiedBoard) & Constants.occupancyMaskBishop[index];
+		int lookupIndex = (int) ((bishopBlockers
+				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
+		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~bitboards[side];
+		return moveSquares;
+	}
+
+	long rookAttacks(long occupiedBoard, int index, int side) {
+		long rookBlockers = (occupiedBoard) & Constants.occupancyMaskRook[index];
+		int lookupIndex = (int) ((rookBlockers
+				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
+		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~bitboards[side];
+		return moveSquares;
 	}
 
 	public void removePiece(int square) {
