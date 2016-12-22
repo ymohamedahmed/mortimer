@@ -9,8 +9,12 @@ public class BitBoard {
 	public long[] bitboards = new long[14];
 	public byte[] board = new byte[64];
 	public long[] epTargetSquares = new long[2];
-	public Flags flags = new Flags();
-	private History history = new History();
+	// Castling flag
+	// WHITE
+	// wQSideLegal | wKSideLegal | wKingMoved | wRQSideMoved | wRKsideMoved
+	// BLACK
+	// bQSideLegal | bKSideLegal | bKingMoved | bRQSideMoved | bRKSideMoved
+	long[] castling = new long[] { 0L, 0L };
 	public int toMove = Constants.WHITE;
 	int moveNumber = 0;
 	// History arrays
@@ -23,7 +27,10 @@ public class BitBoard {
 	long[][] bishopHistory;
 	long[][] knightHistory;
 	long[][] kingHistory;
+	boolean[][] rQSideMoved;
+	boolean[][] rKSideMoved;
 	byte[][] boardHistory;
+	long[][] castlingHistory;
 	// Stores en passant target squares for each side
 	long[][] epHistory;
 
@@ -39,6 +46,8 @@ public class BitBoard {
 		kingHistory = new long[2][Constants.MAX_MOVES];
 		epHistory = new long[2][Constants.MAX_MOVES];
 		boardHistory = new byte[Constants.MAX_MOVES][64];
+		epHistory = new long[2][Constants.MAX_MOVES];
+		castlingHistory = new long[2][Constants.MAX_MOVES];
 	}
 
 	boolean isEmpty() {
@@ -81,19 +90,26 @@ public class BitBoard {
 
 		// update rook castling flag
 		if (piece == Constants.WHITE_ROOK) {
-			flags.wrookqueensidemoved = (flags.wrookqueensidemoved) ? true : (oldIndex == 0);
-			flags.wrookkingsidemoved = (flags.wrookkingsidemoved) ? true : (oldIndex == 7);
+			if (oldIndex == 0) {
+				castling[side] |= 0b010;
+			}
+			if (oldIndex == 7) {
+				castling[side] |= 0b001;
+			}
 		} else if (piece == Constants.BLACK_ROOK) {
-			flags.wrookqueensidemoved = (flags.brookqueensidemoved) ? true : (oldIndex == 56);
-			flags.wrookkingsidemoved = (flags.brookkingsidemoved) ? true : (oldIndex == 63);
+			if (oldIndex == 56) {
+				castling[side] |= 0b010;
+			}
+			if (oldIndex == 63) {
+				castling[side] |= 0b001;
+			}
 		} else if (piece == Constants.WHITE_KING) {
-			flags.wkingmoved = (flags.wkingmoved) ? true : (oldIndex == 4);
+			castling[side] |= 0b100;
 		} else if (piece == Constants.BLACK_KING) {
-			flags.bkingmoved = (flags.bkingmoved) ? true : (oldIndex == 60);
+			castling[side] |= 0b100;
 		}
 
 		if (capture) {
-			history.capturedPiece = board[finalIndex];
 			removePiece(finalIndex);
 		}
 		if (move.isEnPassant()) {
@@ -119,22 +135,23 @@ public class BitBoard {
 		// TODO move rook during castling
 		byte castle = move.getCastlingFlag();
 		if (castle != 0) {
+			System.out.println("CASTLING FLAG: " + Long.toBinaryString(castling[side]));
 			int rookOldIndex = 0;
 			int rookFinalIndex = 0;
 			switch (castle) {
-			case 1:
+			case Constants.wQSide:
 				rookOldIndex = 0;
 				rookFinalIndex = 3;
 				break;
-			case 2:
+			case Constants.wKSide:
 				rookOldIndex = 7;
 				rookFinalIndex = 5;
 				break;
-			case 3:
+			case Constants.bQSide:
 				rookOldIndex = 56;
 				rookFinalIndex = 59;
 				break;
-			case 4:
+			case Constants.bKSide:
 				rookOldIndex = 63;
 				rookFinalIndex = 61;
 				break;
@@ -142,7 +159,6 @@ public class BitBoard {
 			removePiece(rookOldIndex);
 			addPiece((castle <= 2) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, rookFinalIndex);
 		}
-	
 
 	}
 
@@ -164,6 +180,8 @@ public class BitBoard {
 		boardHistory[moveNumber] = board.clone();
 		epHistory[0][moveNumber] = epTargetSquares[0];
 		epHistory[1][moveNumber] = epTargetSquares[1];
+		castlingHistory[0][moveNumber] = castling[0];
+		castlingHistory[1][moveNumber] = castling[1];
 	}
 
 	public void undo() {
@@ -185,6 +203,8 @@ public class BitBoard {
 		board = boardHistory[moveNumber].clone();
 		epTargetSquares[0] = epHistory[0][moveNumber];
 		epTargetSquares[1] = epHistory[1][moveNumber];
+		castling[0] = castlingHistory[0][moveNumber];
+		castling[1] = castlingHistory[1][moveNumber];
 		toMove = (toMove == 0) ? 1 : 0;
 
 	}
@@ -197,33 +217,34 @@ public class BitBoard {
 			boolean c3 = board[2] == Constants.EMPTY;
 			boolean c4 = board[3] == Constants.EMPTY;
 			boolean c5 = board[4] == Constants.WHITE_KING;
-			boolean c6 = !flags.wrookqueensidemoved;
-			boolean c7 = !flags.wkingmoved;
-			boolean c8 = (flags.castlingAttackedSquare[Constants.wQSide] & 1) == 0;
-			// System.out.println(c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5
-			// + " " + c6 + " " + c7 + " " + c8);
+			boolean c6 = !((castling[side] & 0b00100) == 4);
+			boolean c7 = !((castling[side] & 0b00010) == 2);
+			// Checking if squares are attacked
+			boolean c8 = !isSquareAttacked(1, side) && !isSquareAttacked(2, side) && !isSquareAttacked(3, side)
+					&& !isSquareAttacked(4, side);
+			System.out.println(c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " " + c6 + " " + c7 + " " + c8);
 			// Now test whether king would be in check (more expensive
 			// calculation)
 			if (c1 && c2 && c3 && c4 && c5 && c6 && c7 && c8) {
-				flags.wqueenside = true;
+				castling[side] |= 0b10000;
 			} else {
-				flags.wqueenside = false;
+				castling[side] &= 0b01111;
 			}
 			// Consider kingside
 			boolean c9 = board[7] == Constants.WHITE_ROOK;
 			boolean c10 = board[6] == Constants.EMPTY;
 			boolean c11 = board[5] == Constants.EMPTY;
 			boolean c12 = board[4] == Constants.WHITE_KING;
-			boolean c13 = !flags.wrookkingsidemoved;
-			boolean c14 = !flags.wkingmoved;
-			boolean c15 = (flags.castlingAttackedSquare[Constants.wKSide] & 1) == 0;
+			boolean c13 = !((castling[side] & 0b00100) == 4);
+			boolean c14 = !((castling[side] & 0b00001) == 1);
+			boolean c15 = !isSquareAttacked(4, side) && !isSquareAttacked(5, side) && !isSquareAttacked(6, side);
 
 			// Now test whether king would be in check (more expensive
 			// calculation)
 			if (c9 && c10 && c11 && c12 && c13 && c14 && c15) {
-				flags.wkingside = true;
+				castling[side] |= 0b01000;
 			} else {
-				flags.wkingside = false;
+				castling[side] &= 0b10111;
 			}
 		} else {
 			// Consider queenside(conditions required for castling denoted by c)
@@ -232,32 +253,33 @@ public class BitBoard {
 			boolean c3 = board[58] == Constants.EMPTY;
 			boolean c4 = board[59] == Constants.EMPTY;
 			boolean c5 = board[60] == Constants.BLACK_KING;
-			boolean c6 = !flags.brookqueensidemoved;
-			boolean c7 = !flags.bkingmoved;
-			boolean c8 = (flags.castlingAttackedSquare[Constants.bQSide] & 1) == 0;
+			boolean c6 = !((castling[side] & 0b00100) == 4);
+			boolean c7 = !((castling[side] & 0b00010) == 2);
+			boolean c8 = !isSquareAttacked(57, side) && !isSquareAttacked(58, side) && !isSquareAttacked(59, side)
+					&& !isSquareAttacked(60, side);
 
 			// Now test whether king would be in check (more expensive
 			// calculation)
 			if (c1 && c2 && c3 && c4 && c5 && c6 && c7 && c8) {
-				flags.bqueenside = true;
+				castling[side] |= 0b10000;
 			} else {
-				flags.bqueenside = false;
+				castling[side] &= 0b01111;
 			}
 			// Consider kingside
 			boolean c9 = board[63] == Constants.WHITE_ROOK;
 			boolean c10 = board[62] == Constants.EMPTY;
 			boolean c11 = board[61] == Constants.EMPTY;
 			boolean c12 = board[60] == Constants.WHITE_KING;
-			boolean c13 = !flags.brookkingsidemoved;
-			boolean c14 = !flags.bkingmoved;
-			boolean c15 = (flags.castlingAttackedSquare[Constants.bKSide] & 1) == 0;
+			boolean c13 = !((castling[side] & 0b00100) == 4);
+			boolean c14 = !((castling[side] & 0b00001) == 1);
+			boolean c15 = !isSquareAttacked(60, side) && !isSquareAttacked(61, side) && !isSquareAttacked(62, side);
 
 			// Now test whether king would be in check (more expensive
 			// calculation)
 			if (c9 && c10 && c11 && c12 && c13 && c14 && c15) {
-				flags.bkingside = true;
+				castling[side] |= 0b01000;
 			} else {
-				flags.bkingside = false;
+				castling[side] &= 0b10111;
 			}
 		}
 	}
@@ -277,6 +299,21 @@ public class BitBoard {
 				| (Constants.KNIGHT_TABLE[kingIndex] & enemyKnights)
 				| (bishopAttacks(occupiedBoard, kingIndex, side) & enemyBishopQueen)
 				| (rookAttacks(occupiedBoard, kingIndex, side) & enemyRookQueen);
+		return (bitScanForward(result) != -1);
+	}
+
+	public boolean isSquareAttacked(int index, int side) {
+		long enemyPawns = bitboards[3 - side];
+		long enemyKnights = bitboards[5 - side];
+		long enemyRookQueen = bitboards[11 - side];
+		long enemyBishopQueen = enemyRookQueen;
+		long occupiedBoard = bitboards[Constants.WHITE] | bitboards[Constants.BLACK];
+		enemyRookQueen |= bitboards[7 - side];
+		enemyBishopQueen |= bitboards[9 - side];
+		long result = (Constants.PAWN_ATTACKS_TABLE[side][index] & enemyPawns)
+				| (Constants.KNIGHT_TABLE[index] & enemyKnights)
+				| (bishopAttacks(occupiedBoard, index, side) & enemyBishopQueen)
+				| (rookAttacks(occupiedBoard, index, side) & enemyRookQueen);
 		return (bitScanForward(result) != -1);
 	}
 
@@ -314,10 +351,6 @@ public class BitBoard {
 		}
 
 		toMove = Constants.WHITE;
-		flags.wqueenside = false;
-		flags.wkingside = false;
-		flags.bqueenside = false;
-		flags.bkingside = false;
 	}
 
 	public void resetToInitialSetup() {
@@ -366,10 +399,8 @@ public class BitBoard {
 		bitboards[Constants.BLACK_QUEEN] = 0x0800_0000_0000_0000L;
 		bitboards[Constants.BLACK_KING] = 0x1000000000000000L;
 		toMove = Constants.WHITE;
-		flags.wqueenside = false;
-		flags.wkingside = false;
-		flags.bqueenside = false;
-		flags.bkingside = false;
+		castling[0] = 0L;
+		castling[1] = 0L;
 	}
 
 	byte getType(int square) {
@@ -403,23 +434,4 @@ public class BitBoard {
 		return pos == 64 ? -1 : pos;
 	}
 
-	class Flags {
-		boolean wqueenside;
-		boolean wkingside;
-		boolean bqueenside;
-		boolean bkingside;
-		// Whether or not pieces have moved
-		boolean wkingmoved;
-		boolean bkingmoved;
-		boolean wrookqueensidemoved;
-		boolean wrookkingsidemoved;
-		boolean brookqueensidemoved;
-		boolean brookkingsidemoved;
-		long[] castlingAttackedSquare = new long[5];
-	}
-
-	class History {
-		byte capturedPiece;
-		Flags flags;
-	}
 }

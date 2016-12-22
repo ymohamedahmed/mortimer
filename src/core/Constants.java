@@ -41,17 +41,17 @@ public class Constants {
 	public static final long FILE_H = 0x0101010101010101L << 7;
 
 	// Castling moves
-	public static final long bqueenside = 0x2000_0000_0000_0000L;
-	public static final long bkingside = 0x0200_0000_0000_0000L;
-	public static final long wqueenside = 0x0000_0000_0000_0020L;
-	public static final long wkingside = 0x0000_0000_0000_0002L;
+	public static final long bqueenside = 0x0400_0000_0000_0000L;
+	public static final long bkingside = 0x4000_0000_0000_0000L;
+	public static final long wqueenside = 0x0000_0000_0000_0004L;
+	public static final long wkingside = 0x0000_0000_0000_0040L;
 
 	// Castling flags
-	public static byte noCastle = 0;
-	public static byte wQSide = 1;
-	public static byte wKSide = 2;
-	public static byte bQSide = 3;
-	public static byte bKSide = 4;
+	public static final byte noCastle = 0;
+	public static final byte wQSide = 1;
+	public static final byte wKSide = 2;
+	public static final byte bQSide = 3;
+	public static final byte bKSide = 4;
 
 	// Lookup tables
 	public static long KNIGHT_TABLE[] = new long[64];

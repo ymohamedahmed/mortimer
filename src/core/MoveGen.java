@@ -49,52 +49,6 @@ public class MoveGen {
 			kingBoard &= kingBoard - 1;
 		}
 
-		for (Move move : moves) {
-			int finalIndex = move.getFinalPos();
-
-			if (side == 1) {
-				if (finalIndex == 1) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b1000;
-				}
-				if (finalIndex == 2) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0100;
-				}
-				if (finalIndex == 3) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0010;
-				}
-				if (finalIndex == 4) {
-					board.flags.castlingAttackedSquare[Constants.wQSide] |= 0b0001;
-					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b100;
-				}
-				if (finalIndex == 5) {
-					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b010;
-				}
-				if (finalIndex == 6) {
-					board.flags.castlingAttackedSquare[Constants.wKSide] |= 0b001;
-				}
-			} else {
-				if (finalIndex == 57) {
-					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b1000;
-				}
-				if (finalIndex == 58) {
-					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b0100;
-				}
-				if (finalIndex == 59) {
-					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b0010;
-				}
-				if (finalIndex == 60) {
-					board.flags.castlingAttackedSquare[Constants.bQSide] |= 0b0001;
-					board.flags.castlingAttackedSquare[Constants.bKSide] |= 0b100;
-				}
-				if (finalIndex == 61) {
-					board.flags.castlingAttackedSquare[Constants.bKSide] |= 0b010;
-				}
-				if (finalIndex == 62) {
-					board.flags.castlingAttackedSquare[Constants.bKSide] |= 0b001;
-				}
-			}
-		}
-
 		Iterator<Move> iter = moves.iterator();
 		while (iter.hasNext()) {
 			Move move = iter.next();
@@ -229,17 +183,17 @@ public class MoveGen {
 		addMoves(pieceType, index, moves, moveList, false, false, Constants.noCastle);
 		// Check for castling moves
 		if (side == Constants.WHITE) {
-			if (board.flags.wqueenside) {
+			if ((board.castling[side] & 0b10000) == 16) {
 				addMoves(pieceType, index, Constants.wqueenside, moveList, false, false, Constants.wQSide);
 			}
-			if (board.flags.wkingside) {
+			if ((board.castling[side] & 0b01000) == 8) {
 				addMoves(pieceType, index, Constants.wkingside, moveList, false, false, Constants.wKSide);
 			}
 		} else {
-			if (board.flags.bqueenside) {
+			if ((board.castling[side] & 0b10000) == 16) {
 				addMoves(pieceType, index, Constants.bqueenside, moveList, false, false, Constants.bQSide);
 			}
-			if (board.flags.bkingside) {
+			if ((board.castling[side] & 0b01000) == 8) {
 				addMoves(pieceType, index, Constants.bkingside, moveList, false, false, Constants.bKSide);
 			}
 		}
