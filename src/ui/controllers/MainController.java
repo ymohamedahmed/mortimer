@@ -98,7 +98,9 @@ public class MainController {
 
 		for (int square : blueSquares) {
 			if (square == index) {
-				move(board, new Move(piece, oldPos, index), true);
+
+				move(board,getMove(moveList, board.board[oldPos], oldPos, index), true);
+				
 				blueSquares.clear();
 				pieceMoved = true;
 				break;
@@ -130,6 +132,15 @@ public class MainController {
 			}
 
 		}
+	}
+
+	public Move getMove(ArrayList<Move> moves, int piece, int oldIndex, int finalIndex) {
+		for (Move move : moves) {
+			if (move.getPieceType() == piece && move.getOldPos() == oldIndex && move.getFinalPos() == finalIndex) {
+				return move;
+			}
+		}
+		return null;
 	}
 
 	private ArrayList<Move> getMovesPiece(int oldPos, ArrayList<Move> moveList) {

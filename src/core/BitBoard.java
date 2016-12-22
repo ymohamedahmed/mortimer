@@ -96,26 +96,9 @@ public class BitBoard {
 			history.capturedPiece = board[finalIndex];
 			removePiece(finalIndex);
 		}
-		// Consider en passant
-		if (move.getPieceType() == Constants.WHITE_PAWN) {
-			if (finalIndex - oldIndex == 9 || finalIndex - oldIndex == 7) {
-				if (!capture) {
-					removePiece(finalIndex - 8);
-					System.out.println("PIECE REMOVED");
-				}
-			}
-			/*System.out.println("EN PASSANT");
+		if (move.isEnPassant()) {
 			int offset = (side == 0) ? -8 : 8;
-			System.out.println("REMOVING PIECE AT : " + (finalIndex + offset));*/
-
-		}
-		if (move.getPieceType() == Constants.BLACK_PAWN) {
-			if (finalIndex - oldIndex == -9 || finalIndex - oldIndex == -7) {
-				if (!capture) {
-					removePiece(finalIndex + 8);
-					System.out.println("PIECE REMOVED");
-				}
-			}
+			removePiece(finalIndex + offset);
 		}
 		removePiece(oldIndex);
 		addPiece(piece, finalIndex);
@@ -159,6 +142,7 @@ public class BitBoard {
 			removePiece(rookOldIndex);
 			addPiece((castle <= 2) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, rookFinalIndex);
 		}
+	
 
 	}
 
