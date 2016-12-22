@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class BitBoard {
 	public long[] bitboards = new long[14];
 	public byte[] board = new byte[64];
+	public long[] epTargetSquares = new long[2];
 	public Flags flags = new Flags();
 	private History history = new History();
 	public int toMove = Constants.WHITE;
@@ -22,8 +23,9 @@ public class BitBoard {
 	long[][] bishopHistory;
 	long[][] knightHistory;
 	long[][] kingHistory;
-	long[] flagsHistory;
 	byte[][] boardHistory;
+	// Stores en passant target squares for each side
+	long[][] epHistory;
 
 	public BitBoard() {
 		moveHistory = new long[Constants.MAX_MOVES];
@@ -35,7 +37,7 @@ public class BitBoard {
 		bishopHistory = new long[2][Constants.MAX_MOVES];
 		knightHistory = new long[2][Constants.MAX_MOVES];
 		kingHistory = new long[2][Constants.MAX_MOVES];
-		flagsHistory = new long[Constants.MAX_MOVES];
+		epHistory = new long[2][Constants.MAX_MOVES];
 		boardHistory = new byte[Constants.MAX_MOVES][64];
 	}
 
@@ -94,19 +96,41 @@ public class BitBoard {
 			history.capturedPiece = board[finalIndex];
 			removePiece(finalIndex);
 		}
+		// Consider en passant
+		if (move.getPieceType() == Constants.WHITE_PAWN) {
+			if (finalIndex - oldIndex == 9 || finalIndex - oldIndex == 7) {
+				if (!capture) {
+					removePiece(finalIndex - 8);
+					System.out.println("PIECE REMOVED");
+				}
+			}
+			/*System.out.println("EN PASSANT");
+			int offset = (side == 0) ? -8 : 8;
+			System.out.println("REMOVING PIECE AT : " + (finalIndex + offset));*/
 
+		}
+		if (move.getPieceType() == Constants.BLACK_PAWN) {
+			if (finalIndex - oldIndex == -9 || finalIndex - oldIndex == -7) {
+				if (!capture) {
+					removePiece(finalIndex + 8);
+					System.out.println("PIECE REMOVED");
+				}
+			}
+		}
 		removePiece(oldIndex);
 		addPiece(piece, finalIndex);
 
 		updateCastlingFlags(enemy);
-		flags.enPassantSquares[side] = 0;
+		epTargetSquares[enemy] = 0;
 		if (piece == Constants.WHITE_PAWN) {
 			if (finalIndex - oldIndex == 16) {
-				flags.enPassantSquares[side] = (long) Math.pow(2, oldIndex + 8);
+				int square = finalIndex - 8;
+				epTargetSquares[1] = 1L << square;
 			}
 		} else if (piece == Constants.BLACK_PAWN) {
 			if (finalIndex - oldIndex == -16) {
-				flags.enPassantSquares[side] = (long) Math.pow(2, oldIndex - 8);
+				int square = finalIndex + 8;
+				epTargetSquares[0] = 1L << square;
 			}
 		}
 		// TODO move rook during castling
@@ -135,9 +159,8 @@ public class BitBoard {
 			removePiece(rookOldIndex);
 			addPiece((castle <= 2) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, rookFinalIndex);
 		}
-		
-	}
 
+	}
 
 	public void storeHistory() {
 		whiteHistory[moveNumber] = bitboards[0];
@@ -155,6 +178,8 @@ public class BitBoard {
 		kingHistory[0][moveNumber] = bitboards[12];
 		kingHistory[1][moveNumber] = bitboards[13];
 		boardHistory[moveNumber] = board.clone();
+		epHistory[0][moveNumber] = epTargetSquares[0];
+		epHistory[1][moveNumber] = epTargetSquares[1];
 	}
 
 	public void undo() {
@@ -174,6 +199,8 @@ public class BitBoard {
 		bitboards[12] = kingHistory[0][moveNumber];
 		bitboards[13] = kingHistory[1][moveNumber];
 		board = boardHistory[moveNumber].clone();
+		epTargetSquares[0] = epHistory[0][moveNumber];
+		epTargetSquares[1] = epHistory[1][moveNumber];
 		toMove = (toMove == 0) ? 1 : 0;
 
 	}
@@ -404,7 +431,6 @@ public class BitBoard {
 		boolean wrookkingsidemoved;
 		boolean brookqueensidemoved;
 		boolean brookkingsidemoved;
-		long[] enPassantSquares = new long[2];
 		long[] castlingAttackedSquare = new long[5];
 	}
 

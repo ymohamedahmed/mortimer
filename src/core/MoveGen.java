@@ -270,7 +270,7 @@ public class MoveGen {
 		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, false, Constants.noCastle);
 		long promotions = attacks & promotions_mask[side];
 		addMoves(pawnType, index, promotions, moveList, false, true, Constants.noCastle);
-		long enPassant = attacks & board.flags.enPassantSquares[enemy];
+		long enPassant = Constants.PAWN_ATTACKS_TABLE[side][index] & board.epTargetSquares[side];
 		addMoves(pawnType, index, enPassant, moveList, true, false, Constants.noCastle);
 	}
 

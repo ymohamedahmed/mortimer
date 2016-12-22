@@ -91,7 +91,6 @@ public class MainController {
 		// Get the position clicked in terms of the board
 		int column = (int) Math.floor(evt.getX() / cellSize);
 		int row = 7 - (int) Math.floor(evt.getY() / cellSize);
-		System.out.println("CLICK AT (" + row + "," + column + ")");
 		boolean pieceMoved = false;
 		// Get the piece that was clicked
 		int index = (8 * row) + column;
@@ -110,8 +109,6 @@ public class MainController {
 		if (piece != Constants.EMPTY && !pieceMoved) {
 			// Get its available moves
 			ArrayList<Move> moves = getMovesPiece(index, moveList);
-			System.out.println("MOVE BY PIECE");
-			moveGen.printMoveList(moves);
 			oldPos = index;
 			// Clear the canvas and then repaint it
 			clearCanvas();
@@ -133,7 +130,6 @@ public class MainController {
 			}
 
 		}
-		System.out.println("PIECE CLICKED: " + piece);
 	}
 
 	private ArrayList<Move> getMovesPiece(int oldPos, ArrayList<Move> moveList) {
@@ -173,18 +169,13 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
-		System.out.println("BOARD ARRAY BEFORE");
-		board.printBoardArray(board.board);
 		board.move(move);
 		if (repaint) {
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
 			moveList = getMoves(board, true);
-			System.out.println("SIZE: " + moveList.size());
 		}
-		System.out.println("BOARD ARRAY AFTER");
-		board.printBoardArray(board.board);
 	}
 
 	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck) {
