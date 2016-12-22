@@ -211,75 +211,101 @@ public class BitBoard {
 
 	void updateCastlingFlags(int side) {
 		if (side == 0) {
-			// Consider queenside(conditions required for castling denoted by c)
-			boolean c1 = board[0] == Constants.WHITE_ROOK;
-			boolean c2 = board[1] == Constants.EMPTY;
-			boolean c3 = board[2] == Constants.EMPTY;
-			boolean c4 = board[3] == Constants.EMPTY;
-			boolean c5 = board[4] == Constants.WHITE_KING;
-			boolean c6 = !((castling[side] & 0b00100) == 4);
-			boolean c7 = !((castling[side] & 0b00010) == 2);
+			// Consider queenside(conditions required for castling)
 			// Checking if squares are attacked
-			boolean c8 = !isSquareAttacked(1, side) && !isSquareAttacked(2, side) && !isSquareAttacked(3, side)
-					&& !isSquareAttacked(4, side);
-			System.out.println(c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " " + c6 + " " + c7 + " " + c8);
-			// Now test whether king would be in check (more expensive
+			// Then test whether king would be in check (more expensive
 			// calculation)
-			if (c1 && c2 && c3 && c4 && c5 && c6 && c7 && c8) {
-				castling[side] |= 0b10000;
-			} else {
-				castling[side] &= 0b01111;
+			castling[side] &= 0b01111;
+			if (board[0] == Constants.WHITE_ROOK) {
+				if (board[1] == Constants.EMPTY) {
+					if (board[2] == Constants.EMPTY) {
+						if (board[3] == Constants.EMPTY) {
+							if (board[4] == Constants.WHITE_KING) {
+								if (!((castling[side] & 0b00100) == 4)) {
+									if (!((castling[side] & 0b00010) == 2)) {
+										if (!isSquareAttacked(1, side)) {
+											if (!isSquareAttacked(2, side)) {
+												if (!isSquareAttacked(3, side)) {
+													if (!isSquareAttacked(4, side)) {
+														castling[side] |= 0b10000;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 			// Consider kingside
-			boolean c9 = board[7] == Constants.WHITE_ROOK;
-			boolean c10 = board[6] == Constants.EMPTY;
-			boolean c11 = board[5] == Constants.EMPTY;
-			boolean c12 = board[4] == Constants.WHITE_KING;
-			boolean c13 = !((castling[side] & 0b00100) == 4);
-			boolean c14 = !((castling[side] & 0b00001) == 1);
-			boolean c15 = !isSquareAttacked(4, side) && !isSquareAttacked(5, side) && !isSquareAttacked(6, side);
-
-			// Now test whether king would be in check (more expensive
-			// calculation)
-			if (c9 && c10 && c11 && c12 && c13 && c14 && c15) {
-				castling[side] |= 0b01000;
-			} else {
-				castling[side] &= 0b10111;
+			castling[side] &= 0b10111;
+			if (board[7] == Constants.WHITE_ROOK) {
+				if (board[6] == Constants.EMPTY) {
+					if (board[5] == Constants.EMPTY) {
+						if (board[4] == Constants.WHITE_KING) {
+							if (!((castling[side] & 0b00100) == 4)) {
+								if (!((castling[side] & 0b00001) == 1)) {
+									if (!isSquareAttacked(4, side)) {
+										if (!isSquareAttacked(5, side)) {
+											if (!isSquareAttacked(6, side)) {
+												castling[side] |= 0b01000;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		} else {
 			// Consider queenside(conditions required for castling denoted by c)
-			boolean c1 = board[56] == Constants.BLACK_ROOK;
-			boolean c2 = board[57] == Constants.EMPTY;
-			boolean c3 = board[58] == Constants.EMPTY;
-			boolean c4 = board[59] == Constants.EMPTY;
-			boolean c5 = board[60] == Constants.BLACK_KING;
-			boolean c6 = !((castling[side] & 0b00100) == 4);
-			boolean c7 = !((castling[side] & 0b00010) == 2);
-			boolean c8 = !isSquareAttacked(57, side) && !isSquareAttacked(58, side) && !isSquareAttacked(59, side)
-					&& !isSquareAttacked(60, side);
-
-			// Now test whether king would be in check (more expensive
-			// calculation)
-			if (c1 && c2 && c3 && c4 && c5 && c6 && c7 && c8) {
-				castling[side] |= 0b10000;
-			} else {
-				castling[side] &= 0b01111;
+			castling[side] &= 0b01111;
+			if (board[56] == Constants.BLACK_ROOK) {
+				if (board[57] == Constants.EMPTY) {
+					if (board[58] == Constants.EMPTY) {
+						if (board[59] == Constants.EMPTY) {
+							if (board[60] == Constants.BLACK_KING) {
+								if (!((castling[side] & 0b00100) == 4)) {
+									if (!((castling[side] & 0b00010) == 2)) {
+										if (!isSquareAttacked(57, side)) {
+											if (!isSquareAttacked(58, side)) {
+												if (!isSquareAttacked(59, side)) {
+													if (!isSquareAttacked(60, side)) {
+														castling[side] |= 0b10000;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 			// Consider kingside
-			boolean c9 = board[63] == Constants.WHITE_ROOK;
-			boolean c10 = board[62] == Constants.EMPTY;
-			boolean c11 = board[61] == Constants.EMPTY;
-			boolean c12 = board[60] == Constants.WHITE_KING;
-			boolean c13 = !((castling[side] & 0b00100) == 4);
-			boolean c14 = !((castling[side] & 0b00001) == 1);
-			boolean c15 = !isSquareAttacked(60, side) && !isSquareAttacked(61, side) && !isSquareAttacked(62, side);
-
-			// Now test whether king would be in check (more expensive
-			// calculation)
-			if (c9 && c10 && c11 && c12 && c13 && c14 && c15) {
-				castling[side] |= 0b01000;
-			} else {
-				castling[side] &= 0b10111;
+			castling[side] &= 0b10111;
+			if (board[63] == Constants.WHITE_ROOK) {
+				if (board[62] == Constants.EMPTY) {
+					if (board[61] == Constants.EMPTY) {
+						if (board[60] == Constants.WHITE_KING) {
+							if (!((castling[side] & 0b00100) == 4)) {
+								if (!((castling[side] & 0b00001) == 1)) {
+									if (!isSquareAttacked(60, side)) {
+										if (!isSquareAttacked(61, side)) {
+											if (!isSquareAttacked(62, side)) {
+												castling[side] |= 0b01000;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
