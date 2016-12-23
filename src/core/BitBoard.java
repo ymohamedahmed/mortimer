@@ -461,11 +461,23 @@ public class BitBoard {
 		return pos == 64 ? -1 : pos;
 	}
 
-	public static void initialiseZobrist(){
-		for(int x = 0; x <= 63; x++){
-			for(int y = 0; y <= 11; y++){
-				zobristTable[x][y] = new Random().nextInt((int) Math.pow(2, 64)-1);
+	public static void initialiseZobrist() {
+		for (int x = 0; x <= 63; x++) {
+			for (int y = 0; y <= 11; y++) {
+				zobristTable[x][y] = new Random().nextInt((int) Math.pow(2, 64) - 1);
 			}
 		}
+	}
+
+	// assuming zobrist has been initialised
+	public int hash() {
+		int hash = 0;
+		for (int index = 0; index < 64; index++) {
+			if (board[index] != Constants.EMPTY) {
+				int j = board[index] - 2;
+				hash = hash ^ zobristTable[index][j];
+			}
+		}
+		return hash;
 	}
 }

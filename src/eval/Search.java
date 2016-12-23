@@ -28,7 +28,12 @@ public class Search {
 	}
 	//Color Factor: 1 for white, -1 for black
 	private int negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
-		
+		double alphaOrig = alpha;
+		TranspositionEntry tEntry = new TranspositionEntry();
+		tEntry = hashtable.get(board.hash());
+		if(tEntry != null){
+			
+		}
 		return 0;
 	}
 
