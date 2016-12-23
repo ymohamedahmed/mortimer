@@ -1,6 +1,10 @@
 package core;
 
 public class Constants {
+	//Max move 'thinking' time (ms)
+	public static final double MAX_TIME = 4000.0; 
+	//Max search depth
+	public static final double MAX_DEPTH = 15;
 	// Image filenames
 	public static final String[] FILE_NAMES = { null, null, "wp", "bp", "wn", "bn", "wr", "br", "wb", "bb", "wq", "bq",
 			"wk", "bk" };
