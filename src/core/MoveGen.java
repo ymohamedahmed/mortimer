@@ -52,8 +52,8 @@ public class MoveGen {
 		Iterator<Move> iter = moves.iterator();
 		while (iter.hasNext()) {
 			Move move = iter.next();
-			if (board.board[move.getFinalPos()] == Constants.WHITE_KING
-					|| board.board[move.getFinalPos()] == Constants.BLACK_KING) {
+			if (board.board[move.getFinalPos()] == CoreConstants.WHITE_KING
+					|| board.board[move.getFinalPos()] == CoreConstants.BLACK_KING) {
 				iter.remove();
 			}
 		}
@@ -114,47 +114,47 @@ public class MoveGen {
 	}
 
 	void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
-		int pieceType = (side == 0) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK;
-		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
-				& Constants.occupancyMaskRook[index];
+		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK;
+		long rookBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
+				& CoreConstants.occupancyMaskRook[index];
 		int lookupIndex = (int) ((rookBlockers
-				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
-		long moveSquares = Constants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
+				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
+		long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
 
 		/*
 		 * System.out.println("ROOK MOVES"); board.printBoard(moveSquares);
 		 */
 
-		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
+		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
-		int pieceType = (side == 0) ? Constants.WHITE_BISHOP : Constants.BLACK_BISHOP;
-		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
-				& Constants.occupancyMaskBishop[index];
+		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP;
+		long bishopBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
+				& CoreConstants.occupancyMaskBishop[index];
 		int lookupIndex = (int) ((bishopBlockers
-				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
-		long moveSquares = Constants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
+				* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
+		long moveSquares = CoreConstants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
 		/*
 		 * System.out.println("BISHOP MOVES"); board.printBoard(moveSquares);
 		 */
-		addMoves(pieceType, index, moveSquares, moveList, false, false, Constants.noCastle);
+		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
-		int pieceType = (side == 0) ? Constants.WHITE_QUEEN : Constants.BLACK_QUEEN;
+		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN;
 		// Or of the rook moves and bishop moves are the queen moves
-		long rookBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
-				& Constants.occupancyMaskRook[index];
+		long rookBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
+				& CoreConstants.occupancyMaskRook[index];
 		int lookupIndexRook = (int) ((rookBlockers
-				* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
-		long moveSquaresRook = Constants.magicMovesRook[index][lookupIndexRook] & ~board.bitboards[side];
+				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
+		long moveSquaresRook = CoreConstants.magicMovesRook[index][lookupIndexRook] & ~board.bitboards[side];
 
-		long bishopBlockers = (board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK])
-				& Constants.occupancyMaskBishop[index];
+		long bishopBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
+				& CoreConstants.occupancyMaskBishop[index];
 		int lookupIndexBishop = (int) ((bishopBlockers
-				* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
-		long moveSquaresBishop = Constants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
+				* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
+		long moveSquaresBishop = CoreConstants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
 
 		long queenMoves = moveSquaresRook | moveSquaresBishop;
 
@@ -164,78 +164,78 @@ public class MoveGen {
 		 * board.printBoard(moveSquaresRook); board.printBoard(queenMoves);
 		 */
 
-		addMoves(pieceType, index, queenMoves, moveList, false, false, Constants.noCastle);
+		addMoves(pieceType, index, queenMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
-		int pieceType = (side == 0) ? Constants.WHITE_KNIGHT : Constants.BLACK_KNIGHT;
-		long knightMoves = Constants.KNIGHT_TABLE[index] & ~board.bitboards[side];
-		addMoves(pieceType, index, knightMoves, moveList, false, false, Constants.noCastle);
+		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT;
+		long knightMoves = CoreConstants.KNIGHT_TABLE[index] & ~board.bitboards[side];
+		addMoves(pieceType, index, knightMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
-		long moves = Constants.KING_TABLE[index] & ~board.bitboards[side];
+		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
 		/*
 		 * System.out.println("KING MOVES");
 		 * board.printBoard(Constants.KING_TABLE[index]);
 		 */
-		int pieceType = (side == 0) ? Constants.WHITE_KING : Constants.BLACK_KING;
-		addMoves(pieceType, index, moves, moveList, false, false, Constants.noCastle);
+		int pieceType = (side == 0) ? CoreConstants.WHITE_KING : CoreConstants.BLACK_KING;
+		addMoves(pieceType, index, moves, moveList, false, false, CoreConstants.noCastle);
 		// Check for castling moves
-		if (side == Constants.WHITE) {
+		if (side == CoreConstants.WHITE) {
 			if ((board.castling[side] & 0b10000) == 16) {
-				addMoves(pieceType, index, Constants.wqueenside, moveList, false, false, Constants.wQSide);
+				addMoves(pieceType, index, CoreConstants.wqueenside, moveList, false, false, CoreConstants.wQSide);
 			}
 			if ((board.castling[side] & 0b01000) == 8) {
-				addMoves(pieceType, index, Constants.wkingside, moveList, false, false, Constants.wKSide);
+				addMoves(pieceType, index, CoreConstants.wkingside, moveList, false, false, CoreConstants.wKSide);
 			}
 		} else {
 			if ((board.castling[side] & 0b10000) == 16) {
-				addMoves(pieceType, index, Constants.bqueenside, moveList, false, false, Constants.bQSide);
+				addMoves(pieceType, index, CoreConstants.bqueenside, moveList, false, false, CoreConstants.bQSide);
 			}
 			if ((board.castling[side] & 0b01000) == 8) {
-				addMoves(pieceType, index, Constants.bkingside, moveList, false, false, Constants.bKSide);
+				addMoves(pieceType, index, CoreConstants.bkingside, moveList, false, false, CoreConstants.bKSide);
 			}
 		}
 	}
 
 	void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
-		int pieceType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
+		int pieceType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		int[] offsets = { 8, 56 };
-		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
-		long[] startWithMask = { Constants.ROW_3, Constants.ROW_6 };
+		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
+		long[] startWithMask = { CoreConstants.ROW_3, CoreConstants.ROW_6 };
 		int offset = offsets[side];
-		long pawns = board.bitboards[side | Constants.PAWN];
-		long emptySquares = ~(board.bitboards[Constants.WHITE] | board.bitboards[Constants.BLACK]);
+		long pawns = board.bitboards[side | CoreConstants.PAWN];
+		long emptySquares = ~(board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK]);
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
-		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false, Constants.noCastle,
+		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false, CoreConstants.noCastle,
 				offset);
 		long promotions = pushes & promotions_mask[side];
-		addMovesWithOffset(pieceType, promotions, moveList, false, true, Constants.noCastle, offset);
+		addMovesWithOffset(pieceType, promotions, moveList, false, true, CoreConstants.noCastle, offset);
 		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
-		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, Constants.noCastle, offset + offset);
+		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, CoreConstants.noCastle, offset + offset);
 	}
 
 	void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int enemy = (side == 0) ? 1 : 0;
-		int pawnType = (side == 0) ? Constants.WHITE_PAWN : Constants.BLACK_PAWN;
-		long[] promotions_mask = { Constants.ROW_8, Constants.ROW_1 };
-		long attacks = Constants.PAWN_ATTACKS_TABLE[side][index] & board.bitboards[enemy];
-		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, false, Constants.noCastle);
+		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
+		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
+		long attacks = CoreConstants.PAWN_ATTACKS_TABLE[side][index] & board.bitboards[enemy];
+		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, false, CoreConstants.noCastle);
 		long promotions = attacks & promotions_mask[side];
-		addMoves(pawnType, index, promotions, moveList, false, true, Constants.noCastle);
-		long enPassant = Constants.PAWN_ATTACKS_TABLE[side][index] & board.epTargetSquares[side];
-		addMoves(pawnType, index, enPassant, moveList, true, false, Constants.noCastle);
+		addMoves(pawnType, index, promotions, moveList, false, true, CoreConstants.noCastle);
+		long enPassant = CoreConstants.PAWN_ATTACKS_TABLE[side][index] & board.epTargetSquares[side];
+		addMoves(pawnType, index, enPassant, moveList, true, false, CoreConstants.noCastle);
 	}
 
 	long getPawnEastAttacks(long board, int side) {
 		long result;
 		// WHITE
 		if (side == 0) {
-			result = ((board << 9) & ~Constants.FILE_A);
+			result = ((board << 9) & ~CoreConstants.FILE_A);
 
 		} else {
-			result = ((board >>> 7) & ~Constants.FILE_A);
+			result = ((board >>> 7) & ~CoreConstants.FILE_A);
 		}
 		return result;
 	}
@@ -244,9 +244,9 @@ public class MoveGen {
 		long result;
 		// WHITE
 		if (side == 0) {
-			result = ((board << 7) & ~Constants.FILE_H);
+			result = ((board << 7) & ~CoreConstants.FILE_H);
 		} else {
-			result = ((board >>> 9) & ~Constants.FILE_H);
+			result = ((board >>> 9) & ~CoreConstants.FILE_H);
 		}
 		return result;
 	}
@@ -271,16 +271,16 @@ public class MoveGen {
 
 		for (index = 0; index < 64; index++) {
 
-			mask = rook ? Constants.occupancyMaskRook[index] : Constants.occupancyMaskBishop[index];
+			mask = rook ? CoreConstants.occupancyMaskRook[index] : CoreConstants.occupancyMaskBishop[index];
 			getIndexSetBits(setBitsMask, mask);
 			bitCount = Long.bitCount(mask);
 			varCount = (int) (1L << bitCount);
 
 			for (i = 0; i < varCount; i++) {
-				Constants.occupancyVariation[index][i] = 0;
+				CoreConstants.occupancyVariation[index][i] = 0;
 				getIndexSetBits(setBitsIndex, i);
 				for (j = 0; setBitsIndex[j] != -1; j++) {
-					Constants.occupancyVariation[index][i] |= (1L << setBitsMask[setBitsIndex[j]]);
+					CoreConstants.occupancyVariation[index][i] |= (1L << setBitsMask[setBitsIndex[j]]);
 				}
 			}
 
@@ -288,61 +288,61 @@ public class MoveGen {
 			for (i = 0; i < variations; i++) {
 				validMoves = 0;
 				if (rook) {
-					magicIndex = (int) ((Constants.occupancyVariation[index][i]
-							* Constants.magicNumbersRook[index]) >>> Constants.magicShiftRook[index]);
+					magicIndex = (int) ((CoreConstants.occupancyVariation[index][i]
+							* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
 					for (j = index + 8; j < 64; j += 8) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 8; j >= 0; j -= 8) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 1; j % 8 != 0; j++) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 1; j % 8 != 7 && j >= 0; j--) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
-					Constants.magicMovesRook[index][magicIndex] = validMoves;
+					CoreConstants.magicMovesRook[index][magicIndex] = validMoves;
 				} else {
-					magicIndex = (int) ((Constants.occupancyVariation[index][i]
-							* Constants.magicNumbersBishop[index]) >>> Constants.magicShiftBishop[index]);
+					magicIndex = (int) ((CoreConstants.occupancyVariation[index][i]
+							* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
 					for (j = index + 9; j % 8 != 0 && j < 64; j += 9) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 9; j % 8 != 7 && j >= 0; j -= 9) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 7; j % 8 != 7 && j < 64; j += 7) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 7; j % 8 != 0 && j >= 0; j -= 7) {
 						validMoves |= (1L << j);
-						if ((Constants.occupancyVariation[index][i] & (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
-					Constants.magicMovesBishop[index][magicIndex] = validMoves;
+					CoreConstants.magicMovesBishop[index][magicIndex] = validMoves;
 
 				}
 			}
@@ -369,16 +369,16 @@ public class MoveGen {
 			if (square == 63) {
 				target = 0x8000_0000_0000_0000L;
 			}
-			long NNE = (target << 17) & ~Constants.FILE_A;
-			long NEE = (target << 10) & ~Constants.FILE_A & ~Constants.FILE_B;
-			long SEE = (target >>> 6) & ~Constants.FILE_A & ~Constants.FILE_B;
-			long SSE = (target >>> 15) & ~Constants.FILE_A;
-			long NNW = (target << 15) & ~Constants.FILE_H;
-			long NWW = (target << 6) & ~Constants.FILE_G & ~Constants.FILE_H;
-			long SWW = (target >>> 10) & ~Constants.FILE_G & ~Constants.FILE_H;
-			long SSW = (target >>> 17) & ~Constants.FILE_H;
+			long NNE = (target << 17) & ~CoreConstants.FILE_A;
+			long NEE = (target << 10) & ~CoreConstants.FILE_A & ~CoreConstants.FILE_B;
+			long SEE = (target >>> 6) & ~CoreConstants.FILE_A & ~CoreConstants.FILE_B;
+			long SSE = (target >>> 15) & ~CoreConstants.FILE_A;
+			long NNW = (target << 15) & ~CoreConstants.FILE_H;
+			long NWW = (target << 6) & ~CoreConstants.FILE_G & ~CoreConstants.FILE_H;
+			long SWW = (target >>> 10) & ~CoreConstants.FILE_G & ~CoreConstants.FILE_H;
+			long SSW = (target >>> 17) & ~CoreConstants.FILE_H;
 
-			Constants.KNIGHT_TABLE[square] = NNE | NEE | SEE | SSE | NNW | NWW | SWW | SSW;
+			CoreConstants.KNIGHT_TABLE[square] = NNE | NEE | SEE | SSE | NNW | NWW | SWW | SSW;
 		}
 	}
 
@@ -388,15 +388,15 @@ public class MoveGen {
 			if (square == 63) {
 				target = 0x8000_0000_0000_0000L;
 			}
-			long N = (target << 8) & ~Constants.ROW_1;
-			long S = (target >>> 8) & ~Constants.ROW_8;
-			long E = (target << 1) & ~Constants.FILE_A;
-			long W = (target >>> 1) & ~Constants.FILE_H;
-			long NE = (target << 9) & ~Constants.FILE_A;
-			long NW = (target << 7) & ~Constants.FILE_H;
-			long SE = (target >>> 7) & ~Constants.FILE_A;
-			long SW = (target >>> 9) & ~Constants.FILE_H;
-			Constants.KING_TABLE[square] = N | S | E | W | NE | NW | SE | SW;
+			long N = (target << 8) & ~CoreConstants.ROW_1;
+			long S = (target >>> 8) & ~CoreConstants.ROW_8;
+			long E = (target << 1) & ~CoreConstants.FILE_A;
+			long W = (target >>> 1) & ~CoreConstants.FILE_H;
+			long NE = (target << 9) & ~CoreConstants.FILE_A;
+			long NW = (target << 7) & ~CoreConstants.FILE_H;
+			long SE = (target >>> 7) & ~CoreConstants.FILE_A;
+			long SW = (target >>> 9) & ~CoreConstants.FILE_H;
+			CoreConstants.KING_TABLE[square] = N | S | E | W | NE | NW | SE | SW;
 		}
 	}
 
@@ -408,7 +408,7 @@ public class MoveGen {
 				if (index == 63) {
 					board = 0x8000_0000_0000_0000L;
 				}
-				Constants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(board, side)
+				CoreConstants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(board, side)
 						| getPawnWestAttacks(board, side);
 			}
 		}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import core.BitBoard;
-import core.Constants;
+import core.CoreConstants;
 import core.Move;
 import core.MoveGen;
 
@@ -21,9 +21,9 @@ public class Search {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
 			double firstGuess = 0;
-			for (int d = 1; d <= Constants.MAX_DEPTH; d++) {
+			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d++) {
 				firstGuess = mtdf(board, firstGuess, d, color);
-				if (System.currentTimeMillis() - startTime >= Constants.MAX_TIME) {
+				if (System.currentTimeMillis() - startTime >= EvalConstants.MAX_TIME) {
 					break;
 				}
 			}
@@ -73,7 +73,7 @@ public class Search {
 			return colorFactor * (eval.evaluate(board, colorFactor));
 		}
 		double bestValue = Double.NEGATIVE_INFINITY;
-		ArrayList<Move> moves = sortMoves(board, moveGen.generateMoves(board, false));
+		ArrayList<Move> moves = sortMoves(board, moveGen.generateMoves(board, false), colorFactor);
 		for (Move move : moves) {
 			board.move(move);
 			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
@@ -125,17 +125,26 @@ public class Search {
 		return moves;
 	}
 
-	private ArrayList<Move> sortMoves(BitBoard board, ArrayList<Move> possibleMoves) {
+	private ArrayList<Move> sortMoves(BitBoard board, ArrayList<Move> possibleMoves, int colorFactor) {
 		// Calculating score for each move
 		ArrayList<Move> sortedMoves = new ArrayList<>();
 		ArrayList<MoveScore> movesScore = new ArrayList<>();
 		for (Move move : possibleMoves) {
 			board.move(move);
-			MoveScore moveScore = new MoveScore(move, eval.evaluate(board, (move.getPieceType() % 2 == 0) ? 1 : -1));
+			MoveScore moveScore = new MoveScore(move, eval.evaluate(board, colorFactor));
 			movesScore.add(moveScore);
 		}
 		ArrayList<MoveScore> sorted = quickSort(movesScore);
-		sorted.forEach(e -> sortedMoves.add(e.getMove()));
+		// Descending order for white (maximiser)
+		// Ascending order for black (minimiser)
+		if (colorFactor == 1) {
+			int size = sorted.size();
+			for (int i = 0; i < size; i++) {
+				sortedMoves.set(size - 1 - i, sorted.get(i).getMove());
+			}
+		} else {
+			sorted.forEach(e -> sortedMoves.add(e.getMove()));
+		}
 		return sortedMoves;
 	}
 

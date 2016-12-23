@@ -1,10 +1,6 @@
 package core;
 
-public class Constants {
-	//Max move 'thinking' time (ms)
-	public static final double MAX_TIME = 4000.0; 
-	//Max search depth
-	public static final double MAX_DEPTH = 15;
+public class CoreConstants {
 	// Image filenames
 	public static final String[] FILE_NAMES = { null, null, "wp", "bp", "wn", "bn", "wr", "br", "wb", "bb", "wq", "bq",
 			"wk", "bk" };
@@ -128,4 +124,11 @@ public class Constants {
 	public static long occupancyVariation[][] = new long[64][4096];
 	public static long magicMovesRook[][] = new long[64][4096];
 	public static long magicMovesBishop[][] = new long[64][1024];
+
+	// Hamming Weight constants
+	public static long m1 = 0x5555555555555555L;
+	public static long m2 = 0x3333333333333333L;
+	public static long m4 = 0x0f0f0f0f0f0f0f0fL;
+	public static long h01 = 0x0101010101010101L;
+
 }

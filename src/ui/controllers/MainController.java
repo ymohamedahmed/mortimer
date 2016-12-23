@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import core.BitBoard;
-import core.Constants;
+import core.CoreConstants;
 import core.Move;
 import core.MoveGen;
 import javafx.scene.canvas.Canvas;
@@ -19,8 +19,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public class MainController {
-	private final int PLAYER_COLOR = Constants.BLACK;
-	private final int AI_COLOR = Constants.WHITE;
+	private final int PLAYER_COLOR = CoreConstants.BLACK;
+	private final int AI_COLOR = CoreConstants.WHITE;
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
 	public StackPane stackPane;
@@ -57,9 +57,9 @@ public class MainController {
 		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
 				byte piece = board.board[(row * 8) + col];
-				if (piece != Constants.EMPTY) {
+				if (piece != CoreConstants.EMPTY) {
 					Image image = new Image(MainController.class
-							.getResource("/images/" + Constants.FILE_NAMES[piece] + ".png").toExternalForm());
+							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png").toExternalForm());
 					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
 				}
 			}
@@ -103,7 +103,7 @@ public class MainController {
 		}
 
 		// Clicks square with piece in it
-		if (piece != Constants.EMPTY && !pieceMoved) {
+		if (piece != CoreConstants.EMPTY && !pieceMoved) {
 			// Get its available moves
 			ArrayList<Move> moves = getMovesPiece(index, moveList);
 			oldPos = index;
@@ -116,7 +116,7 @@ public class MainController {
 			for (Move move : moves) {
 				int rowMove = Math.floorDiv(move.getFinalPos(), 8);
 				int colMove = move.getFinalPos() % 8;
-				if (board.board[move.getFinalPos()] == Constants.EMPTY) {
+				if (board.board[move.getFinalPos()] == CoreConstants.EMPTY) {
 					g.setFill(Color.BLUE);
 					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
 				} else {
@@ -186,16 +186,16 @@ public class MainController {
 		int newPos = pawnOldPos + (colorFactor * 8);
 		switch (choice) {
 		case "Queen":
-			board.addPiece((side == 0) ? Constants.WHITE_QUEEN : Constants.BLACK_QUEEN, newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
 			break;
 		case "Rook":
-			board.addPiece((side == 0) ? Constants.WHITE_ROOK : Constants.BLACK_ROOK, newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK, newPos);
 			break;
 		case "Bishop":
-			board.addPiece((side == 0) ? Constants.WHITE_BISHOP : Constants.BLACK_BISHOP, newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP, newPos);
 			break;
 		case "Knight":
-			board.addPiece((side == 0) ? Constants.WHITE_KNIGHT : Constants.BLACK_KNIGHT, newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT, newPos);
 			break;
 		}
 		board.removePiece(pawnOldPos);
