@@ -1,6 +1,6 @@
 package core;
 
-import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by yousuf on 11/22/16.
@@ -9,6 +9,7 @@ public class BitBoard {
 	public long[] bitboards = new long[14];
 	public byte[] board = new byte[64];
 	public long[] epTargetSquares = new long[2];
+	private static int[][] zobristTable = new int[64][12];
 	// Castling flag
 	// WHITE
 	// wQSideLegal | wKSideLegal | wKingMoved | wRQSideMoved | wRKsideMoved
@@ -460,4 +461,11 @@ public class BitBoard {
 		return pos == 64 ? -1 : pos;
 	}
 
+	public static void initialiseZobrist(){
+		for(int x = 0; x <= 63; x++){
+			for(int y = 0; y <= 11; y++){
+				zobristTable[x][y] = new Random().nextInt((int) Math.pow(2, 64)-1);
+			}
+		}
+	}
 }

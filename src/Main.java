@@ -7,6 +7,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+import core.BitBoard;
+import core.MoveGen;
+
 public class Main extends Application {
     public static void main(String[] args) {
         try {
@@ -34,6 +37,15 @@ public class Main extends Application {
             primaryStage.close();
             System.exit(0);
         });
+    }
+    public void initialiseLookup(){
+		MoveGen moveGen = new MoveGen();
+		moveGen.initialiseKnightLookupTable();
+		moveGen.initialiseKingLookupTable();
+		moveGen.initialisePawnLookupTable();
+		moveGen.generateMoveDatabase(true);
+		moveGen.generateMoveDatabase(false);
+		BitBoard.initialiseZobrist();
     }
 
 }

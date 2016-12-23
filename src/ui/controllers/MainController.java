@@ -29,8 +29,8 @@ public class MainController {
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
-	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
-	private MoveGen moveGen;
+	
+	private MoveGen moveGen = new MoveGen();
 
 	public void initialize() {
 		playGame();
@@ -71,12 +71,7 @@ public class MainController {
 	private void playGame() {
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
-		moveGen = new MoveGen();
-		moveGen.initialiseKnightLookupTable();
-		moveGen.initialiseKingLookupTable();
-		moveGen.initialisePawnLookupTable();
-		moveGen.generateMoveDatabase(true);
-		moveGen.generateMoveDatabase(false);
+
 		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
@@ -99,8 +94,8 @@ public class MainController {
 		for (int square : blueSquares) {
 			if (square == index) {
 
-				move(board,getMove(moveList, board.board[oldPos], oldPos, index), true);
-				
+				move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
+
 				blueSquares.clear();
 				pieceMoved = true;
 				break;
@@ -151,32 +146,6 @@ public class MainController {
 			}
 		}
 		return result;
-	}
-
-	private ArrayList<MoveScore> quickSort(ArrayList<MoveScore> moves) {
-		if (!moves.isEmpty()) {
-			MoveScore pivot = moves.get(0);
-			ArrayList<MoveScore> less = new ArrayList<>();
-			ArrayList<MoveScore> pivotList = new ArrayList<>();
-			ArrayList<MoveScore> more = new ArrayList<>();
-
-			for (MoveScore move : moves) {
-				if (move.getScore() < pivot.getScore()) {
-					less.add(move);
-				} else if (move.getScore() > pivot.getScore()) {
-					more.add(move);
-				} else {
-					pivotList.add(move);
-				}
-			}
-			less = quickSort(less);
-			more = quickSort(more);
-
-			less.addAll(pivotList);
-			less.addAll(more);
-			return less;
-		}
-		return moves;
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
@@ -232,10 +201,6 @@ public class MainController {
 		board.removePiece(pawnOldPos);
 	}
 
-	private enum TranspositionFlag {
-		EXACT, LOWERBOUND, UPPERBOUND
-	}
-
 	private enum CellColor {
 		COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
 		private Color color;
@@ -246,66 +211,6 @@ public class MainController {
 
 		public Color getColor() {
 			return color;
-		}
-	}
-
-	private class TranspositionEntry {
-		private double score;
-		private TranspositionFlag flag;
-		private int depth;
-		private boolean valid = false;
-
-		public TranspositionEntry() {
-		}
-
-		public double getScore() {
-			return score;
-		}
-
-		public void setScore(double score) {
-			this.score = score;
-		}
-
-		public TranspositionFlag getFlag() {
-			return flag;
-		}
-
-		public void setFlag(TranspositionFlag flag) {
-			this.flag = flag;
-		}
-
-		public int getDepth() {
-			return depth;
-		}
-
-		public void setDepth(int depth) {
-			this.depth = depth;
-		}
-
-		public boolean isValid() {
-			return valid;
-		}
-
-		public void setValid(boolean valid) {
-			this.valid = valid;
-		}
-	}
-
-	class MoveScore {
-		private Move move;
-		private double score;
-
-		public MoveScore(Move move, double score) {
-			this.move = move;
-			this.score = score;
-		}
-
-		public Move getMove() {
-			return move;
-		}
-
-		public double getScore() {
-			return score;
 		}
 	}
 

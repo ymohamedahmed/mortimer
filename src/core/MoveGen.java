@@ -408,7 +408,6 @@ public class MoveGen {
 				if (index == 63) {
 					board = 0x8000_0000_0000_0000L;
 				}
-				long attacks = ((board << 9) & ~Constants.FILE_A) | ((board << 7) & ~Constants.FILE_H);
 				Constants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(board, side)
 						| getPawnWestAttacks(board, side);
 			}
