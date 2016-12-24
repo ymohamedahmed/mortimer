@@ -13,7 +13,7 @@ public class Search {
 	private Evaluation eval = new Evaluation();
 	private MoveGen moveGen = new MoveGen();
 
-	private Move rootNegamax(BitBoard board, int color) {
+	public Move rootNegamax(BitBoard board, int color) {
 		double maxScore = Double.NEGATIVE_INFINITY;
 		Move optimal = null;
 		ArrayList<Move> moves = moveGen.generateMoves(board, true);
@@ -23,10 +23,13 @@ public class Search {
 			double firstGuess = 0;
 			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d++) {
 				firstGuess = mtdf(board, firstGuess, d, color);
+				System.out.println("FINAL DEPTH: " + d);
 				if (System.currentTimeMillis() - startTime >= EvalConstants.MAX_TIME) {
+					System.out.println("FINAL DEPTH: " + d);
 					break;
 				}
 			}
+			System.out.println("SCORE: " + firstGuess);
 			board.undo();
 			if (firstGuess > maxScore) {
 				maxScore = firstGuess;
@@ -77,6 +80,7 @@ public class Search {
 		for (Move move : moves) {
 			board.move(move);
 			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
+			board.undo();
 			bestValue = Math.max(bestValue, v);
 			alpha = Math.max(alpha, v);
 			if (alpha >= beta) {
@@ -133,6 +137,7 @@ public class Search {
 			board.move(move);
 			MoveScore moveScore = new MoveScore(move, eval.evaluate(board, colorFactor));
 			movesScore.add(moveScore);
+			board.undo();
 		}
 		ArrayList<MoveScore> sorted = quickSort(movesScore);
 		// Descending order for white (maximiser)
@@ -140,7 +145,7 @@ public class Search {
 		if (colorFactor == 1) {
 			int size = sorted.size();
 			for (int i = 0; i < size; i++) {
-				sortedMoves.set(size - 1 - i, sorted.get(i).getMove());
+				sortedMoves.add(i, sorted.get(size - 1 - i).getMove());
 			}
 		} else {
 			sorted.forEach(e -> sortedMoves.add(e.getMove()));

@@ -1,7 +1,6 @@
 package ui.controllers;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +8,8 @@ import core.BitBoard;
 import core.CoreConstants;
 import core.Move;
 import core.MoveGen;
+import eval.EvalConstants;
+import eval.Search;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ChoiceDialog;
@@ -19,8 +20,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public class MainController {
-	private final int PLAYER_COLOR = CoreConstants.BLACK;
-	private final int AI_COLOR = CoreConstants.WHITE;
+	private int PLAYER_COLOR = CoreConstants.BLACK;
+	private int AI_COLOR = CoreConstants.WHITE;
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
 	public StackPane stackPane;
@@ -29,7 +30,8 @@ public class MainController {
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
-	
+	private Search search = new Search();
+
 	private MoveGen moveGen = new MoveGen();
 
 	public void initialize() {
@@ -71,8 +73,10 @@ public class MainController {
 	private void playGame() {
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
-
-		moveList = getMoves(board, false);
+		if (AI_COLOR == CoreConstants.WHITE) {
+			moveAI(board);
+		}
+		moveList = getMoves(board, true);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
 	}
@@ -150,55 +154,74 @@ public class MainController {
 
 	public void move(BitBoard board, Move move, boolean repaint) {
 		board.move(move);
+		int side = move.getPieceType() % 2;
+		if (move.isPromotion() && side == PLAYER_COLOR) {
+			pawnPromotion(move.getOldPos(), PLAYER_COLOR, board, true);
+		} else if (move.isPromotion() && side == AI_COLOR) {
+			pawnPromotion(move.getOldPos(), PLAYER_COLOR, board, false);
+		}
 		if (repaint) {
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
 			moveList = getMoves(board, true);
 		}
+		if (side == PLAYER_COLOR) {
+			moveAI(board);
+		}
+
 	}
 
 	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck) {
 		return moveGen.generateMoves(board, removeCheck);
 	}
 
-	private void displayPawnPromotionDialog(int pawnOldPos, int side, BitBoard board) {
-		String choice = new String();
-		List<String> choices = new ArrayList<>();
-		choices.add("Queen");
-		choices.add("Rook");
-		choices.add("Bishop");
-		choices.add("Knight");
-
-		ChoiceDialog<String> dialog = new ChoiceDialog<>("Queen", choices);
-		dialog.setTitle("Pawn Promotion");
-		dialog.setHeaderText("Choose the piece to switch your pawn to");
-		dialog.setContentText("Choose piece:");
-		Optional<String> result = dialog.showAndWait();
-
-		if (result.isPresent()) {
-			choice = result.get();
-		} else {
-			displayPawnPromotionDialog(pawnOldPos, side, board);
-		}
-
-		int colorFactor = (side == 0) ? 1 : -1;
+	private void pawnPromotion(int pawnOldPos, int side, BitBoard board, boolean display) {
+		int colorFactor = (side == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
 		int newPos = pawnOldPos + (colorFactor * 8);
-		switch (choice) {
-		case "Queen":
-			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
-			break;
-		case "Rook":
-			board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK, newPos);
-			break;
-		case "Bishop":
-			board.addPiece((side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP, newPos);
-			break;
-		case "Knight":
-			board.addPiece((side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT, newPos);
-			break;
-		}
 		board.removePiece(pawnOldPos);
+		if (display) {
+			String choice = new String();
+			List<String> choices = new ArrayList<>();
+			choices.add("Queen");
+			choices.add("Rook");
+			choices.add("Bishop");
+			choices.add("Knight");
+
+			ChoiceDialog<String> dialog = new ChoiceDialog<>("Queen", choices);
+			dialog.setTitle("Pawn Promotion");
+			dialog.setHeaderText("Choose the piece to switch your pawn to");
+			dialog.setContentText("Choose piece:");
+			Optional<String> result = dialog.showAndWait();
+
+			if (result.isPresent()) {
+				choice = result.get();
+			} else {
+				pawnPromotion(pawnOldPos, side, board, display);
+			}
+			switch (choice) {
+			case "Queen":
+				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
+				break;
+			case "Rook":
+				board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK, newPos);
+				break;
+			case "Bishop":
+				board.addPiece((side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP, newPos);
+				break;
+			case "Knight":
+				board.addPiece((side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT, newPos);
+				break;
+			}
+		} else {
+			board.addPiece(CoreConstants.QUEEN, newPos);
+		}
+	}
+
+	private void moveAI(BitBoard board) {
+		int colorFactor = (AI_COLOR == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
+		Move move = search.rootNegamax(board, colorFactor);
+		move(board, move, true);
 	}
 
 	private enum CellColor {

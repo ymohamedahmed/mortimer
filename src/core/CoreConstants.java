@@ -27,18 +27,22 @@ public class CoreConstants {
 	public static final byte QUEEN = 10;
 	public static final byte KING = 12;
 	public static final int NULL_SQUARE = 64;
-	public static final long ROW_1 = 0xFF << 0;
-	public static final long ROW_3 = 0xFF << 16;
+	public static final long ROW_1 = 0x0000_0000_0000_00FFL;
+	public static final long ROW_2 = 0x0000_0000_0000_FF00L;
+	public static final long ROW_3 = 0x0000_0000_00FF_0000L;
+	public static final long ROW_4 = 0x0000_0000_FF00_0000L;
+	public static final long ROW_5 = 0x0000_00FF_0000_0000L;
 	public static final long ROW_6 = 0x0000_FF00_0000_0000L;
+	public static final long ROW_7 = 0x00FF_0000_0000_0000L;
 	public static final long ROW_8 = 0xFF00_0000_0000_0000L;
-	public static final long FILE_A = 0x0101010101010101L << 0;
-	public static final long FILE_B = 0x0101010101010101L << 1;
-	public static final long FILE_C = 0x0101010101010101L << 2;
-	public static final long FILE_D = 0x0101010101010101L << 3;
-	public static final long FILE_E = 0x0101010101010101L << 4;
-	public static final long FILE_F = 0x0101010101010101L << 5;
-	public static final long FILE_G = 0x0101010101010101L << 6;
-	public static final long FILE_H = 0x0101010101010101L << 7;
+	public static final long FILE_A = 0x0101_0101_0101_0101L << 0;
+	public static final long FILE_B = 0x0101_0101_0101_0101L << 1;
+	public static final long FILE_C = 0x0101_0101_0101_0101L << 2;
+	public static final long FILE_D = 0x0101_0101_0101_0101L << 3;
+	public static final long FILE_E = 0x0101_0101_0101_0101L << 4;
+	public static final long FILE_F = 0x0101_0101_0101_0101L << 5;
+	public static final long FILE_G = 0x0101_0101_0101_0101L << 6;
+	public static final long FILE_H = 0x0101_0101_0101_0101L << 7;
 
 	// Castling moves
 	public static final long bqueenside = 0x0400_0000_0000_0000L;
