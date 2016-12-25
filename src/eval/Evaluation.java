@@ -6,7 +6,8 @@ import core.CoreConstants;
 public class Evaluation {
 
 	public int evaluate(BitBoard board, int color) {
-		return color * material(board);
+		return color * (material(board) + positional(board) + mobility(board) + space(board) + attacks(board)
+				+ pawnStructure(board) + passedPawns(board));
 	}
 
 	private int material(BitBoard board) {
@@ -27,8 +28,47 @@ public class Evaluation {
 		int bishopScore = EvalConstants.PIECE_VALUE[EvalConstants.BISHOP] * (whiteBishops - blackBishops);
 		int rookScore = EvalConstants.PIECE_VALUE[EvalConstants.ROOK] * (whiteRooks - blackRooks);
 		int queenScore = EvalConstants.PIECE_VALUE[EvalConstants.QUEEN] * (whiteQueens - blackQueens);
+		int bishopPairScore = ((whiteBishops == 2) ? EvalConstants.BISHOP_PAIR : 0)
+				- ((blackBishops == 2) ? EvalConstants.BISHOP_PAIR : 0);
 
-		return pawnScore + knightScore + bishopScore + rookScore + queenScore;
+		int nonPawnMaterial = end(whiteKnights + whiteBishops + whiteRooks + whiteQueens + blackKnights + blackBishops
+				+ blackRooks + blackQueens);
+		int gamePhase = nonPawnMaterial >= EvalConstants.MAT_MIDGAME_MAX ? EvalConstants.PHASE_MIDGAME
+				: (nonPawnMaterial <= EvalConstants.MAT_ENDGAME_MIN) ? EvalConstants.PHASE_ENDGAME
+						: ((nonPawnMaterial - EvalConstants.MAT_ENDGAME_MIN) * EvalConstants.PHASE_MIDGAME)
+								/ (EvalConstants.MAT_MIDGAME_MAX - EvalConstants.MAT_ENDGAME_MIN);
+		return pawnScore + knightScore + bishopScore + rookScore + queenScore + bishopPairScore;
 	}
 
+	private int positional(BitBoard board) {
+		return 0;
+	}
+
+	private int mobility(BitBoard board) {
+		return 0;
+	}
+
+	private int space(BitBoard board) {
+		return 0;
+	}
+
+	private int attacks(BitBoard board) {
+		return 0;
+	}
+
+	private int pawnStructure(BitBoard board) {
+		return 0;
+	}
+
+	private int passedPawns(BitBoard board) {
+		return 0;
+	}
+
+	public int open(int phase) {
+		return (phase + 0x8000) >> 16;
+	}
+
+	public int end(int phase) {
+		return (short) (phase * 0xffff);
+	}
 }
