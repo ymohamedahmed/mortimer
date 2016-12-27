@@ -3,14 +3,24 @@ package eval;
 import core.BitBoard;
 import core.CoreConstants;
 
-public class Evaluation {
+public class Evaluation extends EvalConstants {
+	// Evaluation conditions
+	// 0th index is white, 1st index is black
+	private int[] pawnMat = { 0, 0 };
+	private int[] nonPawnMat = { 0, 0 };
+	private int[] pieceSquare = { 0, 0 };
+	private int[] spatial = { 0, 0 };
+	private int[] positional = { 0, 0 };
+	private int[] attacks = { 0, 0 };
+	private int[] kingAttackedCount = { 0, 0 };
+	private int[] kingSafety = { 0, 0 };
+	private int[] pawnStruct = { 0, 0 };
+	private int[] passedPawns = { 0, 0 };
+	private long[] pawnCanAttack = { 0, 0 };
+	private long[] mobilitySquares = { 0, 0 };
+	private long[] kingZone = { 0, 0 };
 
 	public int evaluate(BitBoard board, int color) {
-		return color * (material(board) + positional(board) + mobility(board) + space(board) + attacks(board)
-				+ pawnStructure(board) + passedPawns(board));
-	}
-
-	private int material(BitBoard board) {
 		int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
 		int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
 		int whiteBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_BISHOP]);
@@ -23,45 +33,21 @@ public class Evaluation {
 		int blackRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_ROOK]);
 		int blackQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_QUEEN]);
 
-		int pawnScore = EvalConstants.PIECE_VALUE[EvalConstants.PAWN] * (whitePawns - blackPawns);
-		int knightScore = EvalConstants.PIECE_VALUE[EvalConstants.KNIGHT] * (whiteKnights - blackKnights);
-		int bishopScore = EvalConstants.PIECE_VALUE[EvalConstants.BISHOP] * (whiteBishops - blackBishops);
-		int rookScore = EvalConstants.PIECE_VALUE[EvalConstants.ROOK] * (whiteRooks - blackRooks);
-		int queenScore = EvalConstants.PIECE_VALUE[EvalConstants.QUEEN] * (whiteQueens - blackQueens);
-		int bishopPairScore = ((whiteBishops == 2) ? EvalConstants.BISHOP_PAIR : 0)
-				- ((blackBishops == 2) ? EvalConstants.BISHOP_PAIR : 0);
-
-		int nonPawnMaterial = end(whiteKnights + whiteBishops + whiteRooks + whiteQueens + blackKnights + blackBishops
-				+ blackRooks + blackQueens);
-		int gamePhase = nonPawnMaterial >= EvalConstants.MAT_MIDGAME_MAX ? EvalConstants.PHASE_MIDGAME
-				: (nonPawnMaterial <= EvalConstants.MAT_ENDGAME_MIN) ? EvalConstants.PHASE_ENDGAME
-						: ((nonPawnMaterial - EvalConstants.MAT_ENDGAME_MIN) * EvalConstants.PHASE_MIDGAME)
-								/ (EvalConstants.MAT_MIDGAME_MAX - EvalConstants.MAT_ENDGAME_MIN);
-		return pawnScore + knightScore + bishopScore + rookScore + queenScore + bishopPairScore;
-	}
-
-	private int positional(BitBoard board) {
-		return 0;
-	}
-
-	private int mobility(BitBoard board) {
-		return 0;
-	}
-
-	private int space(BitBoard board) {
-		return 0;
-	}
-
-	private int attacks(BitBoard board) {
-		return 0;
-	}
-
-	private int pawnStructure(BitBoard board) {
-		return 0;
-	}
-
-	private int passedPawns(BitBoard board) {
-		return 0;
+		pawnMat[0] = whitePawns * PIECE_VALUE_PHASE[PAWN];
+		pawnMat[1] = blackPawns * PAWN;
+		nonPawnMat[0] = (whiteKnights * PIECE_VALUE_PHASE[KNIGHT]) + (whiteBishops * PIECE_VALUE_PHASE[BISHOP])
+				+ (whiteRooks * PIECE_VALUE_PHASE[ROOK]) + (whiteQueens * PIECE_VALUE_PHASE[QUEEN])
+				+ ((whiteBishops == 2) ? BISHOP_PAIR : 0);
+		nonPawnMat[1] = (blackKnights * PIECE_VALUE_PHASE[KNIGHT]) + (blackBishops * PIECE_VALUE_PHASE[BISHOP])
+				+ (blackRooks * PIECE_VALUE_PHASE[ROOK]) + (blackQueens * PIECE_VALUE_PHASE[QUEEN])
+				+ ((blackBishops == 2) ? BISHOP_PAIR : 0);
+		int nonPawnMaterial = end(nonPawnMat[0] + nonPawnMat[1]);
+		int gamePhase = nonPawnMaterial >= MAT_MIDGAME_MAX ? PHASE_MIDGAME
+				: (nonPawnMaterial <= MAT_ENDGAME_MIN) ? PHASE_ENDGAME
+						: ((nonPawnMaterial - MAT_ENDGAME_MIN) * PHASE_MIDGAME) / (MAT_MIDGAME_MAX - MAT_ENDGAME_MIN);
+		mobilitySquares[0] = ~board.bitboards[CoreConstants.WHITE];
+		mobilitySquares[1] = ~board.bitboards[CoreConstants.BLACK];
+		return color * 0;
 	}
 
 	public int open(int phase) {
