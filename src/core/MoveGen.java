@@ -121,10 +121,6 @@ public class MoveGen {
 				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
 		long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
 
-		/*
-		 * System.out.println("ROOK MOVES"); board.printBoard(moveSquares);
-		 */
-
 		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
@@ -157,13 +153,6 @@ public class MoveGen {
 		long moveSquaresBishop = CoreConstants.magicMovesBishop[index][lookupIndexBishop] & ~board.bitboards[side];
 
 		long queenMoves = moveSquaresRook | moveSquaresBishop;
-
-		/*
-		 * System.out.println("Q(BISHOP), Q(ROOK), QUEEN MOVES");
-		 * board.printBoard(moveSquaresBishop);
-		 * board.printBoard(moveSquaresRook); board.printBoard(queenMoves);
-		 */
-
 		addMoves(pieceType, index, queenMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
@@ -255,9 +244,15 @@ public class MoveGen {
 		return target << shift | target >>> (64 - shift);
 	}
 
+	long getRookMoves(int index, long all) {
+		long rookBlockers = all * CoreConstants.occupancyMaskRook[index];
+		int lookupIndex = (int) ((rookBlockers
+				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
+
+	}
+
 	// Modified algorithm based on tutorial from
 	// http://www.rivalchess.com/magic-bitboards/
-
 	public void generateMoveDatabase(boolean rook) {
 		long validMoves = 0;
 		int variations;
@@ -399,7 +394,7 @@ public class MoveGen {
 			CoreConstants.KING_TABLE[square] = N | S | E | W | NE | NW | SE | SW;
 		}
 	}
-	
+
 	public void initialisePawnLookupTable() {
 		// Complete for white then use symmetry to complete for white
 		for (int side = 0; side <= 1; side++) {
@@ -422,6 +417,7 @@ public class MoveGen {
 	}
 
 	// For Debugging
+
 	public void printMoveList(ArrayList<Move> moves) {
 		for (Move move : moves) {
 			System.out.println(move.getOldPos() + " TO " + move.getFinalPos());
