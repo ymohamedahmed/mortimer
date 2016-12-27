@@ -47,6 +47,12 @@ public class Evaluation extends EvalConstants {
 						: ((nonPawnMaterial - MAT_ENDGAME_MIN) * PHASE_MIDGAME) / (MAT_MIDGAME_MAX - MAT_ENDGAME_MIN);
 		mobilitySquares[0] = ~board.bitboards[CoreConstants.WHITE];
 		mobilitySquares[1] = ~board.bitboards[CoreConstants.BLACK];
+		long whitePawnsBoard = board.bitboards[CoreConstants.WHITE_PAWN];
+		long blackPawnsBoard = board.bitboards[CoreConstants.BLACK_PAWN];
+		if(gamePhase > 0){
+		}else{
+			
+		}
 		return color * 0;
 	}
 

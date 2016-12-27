@@ -39,13 +39,8 @@ public class MoveGen {
 			queenBoard &= queenBoard - 1;
 		}
 		long kingBoard = board.bitboards[side + 12];
-		/*
-		 * System.out.println("KING BOARD: "); board.printBoard(kingBoard);
-		 */
 		while (kingBoard != 0) {
 			addKingMoves(board, moves, bitScanForward(kingBoard), side);
-			// System.out.println("KING INDEX: " +
-			// bitScanForward(kingBoard));
 			kingBoard &= kingBoard - 1;
 		}
 
@@ -58,8 +53,7 @@ public class MoveGen {
 			}
 		}
 		if (legal) {
-			moves = removeCheckMoves(board, moves, 0);
-			moves = removeCheckMoves(board, moves, 1);
+			moves = removeCheckMoves(board, moves, side);
 		}
 		return moves;
 	}
