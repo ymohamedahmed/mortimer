@@ -73,7 +73,7 @@ public class Search {
 			}
 		}
 		if (depth == 0) {
-			return colorFactor * (eval.evaluate(board, colorFactor));
+			return colorFactor * (eval.evaluate(moveGen, board, colorFactor));
 		}
 		double bestValue = Double.NEGATIVE_INFINITY;
 		ArrayList<Move> moves = sortMoves(board, moveGen.generateMoves(board, false), colorFactor);
@@ -135,7 +135,7 @@ public class Search {
 		ArrayList<MoveScore> movesScore = new ArrayList<>();
 		for (Move move : possibleMoves) {
 			board.move(move);
-			MoveScore moveScore = new MoveScore(move, eval.evaluate(board, colorFactor));
+			MoveScore moveScore = new MoveScore(move, eval.evaluate(moveGen,board, colorFactor));
 			movesScore.add(moveScore);
 			board.undo();
 		}

@@ -5,9 +5,6 @@ import java.util.Iterator;
 
 public class MoveGen {
 
-	public MoveGen() {
-	}
-
 	public ArrayList<Move> generateMoves(BitBoard board, boolean legal) {
 		ArrayList<Move> moves = new ArrayList<>();
 		// Add pawn moves first
@@ -58,7 +55,7 @@ public class MoveGen {
 		return moves;
 	}
 
-	ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
+	private ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
 
 		// Iterator has to be used to avoid concurrent modification exception
 		// i.e. so that we can remove from the arraylist as we loop through it
@@ -78,8 +75,8 @@ public class MoveGen {
 		return moveList;
 	}
 
-	void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList, boolean enPassant, boolean promotion,
-			byte castling) {
+	private void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList, boolean enPassant,
+			boolean promotion, byte castling) {
 		while (moves != 0) {
 			Move move = new Move(pieceType, index, bitScanForward(moves));
 			move.setCastling(castling);
@@ -90,8 +87,8 @@ public class MoveGen {
 		}
 	}
 
-	void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList, boolean enPassant, boolean promotion,
-			byte castling, int offset) {
+	private void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList, boolean enPassant,
+			boolean promotion, byte castling, int offset) {
 		while (moves != 0) {
 			int to = bitScanForward(moves);
 			int from = (to - offset) % 64;
@@ -107,31 +104,27 @@ public class MoveGen {
 		}
 	}
 
-	void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK;
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
 				& CoreConstants.occupancyMaskRook[index];
 		int lookupIndex = (int) ((rookBlockers
 				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
 		long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
-
 		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
-	void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
 				& CoreConstants.occupancyMaskBishop[index];
 		int lookupIndex = (int) ((bishopBlockers
 				* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
 		long moveSquares = CoreConstants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
-		/*
-		 * System.out.println("BISHOP MOVES"); board.printBoard(moveSquares);
-		 */
 		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
-	void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN;
 		// Or of the rook moves and bishop moves are the queen moves
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
@@ -150,13 +143,13 @@ public class MoveGen {
 		addMoves(pieceType, index, queenMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
-	void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT;
 		long knightMoves = CoreConstants.KNIGHT_TABLE[index] & ~board.bitboards[side];
 		addMoves(pieceType, index, knightMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
-	void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
 		/*
 		 * System.out.println("KING MOVES");
@@ -182,7 +175,7 @@ public class MoveGen {
 		}
 	}
 
-	void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
+	private void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		int[] offsets = { 8, 56 };
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
@@ -199,7 +192,7 @@ public class MoveGen {
 		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, CoreConstants.noCastle, offset + offset);
 	}
 
-	void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int enemy = (side == 0) ? 1 : 0;
 		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
@@ -211,7 +204,7 @@ public class MoveGen {
 		addMoves(pawnType, index, enPassant, moveList, true, false, CoreConstants.noCastle);
 	}
 
-	long getPawnEastAttacks(long board, int side) {
+	private long getPawnEastAttacks(long board, int side) {
 		long result;
 		// WHITE
 		if (side == 0) {
@@ -223,7 +216,7 @@ public class MoveGen {
 		return result;
 	}
 
-	long getPawnWestAttacks(long board, int side) {
+	private long getPawnWestAttacks(long board, int side) {
 		long result;
 		// WHITE
 		if (side == 0) {
@@ -234,15 +227,8 @@ public class MoveGen {
 		return result;
 	}
 
-	long circularLeftShift(long target, int shift) {
+	private long circularLeftShift(long target, int shift) {
 		return target << shift | target >>> (64 - shift);
-	}
-
-	long getRookMoves(int index, long all) {
-		long rookBlockers = all * CoreConstants.occupancyMaskRook[index];
-		int lookupIndex = (int) ((rookBlockers
-				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
-
 	}
 
 	// Modified algorithm based on tutorial from

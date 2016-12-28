@@ -73,4 +73,10 @@ public class Board {
 	public static final long F8 = A1 << 61;
 	public static final long G8 = A1 << 62;
 	public static final long H8 = A1 << 63;
+
+	private static int[] flipIndex = { 7, 5, 3, 1, -1, -3, -5, -7 };
+
+	public static int mirrorIndex(int index) {
+		return index + (flipIndex[index%8]);
+	}
 }

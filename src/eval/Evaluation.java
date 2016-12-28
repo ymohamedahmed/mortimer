@@ -2,6 +2,7 @@ package eval;
 
 import core.BitBoard;
 import core.CoreConstants;
+import core.MoveGen;
 
 public class Evaluation extends EvalConstants {
 	// Evaluation conditions
@@ -20,7 +21,7 @@ public class Evaluation extends EvalConstants {
 	private long[] mobilitySquares = { 0, 0 };
 	private long[] kingZone = { 0, 0 };
 
-	public int evaluate(BitBoard board, int color) {
+	public int evaluate(MoveGen moveGen, BitBoard board, int color) {
 		int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
 		int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
 		int whiteBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_BISHOP]);
@@ -50,6 +51,7 @@ public class Evaluation extends EvalConstants {
 		long whitePawnsBoard = board.bitboards[CoreConstants.WHITE_PAWN];
 		long blackPawnsBoard = board.bitboards[CoreConstants.BLACK_PAWN];
 		if(gamePhase > 0){
+			
 		}else{
 			
 		}
