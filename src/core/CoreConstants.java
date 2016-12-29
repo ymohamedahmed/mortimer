@@ -43,6 +43,74 @@ public class CoreConstants {
 	public static final long FILE_F = 0x0101_0101_0101_0101L << 5;
 	public static final long FILE_G = 0x0101_0101_0101_0101L << 6;
 	public static final long FILE_H = 0x0101_0101_0101_0101L << 7;
+	public static final long[] FILE = { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
+	public static final long[] ADJACENT_FILE = { FILE_B, FILE_A | FILE_C, FILE_B | FILE_D, FILE_C | FILE_E,
+			FILE_D | FILE_F, FILE_E | FILE_G, FILE_F | FILE_H, FILE_G };
+	public static final long[] LEFT_FILES = {
+			0,
+			FILE_A,
+			FILE_A | FILE_B,
+			FILE_A | FILE_B | FILE_C,
+			FILE_A | FILE_B | FILE_C | FILE_D,
+			FILE_A | FILE_B | FILE_C | FILE_D | FILE_E,
+			FILE_A | FILE_B | FILE_C | FILE_D | FILE_E | FILE_F,
+			FILE_A | FILE_B | FILE_C | FILE_D | FILE_E | FILE_F | FILE_G
+	};
+	public static final long[] RIGHT_FILES = {
+			FILE_A | FILE_B | FILE_C | FILE_D | FILE_E | FILE_F | FILE_G,
+			FILE_B | FILE_C | FILE_D | FILE_E | FILE_F | FILE_G,
+			FILE_C | FILE_D | FILE_E | FILE_F | FILE_G,
+			FILE_D | FILE_E | FILE_F | FILE_G,
+			FILE_E | FILE_F | FILE_G,
+			FILE_F | FILE_G,
+			FILE_G,
+			0
+	};
+	public static final long[] ROW_UPWARD = { 
+			ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
+			ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
+			ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
+			ROW_5 | ROW_6 | ROW_7 | ROW_8, 
+			ROW_6 | ROW_7 | ROW_8, 
+			ROW_7 | ROW_8, 
+			ROW_8, 
+			0 
+	};
+	public static final long[] ROW_UPDWARD_INCLUSIVE = { 
+			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
+			ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8, 
+			ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
+			ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
+			ROW_5 | ROW_6 | ROW_7 | ROW_8, 
+			ROW_6 | ROW_7 | ROW_8, 
+			ROW_7 | ROW_8, 
+			ROW_8 
+	};
+	public static final long[] ROW_DOWNARD = {
+		0,
+		ROW_1,
+		ROW_1 | ROW_2,
+		ROW_1 | ROW_2 | ROW_3,
+		ROW_1 | ROW_2 | ROW_3 | ROW_4,
+		ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5,
+		ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6,
+		ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7,
+	};
+	public static final long[] ROW_DOWNARD_INCLUSIVE = {
+			ROW_1,
+			ROW_1 | ROW_2,
+			ROW_1 | ROW_2 | ROW_3,
+			ROW_1 | ROW_2 | ROW_3 | ROW_4,
+			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5,
+			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6,
+			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7,
+			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
+	};
+	public static final long[] ROW = {ROW_1, ROW_2, ROW_3, ROW_4,ROW_5,ROW_6,ROW_7,ROW_8};
+	public static final long[][] ROW_FORWARD = {ROW_UPWARD, ROW_DOWNARD};
+	public static final long[][] ROW_BACKWARD = {ROW_DOWNARD, ROW_UPWARD};
+	public static final long[][] ROW_FORWARD_INCLUSIVE = {ROW_UPDWARD_INCLUSIVE, ROW_DOWNARD_INCLUSIVE};
+	public static final long[][] ROW_BACKWARD_INCLUSIVE = {ROW_DOWNARD_INCLUSIVE, ROW_UPDWARD_INCLUSIVE};
 
 	// Castling moves
 	public static final long bqueenside = 0x0400_0000_0000_0000L;
