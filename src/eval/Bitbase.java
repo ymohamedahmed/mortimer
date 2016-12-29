@@ -31,9 +31,12 @@ public class Bitbase {
 			white2Move = !white2Move;
 		}
 		int file = 7 - (pIndex & 7);
-		if(file > 3){
+		if (file > 3) {
+			wKingIndex = Board.mirrorIndex(wKingIndex);
+			bKingIndex = Board.mirrorIndex(bKingIndex);
+			pIndex = Board.mirrorIndex(pIndex);
 		}
-		return false;
+		return probe(wKingIndex, bKingIndex, pIndex, white2Move);
 	}
 
 }

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import eval.Board;
+
 public class MoveGenTest {
 	BitBoard board = new BitBoard();
 
@@ -73,5 +75,9 @@ public class MoveGenTest {
 			board.undo();
 		}
 		return nodes;
+	}
+
+	public static int flipHorizontalIndex(int index) {
+		return (index & 0xF8) | (7 - (index & 7));
 	}
 }

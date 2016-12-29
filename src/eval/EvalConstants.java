@@ -23,6 +23,8 @@ public class EvalConstants {
 	public static final int MATE = 30000;
 	public static final int WIN = 20000;
 	public static final int DRAW = 0;
+	public static final int NO_VALUE = Short.MAX_VALUE;
+	public static final int KNOWN_WIN = 20000;
 
 	public static final int[] PIECE_VALUE = { 0, 100, 325, 325, 500, 975 };
 	public static final int[] PIECE_VALUE_PHASE = { 0, 100, S(80, 325), 325, 500, 975 };
@@ -766,6 +768,20 @@ public class EvalConstants {
 			0xfefeee00, 0xc0c8efe, 0xfefeee1e, 0x1e1e1efe, 0xffffef7f, 0x3f3f3fff, 0xffffefff, 0xfcfcffff, 0xffffefff,
 			0xf8f8ffff, 0xffffefff, 0xf0f1ffff, 0xffffefff, 0x60e3ffff, 0xffffefff, 0xc7ffff, 0xffffefff, 0xc8fffff,
 			0xffffefff, 0x1e1fffff, 0xffffefff, 0x3f3fffff, };
+
+	// Endgame
+	public static final int SCALE_FACTOR_DRAW = 0;
+	public static final int SCALE_FACTOR_DRAWISH = 100;
+	public static final int SCALE_FACTOR_DEFAULT = 1000;
+	public static final int[] CLOSER_SQUARES = { 0, 0, 100, 80, 60, 40, 20, 10 };
+	public static final int[] TO_CORNERS = { 100, 90, 80, 70, 70, 80, 90, 100, 90, 70, 60, 50, 50, 60, 70, 90, 80, 60,
+			40, 30, 30, 40, 60, 80, 70, 50, 30, 20, 20, 30, 50, 70, 70, 50, 30, 20, 20, 30, 50, 70, 80, 60, 40, 30, 30,
+			40, 60, 80, 90, 70, 60, 50, 50, 60, 70, 90, 100, 90, 80, 70, 70, 80, 90, 100, };
+
+	public static final int[] TO_COLOR_CORNERS = { 130, 140, 150, 160, 170, 180, 190, 200, 140, 130, 140, 150, 160, 170,
+			180, 190, 150, 140, 125, 140, 140, 155, 170, 180, 160, 150, 140, 110, 120, 140, 160, 170, 170, 160, 140,
+			120, 110, 140, 150, 160, 180, 170, 155, 140, 140, 125, 140, 150, 190, 180, 170, 160, 150, 140, 130, 140,
+			200, 190, 180, 170, 160, 150, 140, 130 };
 
 	public static int S(int opening, int endgame) {
 		return (opening << 16) + endgame;

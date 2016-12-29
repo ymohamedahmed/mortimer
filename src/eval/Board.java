@@ -77,6 +77,14 @@ public class Board {
 	private static int[] flipIndex = { 7, 5, 3, 1, -1, -3, -5, -7 };
 
 	public static int mirrorIndex(int index) {
-		return index + (flipIndex[index%8]);
+		return index + (flipIndex[index % 8]);
 	}
+
+	public static int distance(int a, int b) {
+		return Math.max(Math.abs((a & 7) - (b & 7)), Math.abs((a >> 3) - (b >> 3)));
+	}
+	public static int flipHorizontalIndex(int index) {
+		return (index & 0xF8) | (7 - (index & 7));
+	}
+
 }
