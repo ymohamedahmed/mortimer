@@ -26,6 +26,7 @@ public class EvalConstants {
 	public static final int NO_VALUE = Short.MAX_VALUE;
 	public static final int KNOWN_WIN = 20000;
 	public static final long BLACK_SQUARES = 0x55aa55aa55aa55aaL;
+	public static final long WHITE_SQUARES = 0xaa55aa55aa55aa55L;
 
 	public static final int[] PIECE_VALUE = { 0, 100, 325, 325, 500, 975 };
 	public static final int[] PIECE_VALUE_PHASE = { 0, 100, S(80, 325), 325, 500, 975 };

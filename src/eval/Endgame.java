@@ -170,14 +170,76 @@ public class Endgame extends EvalConstants {
 	}
 
 	private static int endgameKBPKN(BitBoard board, boolean wDominating) {
-		return 0;
+		int domCol = wDominating ? 0 : 1;
+		int enemyCol = domCol == 0 ? 1 : 0;
+		long domBishop = board.bitboards[domCol + CoreConstants.BISHOP];
+		long domBishopSquares = ((domBishop & WHITE_SQUARES) != 0) ? WHITE_SQUARES : BLACK_SQUARES;
+		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
+		int index = board.bitScanForward(pawns);
+		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index / 8] & CoreConstants.FILE[index % 8];
+		long otherKing = board.bitboards[CoreConstants.KING + enemyCol];
+		if ((pawnRoute & otherKing) != 0 && (domBishopSquares & otherKing) == 0) {
+			return DRAW;
+		}
+		return NO_VALUE;
+	}
+
+	private static long getBishopMoves(BitBoard board, int index, int side) {
+		long bishopBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
+				& CoreConstants.occupancyMaskBishop[index];
+		int lookupIndex = (int) ((bishopBlockers
+				* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
+		long moveSquares = CoreConstants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
+		return moveSquares;
 	}
 
 	private static int endgameKBPKB(BitBoard board, boolean wDominating) {
-		return 0;
+		int domCol = wDominating ? 0 : 1;
+		int enemyCol = domCol == 0 ? 1 : 0;
+		long domBishop = board.bitboards[domCol + CoreConstants.BISHOP];
+		long otherBishop = board.bitboards[enemyCol + CoreConstants.BISHOP];
+		long domBishopSquares = ((domBishop & WHITE_SQUARES) != 0) ? WHITE_SQUARES : BLACK_SQUARES;
+		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
+		int index = board.bitScanForward(pawns);
+		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index / 8] & CoreConstants.FILE[index % 8];
+		long otherKing = board.bitboards[CoreConstants.KING + enemyCol];
+		if ((pawnRoute & otherKing) != 0 && (domBishopSquares & otherKing) == 0) {
+			return DRAW;
+		}
+		long otherBishopSquares = ((otherBishop & WHITE_SQUARES) != 0) ? WHITE_SQUARES : BLACK_SQUARES;
+		if (domBishopSquares != otherBishopSquares) {
+			int otherBishopIndex = board.bitScanForward(otherBishop);
+			if ((otherBishop & pawnRoute) != 0 || (getBishopMoves(board, otherBishopIndex, enemyCol)
+					& board.bitboards[enemyCol] & pawnRoute) != 0) {
+				return DRAW;
+			}
+		}
+		return NO_VALUE;
 	}
 
 	private static int scaleKRPPKRP(BitBoard board, boolean wDominating) {
-		return 0;
+		int domCol = wDominating ? 0 : 1;
+		int enemyCol = domCol == 0 ? 1 : 0;
+		long domPawns = board.bitboards[CoreConstants.PAWN + domCol];
+		int[] pawnIndices = { 0, 0 };
+		int i = 0;
+		while (domPawns != 0) {
+			pawnIndices[i] = board.bitScanForward(domPawns);
+			domPawns &= domPawns - 1;
+			i++;
+		}
+		long inFrontOfPawn1 = CoreConstants.ROW_FORWARD[domCol][(int) pawnIndices[0] / 8]
+				& (CoreConstants.FILE[pawnIndices[0] % 8] | CoreConstants.ADJACENT_FILE[pawnIndices[0] % 8]);
+		long inFrontOfPawn2 = CoreConstants.ROW_FORWARD[domCol][(int) pawnIndices[1] / 8]
+				& (CoreConstants.FILE[pawnIndices[1] % 8] | CoreConstants.ADJACENT_FILE[pawnIndices[1] % 8]);
+		long otherPawn = board.bitboards[CoreConstants.PAWN + enemyCol];
+		if((inFrontOfPawn1 & otherPawn) == 0 || (inFrontOfPawn2& otherPawn) == 0){
+			return SCALE_FACTOR_DEFAULT;
+		}
+		long otherKing = board.bitboards[CoreConstants.KING + enemyCol];
+		if((inFrontOfPawn1 & otherKing) != 0 && (inFrontOfPawn1 & otherKing) != 1){
+			return SCALE_FACTOR_DRAWISH;
+		}
+		return SCALE_FACTOR_DEFAULT;
 	}
 }
