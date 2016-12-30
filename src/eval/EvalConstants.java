@@ -5,9 +5,9 @@ import core.CoreConstants;
 public class EvalConstants {
 
 	// Max move 'thinking' time (ms)
-	public static final double MAX_TIME = 1000.0;
+	public static final double MAX_TIME = 3000.0;
 	// Max search depth
-	public static final double MAX_DEPTH = 20;
+	public static final double MAX_DEPTH = 10;
 
 	// Evaluation constants from
 	// https://github.com/albertoruibal/carballo/blob/master/core/src/main/java/com/alonsoruibal/chess/evaluation/CompleteEvaluator.java

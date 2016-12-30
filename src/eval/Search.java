@@ -11,37 +11,40 @@ import core.MoveGen;
 public class Search {
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
 	private Evaluation eval = new Evaluation();
-	private MoveGen moveGen = new MoveGen();
+	private MoveGen moveGen;
 
-	public Move rootNegamax(BitBoard board, int color) {
+	public Move rootNegamax(MoveGen moveGen, BitBoard board, int color) {
+		this.moveGen = moveGen;
 		double maxScore = Double.NEGATIVE_INFINITY;
 		Move optimal = null;
 		ArrayList<Move> moves = moveGen.generateMoves(board, true);
 		for (Move move : moves) {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
-			double firstGuess = 0;
+			int firstGuess = 0;
 			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d++) {
+				System.out.println("DEPTH: " + d);
 				firstGuess = mtdf(board, firstGuess, d, color);
-				System.out.println("FINAL DEPTH: " + d);
+				System.out.println("Time : " + (System.currentTimeMillis() - startTime));
+				System.out.println("GUESS: " + firstGuess);
 				if (System.currentTimeMillis() - startTime >= EvalConstants.MAX_TIME) {
-					System.out.println("FINAL DEPTH: " + d);
+					System.out.println("\nBREAK\n");
+					
 					break;
 				}
 			}
-			System.out.println("SCORE: " + firstGuess);
 			board.undo();
 			if (firstGuess > maxScore) {
 				maxScore = firstGuess;
 				optimal = move;
 			}
 		}
-
+		System.out.println("SCORE: " + maxScore);
 		return optimal;
 	}
 
-	private double mtdf(BitBoard board, double f, int d, int color) {
-		double g = f;
+	private int mtdf(BitBoard board, int f, int d, int color) {
+		int g = f;
 		double upperBound = Double.POSITIVE_INFINITY;
 		double lowerBound = Double.NEGATIVE_INFINITY;
 		while (lowerBound < upperBound) {
@@ -53,11 +56,12 @@ public class Search {
 				lowerBound = g;
 			}
 		}
+		System.out.println("MTDF");
 		return g;
 	}
 
 	// Color Factor: 1 for white, -1 for black
-	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
+	private int negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
 		double alphaOrig = alpha;
 		TranspositionEntry tEntry = new TranspositionEntry();
 		tEntry = hashtable.get(board.hash());
@@ -73,15 +77,16 @@ public class Search {
 			}
 		}
 		if (depth == 0) {
-			return colorFactor * (eval.evaluate(moveGen, board, colorFactor));
+			return colorFactor * (eval.evaluate(board, colorFactor));
 		}
-		double bestValue = Double.NEGATIVE_INFINITY;
-		ArrayList<Move> moves = sortMoves(board, moveGen.generateMoves(board, false), colorFactor);
+		int bestValue = Integer.MIN_VALUE;
+		//ArrayList<Move> moves = sortMoves(board, moveGen.generateMoves(board, false), colorFactor);
+		ArrayList<Move> moves = moveGen.generateMoves(board, false);
 		for (Move move : moves) {
 			board.move(move);
 			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
 			board.undo();
-			bestValue = Math.max(bestValue, v);
+			bestValue = (int) Math.max(bestValue, v);
 			alpha = Math.max(alpha, v);
 			if (alpha >= beta) {
 				break;
@@ -135,7 +140,7 @@ public class Search {
 		ArrayList<MoveScore> movesScore = new ArrayList<>();
 		for (Move move : possibleMoves) {
 			board.move(move);
-			MoveScore moveScore = new MoveScore(move, eval.evaluate(moveGen,board, colorFactor));
+			MoveScore moveScore = new MoveScore(move, eval.evaluate(board, colorFactor));
 			movesScore.add(moveScore);
 			board.undo();
 		}
@@ -158,7 +163,7 @@ public class Search {
 	}
 
 	private class TranspositionEntry {
-		private double score;
+		private int score;
 		private TranspositionFlag flag;
 		private int depth;
 		private boolean valid = false;
@@ -166,11 +171,11 @@ public class Search {
 		public TranspositionEntry() {
 		}
 
-		public double getScore() {
+		public int getScore() {
 			return score;
 		}
 
-		public void setScore(double score) {
+		public void setScore(int score) {
 			this.score = score;
 		}
 

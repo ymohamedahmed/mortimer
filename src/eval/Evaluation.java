@@ -2,7 +2,6 @@ package eval;
 
 import core.BitBoard;
 import core.CoreConstants;
-import core.MoveGen;
 
 public class Evaluation extends EvalConstants {
 	// Evaluation conditions
@@ -23,7 +22,7 @@ public class Evaluation extends EvalConstants {
 	private long[] kingZone = { 0, 0 };
 	private int[] scaleFactor = { 0 };
 
-	public int evaluate(MoveGen moveGen, BitBoard board, int color) {
+	public int evaluate(BitBoard board, int color) {
 		int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
 		int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
 		int whiteBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_BISHOP]);
@@ -307,6 +306,7 @@ public class Evaluation extends EvalConstants {
 				+ (PHASE_MIDGAME - gamePhase) * end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
 				/ PHASE_MIDGAME;
 		assert Math.abs(value) < KNOWN_WIN : "Value is outside bounds";
+		// System.out.println("EVAL: " + (color * value));
 		return color * value;
 	}
 

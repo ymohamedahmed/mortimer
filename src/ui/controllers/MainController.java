@@ -35,6 +35,12 @@ public class MainController {
 	private MoveGen moveGen = new MoveGen();
 
 	public void initialize() {
+		moveGen.initialiseKnightLookupTable();
+		moveGen.initialiseKingLookupTable();
+		moveGen.initialisePawnLookupTable();
+		moveGen.generateMoveDatabase(true);
+		moveGen.generateMoveDatabase(false);
+		BitBoard.initialiseZobrist();
 		playGame();
 	}
 
@@ -73,10 +79,12 @@ public class MainController {
 	private void playGame() {
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
+		moveList = getMoves(board, false);
+		System.out.println("MOVE LIST SIZE: " + moveList.size());
 		if (AI_COLOR == CoreConstants.WHITE) {
 			moveAI(board);
 		}
-		moveList = getMoves(board, true);
+
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
 	}
@@ -165,6 +173,7 @@ public class MainController {
 			clearCanvas();
 			paintChessBoard(board);
 			moveList = getMoves(board, true);
+
 		}
 		if (side == PLAYER_COLOR) {
 			moveAI(board);
@@ -220,7 +229,7 @@ public class MainController {
 
 	private void moveAI(BitBoard board) {
 		int colorFactor = (AI_COLOR == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
-		Move move = search.rootNegamax(board, colorFactor);
+		Move move = search.rootNegamax(moveGen, board, colorFactor);
 		move(board, move, true);
 	}
 
