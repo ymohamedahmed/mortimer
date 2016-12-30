@@ -12,6 +12,7 @@ public class Evaluation extends EvalConstants {
 	private int[] pieceSquare = { 0, 0 };
 	private int[] spatial = { 0, 0 };
 	private int[] positional = { 0, 0 };
+	private int[] mobility = { 0, 0 };
 	private int[] attacks = { 0, 0 };
 	private int[] kingAttackedCount = { 0, 0 };
 	private int[] kingSafety = { 0, 0 };
@@ -64,10 +65,12 @@ public class Evaluation extends EvalConstants {
 			long blackSafe = BLACK_SPACE & ~ei.pawnAttacks[0] & (~ei.attackedSquares[0] | ei.attackedSquares[1]);
 			long whiteBehindPawn = ((whitePawnsBoard >>> 8) | (whitePawnsBoard >>> 16) | (whitePawnsBoard >>> 24));
 			long blackBehindPawns = ((blackPawnsBoard << 8) | (blackPawnsBoard << 16) | (blackPawnsBoard << 24));
-			spatial[0] = SPACE * (((board.hammingWeight(whiteSafe) + board.hammingWeight(whiteSafe & whiteBehindPawn))
-					* (whiteKnights + whiteBishops)) / 4);
-			spatial[1] = SPACE * (((board.hammingWeight(blackSafe) + board.hammingWeight(blackSafe & blackBehindPawns))
-					* (blackKnights + blackBishops)) / 4);
+			spatial[0] = SPACE
+					* (((BitBoard.hammingWeight(whiteSafe) + BitBoard.hammingWeight(whiteSafe & whiteBehindPawn))
+							* (whiteKnights + whiteBishops)) / 4);
+			spatial[1] = SPACE
+					* (((BitBoard.hammingWeight(blackSafe) + BitBoard.hammingWeight(blackSafe & blackBehindPawns))
+							* (blackKnights + blackBishops)) / 4);
 		} else {
 			spatial[0] = 0;
 			spatial[1] = 1;
@@ -129,7 +132,7 @@ public class Evaluation extends EvalConstants {
 						boolean isolated = (myPawns & adjacentFiles) == 0;
 						boolean candidate = !doubled && !opposed
 								&& (((otherPawnsAheadAdjacent & ~pieceAttacks) == 0)
-										|| (board.hammingWeight(myPawnsBesideAndBehindAdjacent) >= board
+										|| (BitBoard.hammingWeight(myPawnsBesideAndBehindAdjacent) >= board
 												.hammingWeight(otherPawnsAheadAdjacent & ~pieceAttacks)));
 						boolean backward = !isolated && !candidate && myPawnsBesideAndBehindAdjacent == 0
 								&& (pieceAttacks & otherPawns) == 0
@@ -188,19 +191,159 @@ public class Evaluation extends EvalConstants {
 						boolean mobile = (pushSquare & (all | attackedNotDefendedRoute)) == 0;
 						boolean runner = mobile && (routeToPromotion & all) == 0 && attackedNotDefendedRoute == 0;
 						passedPawns[col] += PAWN_PASSER[relativeRank];
-						if(relativeRank >= 2){
+						if (relativeRank >= 2) {
 							int pushIndex = isWhite ? index + 8 : index - 8;
-							
+							passedPawns[col] += Board.distance(pushIndex, ei.kingIndex[enemy])
+									* PAWN_PASSER_OTHER_KING_DISTANCE[relativeRank]
+									- Board.distance(pushIndex, ei.kingIndex[col])
+											* PAWN_PASSER_MY_KING_DISTANCE[relativeRank];
+						}
+						if (outside) {
+							passedPawns[col] += PAWN_PASSER_OUTSIDE[relativeRank];
+						}
+						if (supported) {
+							passedPawns[col] += PAWN_PASSER_SUPPORTED[relativeRank];
+						} else if (connected) {
+							passedPawns[col] += PAWN_PASSER_CONNECTED[relativeRank];
+						}
+						if (runner) {
+							passedPawns[col] += PAWN_PASSER_MOBILE[relativeRank];
+						} else if (mobile) {
+							passedPawns[col] += PAWN_PASSER_MOBILE[relativeRank];
 						}
 					}
+					long kings = board.bitboards[CoreConstants.WHITE_KING] | board.bitboards[CoreConstants.BLACK_KING];
+					if (gamePhase > 0 && (pawnFile & ~ranksForward & kingZone[col] & ~CoreConstants.FILE_D
+							& ~CoreConstants.FILE_E) != 0) {
+						pawnStruct[col] += (pawnFile & kings & mines) != 0 ? PAWN_SHIELD_CENTER[relativeRank]
+								: PAWN_SHIELD[relativeRank];
+					}
+				} else if ((square & (board.bitboards[CoreConstants.WHITE_KNIGHT]
+						| board.bitboards[CoreConstants.BLACK_KNIGHT])) != 0) {
+					pieceSquare[col] += POS_KNIGHT[pieceIndex];
+					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy];
+					mobility[col] += MOBILITY[KNIGHT][BitBoard.hammingWeight(safeAttacks & mobilitySquares[col])];
+					kingAttacks = safeAttacks & kingZone[enemy];
+					if (kingAttacks != 0) {
+						kingSafety[col] += PIECE_ATTACKS_KING[KNIGHT] * BitBoard.hammingWeight(kingAttacks);
+						kingAttackedCount[col]++;
+						if ((square & OUTPOST_MASK[col] & ~pawnCanAttack[enemy]) != 0) {
+							positional[col] += KNIGHT_OUTPOST[(square * ei.pawnAttacks[col]) != 0 ? 1 : 0];
+						}
+					}
+				} else if ((square & (board.bitboards[CoreConstants.WHITE_BISHOP]
+						| board.bitboards[CoreConstants.BLACK_BISHOP])) != 0) {
+					pieceSquare[col] += POS_BISHOP[pieceIndex];
+					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy];
+					mobility[col] += MOBILITY[BISHOP][BitBoard.hammingWeight(safeAttacks & mobilitySquares[col])];
+					kingAttacks = safeAttacks & kingZone[enemy];
+					if (kingAttacks != 0) {
+						kingSafety[col] += PIECE_ATTACKS_KING[BISHOP] * BitBoard.hammingWeight(kingAttacks);
+						kingAttackedCount[col]++;
+					}
+					if ((square & OUTPOST_MASK[col] & ~pawnCanAttack[enemy]) != 0) {
+						positional[col] += BISHOP_OUTPOST[(square * ei.pawnAttacks[col] != 0 ? 1 : 0)];
+					}
+					positional[col] -= BISHOP_MY_PAWNS_IN_COLOR_PENALTY * BitBoard.hammingWeight(
+							pawns & mines & ((square & WHITE_SQUARES) != 0 ? WHITE_SQUARES : BLACK_SQUARES));
+					if ((BISHOP_TRAPPING[index] & pawns & others) != 0) {
+						mobility[col] -= BISHOP_TRAPPED_PENALTY[(BISHOP_TRAPPING_GUARD[index] & pawns & others) != 0 ? 1
+								: 0];
+					}
+				} else if ((square & (board.bitboards[CoreConstants.WHITE_ROOK]
+						| board.bitboards[CoreConstants.BLACK_ROOK])) != 0) {
+					pieceSquare[col] += POS_ROOK[pieceIndex];
+					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy] & ~ei.knightAttacks[enemy]
+							& ~ei.bishopAttacks[enemy];
+					int mobilityCount = BitBoard.hammingWeight(safeAttacks & mobilitySquares[col]);
+					mobility[col] += MOBILITY[ROOK][mobilityCount];
+					kingAttacks = safeAttacks & kingZone[enemy];
+					if (kingAttacks != 0) {
+						kingSafety[col] += PIECE_ATTACKS_KING[ROOK] * BitBoard.hammingWeight(kingAttacks);
+						kingAttackedCount[col]++;
+					}
+					if ((square * OUTPOST_MASK[col] & ~pawnCanAttack[enemy]) != 0) {
+						positional[col] += ROOK_OUTPOST[(square * ei.pawnAttacks[col]) != 0 ? 1 : 0];
+					}
+					long rookFile = CoreConstants.FILE[file];
+					if ((rookFile & pawns & mines) == 0) {
+						positional[col] += ROOK_FILE[(rookFile & pawns) == 0 ? 0 : 1];
+					}
+					if (relativeRank >= 4) {
+						long alignedPawns = CoreConstants.ROW[rank] & pawns & others;
+						if (alignedPawns != 0) {
+							positional[col] += ROOK_7 * BitBoard.hammingWeight(alignedPawns);
+						}
+					}
+					if ((square & ROOK_TRAPPING[ei.kingIndex[col]]) != 0
+							&& mobilityCount < ROOK_TRAPPED_PENALTY.length) {
+						positional[col] -= ROOK_TRAPPED_PENALTY[mobilityCount];
+					}
+				} else if ((square & (board.bitboards[CoreConstants.WHITE_QUEEN]
+						| board.bitboards[CoreConstants.BLACK_QUEEN])) != 0) {
+					pieceSquare[col] += POS_QUEEN[pieceIndex];
+					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy] & ~ei.knightAttacks[enemy]
+							& ~ei.bishopAttacks[enemy] & ~ei.rookAttacks[enemy];
+					mobility[col] += MOBILITY[QUEEN][BitBoard.hammingWeight(safeAttacks & mobilitySquares[col])];
+					kingAttacks = safeAttacks & kingZone[enemy];
+					if (kingAttacks != 0) {
+						kingSafety[col] += PIECE_ATTACKS_KING[QUEEN] * BitBoard.hammingWeight(kingAttacks);
+						kingAttackedCount[col]++;
+					}
+				} else if ((square & (board.bitboards[CoreConstants.WHITE_KING]
+						| board.bitboards[CoreConstants.BLACK_KING])) != 0) {
+					pieceSquare[col] += POS_KING[pieceIndex];
 				}
 			}
+			square <<= 1;
 		}
-		return color * 0;
+		boolean white2Move = board.toMove == 0;
+		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
+				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
+				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
+				- passedPawns[1] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]
+						- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);
+		int value = (gamePhase * open(openingAndEnding)
+				+ (PHASE_MIDGAME - gamePhase) * end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
+				/ PHASE_MIDGAME;
+		assert Math.abs(value) < KNOWN_WIN : "Value is outside bounds";
+		return color * value;
 	}
 
 	private int evalAttacks(BitBoard board, EvalInfo ei, int color, long enemy) {
-		return 0;
+		int attacks = 0;
+		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
+		long attackedPawn = ei.pawnAttacks[color] & enemy & ~pawns;
+		while (attackedPawn != 0) {
+			long leastSigBit = 1 << board.bitScanForward(attackedPawn);
+			attacks += PAWN_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[board.bitScanForward(attackedPawn)]]];
+			attackedPawn &= ~leastSigBit;
+		}
+		long otherWeak = ei.attackedSquares[color] & enemy & ~ei.pawnAttacks[1 - color];
+		if (otherWeak != 0) {
+			long attackedByMinor = (ei.knightAttacks[color] | ei.bishopAttacks[color]) & otherWeak;
+			while (attackedByMinor != 0) {
+				long leastSigBit = 1 << board.bitScanForward(attackedByMinor);
+				attacks += MINOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[board.bitScanForward(attackedByMinor)]]];
+				attackedByMinor &= ~leastSigBit;
+			}
+			long attackedByMajor = (ei.rookAttacks[color] | ei.queenAttacks[color]) & otherWeak;
+			while (attackedByMajor != 0) {
+				long leastSigBit = 1 << board.bitScanForward(attackedByMajor);
+				attacks += MAJOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[board.bitScanForward(attackedByMajor)]]];
+				attackedByMajor &= ~leastSigBit;
+			}
+		}
+		long rooks = board.bitboards[CoreConstants.WHITE_BISHOP] | board.bitboards[CoreConstants.BLACK_BISHOP];
+		long queens = board.bitboards[CoreConstants.WHITE_QUEEN] | board.bitboards[CoreConstants.BLACK_QUEEN];
+		long superiorAttacks = ei.pawnAttacks[color] & enemy & ~pawns
+				| (ei.knightAttacks[color] | ei.bishopAttacks[color]) & enemy & (rooks | queens)
+				| ei.rookAttacks[color] & enemy & queens;
+		int numberSuperiorAttacks = BitBoard.hammingWeight(superiorAttacks);
+		if (numberSuperiorAttacks >= 2) {
+			attacks += numberSuperiorAttacks * HUNG_PIECES;
+		}
+		return attacks;
 	}
 
 	public int open(int phase) {
@@ -209,6 +352,10 @@ public class Evaluation extends EvalConstants {
 
 	public int end(int phase) {
 		return (short) (phase * 0xffff);
+	}
+
+	public int openingEndingWithShift(int shiftValue, int openEndingValue) {
+		return S(open(openEndingValue) >> shiftValue, end(openEndingValue) >> shiftValue);
 	}
 
 	private long getRookMoves(BitBoard board, int index, int side) {

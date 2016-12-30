@@ -20,6 +20,7 @@ public class EvalConstants {
 	public static final int ROOK = 4;
 	public static final int QUEEN = 5;
 	public static final int KING = 6;
+	public static final int[] PIECE_CORE_TO_EVAL = {0,0,1,1,2,2,4,4,3,3,5,5,6,6};
 	public static final int MATE = 30000;
 	public static final int WIN = 20000;
 	public static final int DRAW = 0;

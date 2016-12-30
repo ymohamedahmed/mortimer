@@ -460,11 +460,13 @@ public class BitBoard {
 		int pos = Long.numberOfTrailingZeros(bb);
 		return pos == 64 ? -1 : pos;
 	}
-	public int bitScanBackward(long bb){
+
+	public int bitScanBackward(long bb) {
 		int pos = Long.numberOfLeadingZeros(bb);
-		
-		return pos == 64 ? -1 : 63-pos;
+
+		return pos == 64 ? -1 : 63 - pos;
 	}
+
 	public static void initialiseZobrist() {
 		for (int x = 0; x <= 63; x++) {
 			for (int y = 0; y <= 11; y++) {
@@ -484,7 +486,8 @@ public class BitBoard {
 		}
 		return hash;
 	}
-	public static int hammingWeight(long x){
+
+	public static int hammingWeight(long x) {
 		x -= (x >> 1) & CoreConstants.m1;
 		x = (x & CoreConstants.m2) + ((x >> 2) & CoreConstants.m2);
 		x = (x + (x >> 4)) & CoreConstants.m4;
