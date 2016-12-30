@@ -23,6 +23,7 @@ public class MoveGenTest {
 		moveGen.initialisePawnLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
+
 		endTime = System.currentTimeMillis();
 		System.out.println("lookup table init time: " + (endTime - startTime) + "ms");
 

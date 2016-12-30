@@ -460,7 +460,11 @@ public class BitBoard {
 		int pos = Long.numberOfTrailingZeros(bb);
 		return pos == 64 ? -1 : pos;
 	}
-
+	public int bitScanBackward(long bb){
+		int pos = Long.numberOfLeadingZeros(bb);
+		
+		return pos == 64 ? -1 : 63-pos;
+	}
 	public static void initialiseZobrist() {
 		for (int x = 0; x <= 63; x++) {
 			for (int y = 0; y <= 11; y++) {

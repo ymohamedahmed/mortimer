@@ -118,7 +118,7 @@ public class Evaluation extends EvalConstants {
 					long routeToPromotion = pawnFile & ranksForward;
 					long otherPawnsAheadAdjacent = ranksForward & adjacentFiles & otherPawns;
 					long pushSquare = isWhite ? square << 8 : square >>> 8;
-					boolean suported = (square & ei.pawnAttacks[col]) != 0;
+					boolean supported = (square & ei.pawnAttacks[col]) != 0;
 					boolean doubled = (myPawns & routeToPromotion) != 0;
 					boolean opposed = (otherPawns & routeToPromotion) != 0;
 					boolean passed = !doubled && !opposed && otherPawnsAheadAdjacent == 0;
@@ -131,8 +131,67 @@ public class Evaluation extends EvalConstants {
 								&& (((otherPawnsAheadAdjacent & ~pieceAttacks) == 0)
 										|| (board.hammingWeight(myPawnsBesideAndBehindAdjacent) >= board
 												.hammingWeight(otherPawnsAheadAdjacent & ~pieceAttacks)));
-						/*boolean backward = !isolated && !candidate && myPawnsBesideAndBehindAdjacent == 0
-								&& (pieceAttacks & otherPawns) == 0 && (CoreConstants.ROW_BACKWARD_INCLUSIVE[col]);*/
+						boolean backward = !isolated && !candidate && myPawnsBesideAndBehindAdjacent == 0
+								&& (pieceAttacks & otherPawns) == 0
+								&& (CoreConstants.ROW_BACKWARD_INCLUSIVE[col][isWhite
+										? (int) board.bitScanForward(myPawnsAheadAdjacent) / 8
+										: (int) board.bitScanBackward(myPawnsAheadAdjacent) / 8] & routeToPromotion
+										& (pawns | ei.pawnAttacks[enemy])) != 0;
+						if (backward) {
+							pawnStruct[col] -= PAWN_BACKWARDS[opposed ? 1 : 0];
+						}
+						if (isolated) {
+							pawnStruct[col] -= PAWN_ISOLATED[opposed ? 1 : 0];
+						}
+						if (doubled) {
+							pawnStruct[col] -= PAWN_DOUBLED[opposed ? 1 : 0];
+						}
+						if (!supported && !isolated && !backward) {
+							pawnStruct[col] -= PAWN_UNSUPPORTED;
+						}
+						if (candidate) {
+							passedPawns[col] += PAWN_CANDIDATE[relativeRank];
+						}
+						if ((square & (CoreConstants.FILE_D | CoreConstants.FILE_E)) != 0 && relativeRank == 1
+								&& (pushSquare & mines & ~pawns) != 0) {
+							pawnStruct[col] -= PAWN_BLOCKADE;
+						}
+						if (gamePhase > 0 && relativeRank > 2) {
+							long stormPawns = otherPawnsAheadAdjacent & ~CoreConstants.FILE_D & ~CoreConstants.FILE_E;
+							if (stormPawns != 0) {
+								int otherKingFile = ei.kingIndex[enemy] % 8;
+								if ((stormPawns & CoreConstants.FILE[otherKingFile]) != 0) {
+									pawnStruct[col] += PAWN_STORM_CENTER[relativeRank];
+								} else if ((stormPawns & CoreConstants.ADJACENT_FILE[otherKingFile]) != 0) {
+									pawnStruct[col] += PAWN_STORM[relativeRank];
+								}
+							}
+						}
+
+					} else {
+						long rooks = board.bitboards[CoreConstants.WHITE_BISHOP]
+								| board.bitboards[CoreConstants.BLACK_BISHOP];
+						long queens = board.bitboards[CoreConstants.WHITE_QUEEN]
+								| board.bitboards[CoreConstants.BLACK_QUEEN];
+						long backFile = (getRookMoves(board, index, col) & board.bitboards[enemy]) & pawnFile
+								& CoreConstants.ROW_BACKWARD[col][rank];
+						long attackedNotDefendedRoute = ((routeToPromotion & ei.attackedSquares[enemy])
+								| ((backFile & (rooks | queens) & others) != 0 ? routeToPromotion : 0))
+								& ~((routeToPromotion & ei.attackedSquares[col])
+										| ((backFile & (rooks | queens) & mines) != 0 ? routeToPromotion : 0));
+						boolean connected = ((CoreConstants.KING_TABLE[index] & board.bitboards[enemy]) & adjacentFiles
+								& myPawns) != 0;
+						boolean outside = otherPawns != 0 && (((square & CoreConstants.LEFT_FILES[3]) != 0
+								&& (pawns & CoreConstants.LEFT_FILES[file]) == 0)
+								|| ((square & CoreConstants.RIGHT_FILES[4]) != 0
+										&& (pawns & CoreConstants.RIGHT_FILES[file]) == 0));
+						boolean mobile = (pushSquare & (all | attackedNotDefendedRoute)) == 0;
+						boolean runner = mobile && (routeToPromotion & all) == 0 && attackedNotDefendedRoute == 0;
+						passedPawns[col] += PAWN_PASSER[relativeRank];
+						if(relativeRank >= 2){
+							int pushIndex = isWhite ? index + 8 : index - 8;
+							
+						}
 					}
 				}
 			}
@@ -150,5 +209,14 @@ public class Evaluation extends EvalConstants {
 
 	public int end(int phase) {
 		return (short) (phase * 0xffff);
+	}
+
+	private long getRookMoves(BitBoard board, int index, int side) {
+		long rookBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
+				& CoreConstants.occupancyMaskRook[index];
+		int lookupIndex = (int) ((rookBlockers
+				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
+		long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
+		return moveSquares;
 	}
 }
