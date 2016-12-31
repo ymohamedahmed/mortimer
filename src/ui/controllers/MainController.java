@@ -80,7 +80,6 @@ public class MainController {
 		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
 		moveList = getMoves(board, false);
-		System.out.println("MOVE LIST SIZE: " + moveList.size());
 		if (AI_COLOR == CoreConstants.WHITE) {
 			moveAI(board);
 		}
@@ -105,9 +104,7 @@ public class MainController {
 
 		for (int square : blueSquares) {
 			if (square == index) {
-
 				move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
-
 				blueSquares.clear();
 				pieceMoved = true;
 				break;

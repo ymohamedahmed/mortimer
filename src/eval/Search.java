@@ -21,19 +21,21 @@ public class Search {
 		for (Move move : moves) {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
-			int firstGuess = 0;
+			double firstGuess = 0;
 			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d++) {
 				System.out.println("DEPTH: " + d);
 				firstGuess = mtdf(board, firstGuess, d, color);
 				System.out.println("Time : " + (System.currentTimeMillis() - startTime));
 				System.out.println("GUESS: " + firstGuess);
 				if (System.currentTimeMillis() - startTime >= EvalConstants.MAX_TIME) {
-					System.out.println("\nBREAK\n");
-					
+					System.out.println();
+					System.out.println("BREAK");
+					System.out.println();
 					break;
 				}
 			}
 			board.undo();
+			System.out.println("SCORE FOR MOVE: " + firstGuess );
 			if (firstGuess > maxScore) {
 				maxScore = firstGuess;
 				optimal = move;
@@ -43,8 +45,8 @@ public class Search {
 		return optimal;
 	}
 
-	private int mtdf(BitBoard board, int f, int d, int color) {
-		int g = f;
+	private double mtdf(BitBoard board, double f, int d, int color) {
+		double g = f;
 		double upperBound = Double.POSITIVE_INFINITY;
 		double lowerBound = Double.NEGATIVE_INFINITY;
 		while (lowerBound < upperBound) {
@@ -61,7 +63,7 @@ public class Search {
 	}
 
 	// Color Factor: 1 for white, -1 for black
-	private int negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
+	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
 		double alphaOrig = alpha;
 		TranspositionEntry tEntry = new TranspositionEntry();
 		tEntry = hashtable.get(board.hash());
@@ -79,7 +81,7 @@ public class Search {
 		if (depth == 0) {
 			return colorFactor * (eval.evaluate(board, colorFactor));
 		}
-		int bestValue = Integer.MIN_VALUE;
+		double bestValue = Double.NEGATIVE_INFINITY;
 		//ArrayList<Move> moves = sortMoves(board, moveGen.generateMoves(board, false), colorFactor);
 		ArrayList<Move> moves = moveGen.generateMoves(board, false);
 		for (Move move : moves) {
@@ -105,7 +107,7 @@ public class Search {
 		tEntryFinal.setValid(true);
 		hashtable.put(board.hash(), tEntryFinal);
 
-		return 0;
+		return bestValue;
 	}
 
 	private ArrayList<MoveScore> quickSort(ArrayList<MoveScore> moves) {
@@ -163,7 +165,7 @@ public class Search {
 	}
 
 	private class TranspositionEntry {
-		private int score;
+		private double score;
 		private TranspositionFlag flag;
 		private int depth;
 		private boolean valid = false;
@@ -171,11 +173,11 @@ public class Search {
 		public TranspositionEntry() {
 		}
 
-		public int getScore() {
+		public double getScore() {
 			return score;
 		}
 
-		public void setScore(int score) {
+		public void setScore(double score) {
 			this.score = score;
 		}
 

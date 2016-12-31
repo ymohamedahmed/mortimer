@@ -136,7 +136,6 @@ public class BitBoard {
 		// TODO move rook during castling
 		byte castle = move.getCastlingFlag();
 		if (castle != 0) {
-			System.out.println("CASTLING FLAG: " + Long.toBinaryString(castling[side]));
 			int rookOldIndex = 0;
 			int rookFinalIndex = 0;
 			switch (castle) {
