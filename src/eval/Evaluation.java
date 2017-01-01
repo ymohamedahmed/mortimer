@@ -42,7 +42,7 @@ public class Evaluation extends EvalConstants {
 			return endgameValue;
 		}
 		pawnMat[0] = whitePawns * PIECE_VALUE_PHASE[PAWN];
-		pawnMat[1] = blackPawns * PAWN;
+		pawnMat[1] = blackPawns * PIECE_VALUE_PHASE[PAWN];
 		nonPawnMat[0] = (whiteKnights * PIECE_VALUE_PHASE[KNIGHT]) + (whiteBishops * PIECE_VALUE_PHASE[BISHOP])
 				+ (whiteRooks * PIECE_VALUE_PHASE[ROOK]) + (whiteQueens * PIECE_VALUE_PHASE[QUEEN])
 				+ ((whiteBishops == 2) ? BISHOP_PAIR : 0);
@@ -90,7 +90,7 @@ public class Evaluation extends EvalConstants {
 			pawnCanAttack[1] |= ((blackPawnsBoard & ~CoreConstants.FILE_H) >>> 9)
 					| ((blackPawnsBoard & ~CoreConstants.FILE_A) >>> 7);
 		}
-	/*	attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
+		/*attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
 		attacks[1] = evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);*/
 		kingZone[0] = CoreConstants.KING_TABLE[ei.kingIndex[0]];
 		kingZone[0] |= (kingZone[0] << 8);
@@ -133,7 +133,7 @@ public class Evaluation extends EvalConstants {
 						boolean isolated = (myPawns & adjacentFiles) == 0;
 						boolean candidate = !doubled && !opposed
 								&& (((otherPawnsAheadAdjacent & ~pieceAttacks) == 0)
-										|| (BitBoard.hammingWeight(myPawnsBesideAndBehindAdjacent) >= board
+										|| (BitBoard.hammingWeight(myPawnsBesideAndBehindAdjacent) >= BitBoard
 												.hammingWeight(otherPawnsAheadAdjacent & ~pieceAttacks)));
 						boolean backward = !isolated && !candidate && myPawnsBesideAndBehindAdjacent == 0
 								&& (pieceAttacks & otherPawns) == 0
@@ -301,7 +301,7 @@ public class Evaluation extends EvalConstants {
 		}
 		//System.out.println("LOOP END");
 		boolean white2Move = board.toMove == 0;
-/*		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
+		/*int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
 				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
 				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
 				- passedPawns[1] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]

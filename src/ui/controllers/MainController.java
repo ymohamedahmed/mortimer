@@ -160,10 +160,11 @@ public class MainController {
 	public void move(BitBoard board, Move move, boolean repaint) {
 		board.move(move);
 		int side = move.getPieceType() % 2;
+		int colorFactor = side == 0 ? 1 : -1;
 		if (move.isPromotion() && side == PLAYER_COLOR) {
-			pawnPromotion(move.getOldPos(), PLAYER_COLOR, board, true);
+			pawnPromotion(move.getOldPos(), colorFactor, board, true);
 		} else if (move.isPromotion() && side == AI_COLOR) {
-			pawnPromotion(move.getOldPos(), PLAYER_COLOR, board, false);
+			pawnPromotion(move.getOldPos(), colorFactor, board, false);
 		}
 		if (repaint) {
 			// Clear the canvas and then repaint it

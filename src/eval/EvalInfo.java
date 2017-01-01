@@ -33,23 +33,22 @@ public class EvalInfo {
 						: CoreConstants.BLACK;
 				int enemy = color == 0 ? 1 : 0;
 				if ((square & pawns) != 0) {
-					moves = (CoreConstants.PAWN_ATTACKS_TABLE[color][index] & board.bitboards[enemy]);
+					moves = (CoreConstants.PAWN_ATTACKS_TABLE[color][index]);
 					pawnAttacks[color] |= moves;
 				} else if ((square & knights) != 0) {
-					moves = (CoreConstants.KNIGHT_TABLE[index] & board.bitboards[enemy]);
+					moves = (CoreConstants.KNIGHT_TABLE[index]);
 					knightAttacks[color] |= moves;
 				} else if ((square & bishops) != 0) {
-					moves = (getBishopMoves(board, index, color) & board.bitboards[enemy]);
+					moves = (getBishopMoves(board, index, color));
 					bishopAttacks[color] |= moves;
 				} else if ((square & rooks) != 0) {
-					moves = (getRookMoves(board, index, color) & board.bitboards[enemy]);
+					moves = (getRookMoves(board, index, color));
 					rookAttacks[color] |= moves;
 				} else if ((square & queens) != 0) {
-					moves = (getBishopMoves(board, index, color) | getRookMoves(board, index, color))
-							& board.bitboards[enemy];
+					moves = (getBishopMoves(board, index, color) | getRookMoves(board, index, color));
 					queenAttacks[color] |= moves;
-				}else if((square & kings) != 0){
-					moves = CoreConstants.KING_TABLE[index] & board.bitboards[enemy];
+				} else if ((square & kings) != 0) {
+					moves = CoreConstants.KING_TABLE[index];
 					kingAttacks[color] |= moves;
 				}
 				attacksFromSquares[index] = moves;
@@ -59,8 +58,10 @@ public class EvalInfo {
 			index++;
 			square <<= 1;
 		}
-		attackedSquares[0] = pawnAttacks[0] | knightAttacks[0] | bishopAttacks[0] | rookAttacks[0] | queenAttacks[0] | kingAttacks[0];
-		attackedSquares[1] = pawnAttacks[1] | knightAttacks[1] | bishopAttacks[1] | rookAttacks[1] | queenAttacks[1] | kingAttacks[1];
+		attackedSquares[0] = pawnAttacks[0] | knightAttacks[0] | bishopAttacks[0] | rookAttacks[0] | queenAttacks[0]
+				| kingAttacks[0];
+		attackedSquares[1] = pawnAttacks[1] | knightAttacks[1] | bishopAttacks[1] | rookAttacks[1] | queenAttacks[1]
+				| kingAttacks[1];
 	}
 
 	private long getBishopMoves(BitBoard board, int index, int side) {

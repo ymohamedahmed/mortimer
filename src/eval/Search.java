@@ -29,13 +29,13 @@ public class Search {
 				System.out.println("GUESS: " + firstGuess);
 				if (System.currentTimeMillis() - startTime >= EvalConstants.MAX_TIME) {
 					System.out.println();
+					System.out.println("FINAL DEPTH: " + d);
 					System.out.println("BREAK");
 					System.out.println();
 					break;
 				}
 			}
 			board.undo();
-			System.out.println("SCORE FOR MOVE: " + firstGuess );
 			if (firstGuess > maxScore) {
 				maxScore = firstGuess;
 				optimal = move;
