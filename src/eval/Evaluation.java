@@ -23,7 +23,7 @@ public class Evaluation extends EvalConstants {
 	private int[] scaleFactor = { 0 };
 
 	public int evaluate(BitBoard board, int color) {
-		System.out.println("EVAL START");
+		//System.out.println("EVAL START");
 		int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
 		int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
 		int whiteBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_BISHOP]);
@@ -59,9 +59,7 @@ public class Evaluation extends EvalConstants {
 		long blackPawnsBoard = board.bitboards[CoreConstants.BLACK_PAWN];
 		long pawns = whitePawnsBoard | blackPawnsBoard;
 		EvalInfo ei = new EvalInfo();
-		System.out.println("GENERATING EVAL INFO");
 		ei.generate(board);
-		System.out.println("FINISHED GENERATING EVAL INFO");
 		if (gamePhase > 0) {
 			long whiteSafe = WHITE_SPACE & ~ei.pawnAttacks[1] & (~ei.attackedSquares[1] | ei.attackedSquares[0]);
 			long blackSafe = BLACK_SPACE & ~ei.pawnAttacks[0] & (~ei.attackedSquares[0] | ei.attackedSquares[1]);
@@ -92,10 +90,8 @@ public class Evaluation extends EvalConstants {
 			pawnCanAttack[1] |= ((blackPawnsBoard & ~CoreConstants.FILE_H) >>> 9)
 					| ((blackPawnsBoard & ~CoreConstants.FILE_A) >>> 7);
 		}
-		System.out.println("PRE EVAL ATTACKS");
-		attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
-		attacks[1] = evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);
-		System.out.println("POST EVAL ATTACKS");
+	/*	attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
+		attacks[1] = evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);*/
 		kingZone[0] = CoreConstants.KING_TABLE[ei.kingIndex[0]];
 		kingZone[0] |= (kingZone[0] << 8);
 		kingZone[1] = CoreConstants.KING_TABLE[ei.kingIndex[1]];
@@ -104,7 +100,7 @@ public class Evaluation extends EvalConstants {
 		long pieceAttacks, safeAttacks, kingAttacks;
 		long square = 1;
 		for (int index = 0; index < 64; index++) {
-			System.out.println("INDEX: " + index);
+			//System.out.println("INDEX: " + index);
 			if ((square & all) != 0) {
 				boolean isWhite = ((board.bitboards[CoreConstants.WHITE] & square) != 0);
 				int col = isWhite ? 0 : 1;
@@ -303,17 +299,21 @@ public class Evaluation extends EvalConstants {
 			square <<= 1;
 			
 		}
-		System.out.println("LOOP END");
+		//System.out.println("LOOP END");
 		boolean white2Move = board.toMove == 0;
-		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
+/*		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
 				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
 				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
 				- passedPawns[1] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]
-						- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);
+						- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);*/
+		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
+				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
+				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
+				- passedPawns[1];
 		int value = (gamePhase * open(openingAndEnding)
 				+ (PHASE_MIDGAME - gamePhase) * end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
 				/ PHASE_MIDGAME;
-		System.out.println("EVAL END");
+		//System.out.println("EVAL END");
 		assert Math.abs(value) < KNOWN_WIN : "Value is outside bounds";
 		return color * value;
 	}
