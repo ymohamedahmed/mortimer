@@ -17,7 +17,6 @@ public class EvalInfo {
 	public void generate(BitBoard board) {
 		kingIndex[0] = board.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
 		kingIndex[1] = board.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
-		int index = 0;
 		long square = 1L;
 		long all = board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK];
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
@@ -26,29 +25,30 @@ public class EvalInfo {
 		long rooks = board.bitboards[CoreConstants.WHITE_ROOK] | board.bitboards[CoreConstants.BLACK_ROOK];
 		long queens = board.bitboards[CoreConstants.WHITE_QUEEN] | board.bitboards[CoreConstants.BLACK_QUEEN];
 		long kings = board.bitboards[CoreConstants.WHITE_KING] | board.bitboards[CoreConstants.BLACK_KING];
-		while (index < 64) {
+		for(int index = 0; index < 64; index++){
 			if ((square & all) != 0) {
 				long moves = 0;
 				int color = (board.bitboards[CoreConstants.WHITE] & square) != 0 ? CoreConstants.WHITE
 						: CoreConstants.BLACK;
 				int enemy = color == 0 ? 1 : 0;
 				if ((square & pawns) != 0) {
-					moves = (CoreConstants.PAWN_ATTACKS_TABLE[color][index]);
+					moves = (CoreConstants.PAWN_ATTACKS_TABLE[color][index] & board.bitboards[enemy]);
 					pawnAttacks[color] |= moves;
 				} else if ((square & knights) != 0) {
-					moves = (CoreConstants.KNIGHT_TABLE[index]);
+					moves = (CoreConstants.KNIGHT_TABLE[index] & board.bitboards[enemy]);
 					knightAttacks[color] |= moves;
 				} else if ((square & bishops) != 0) {
-					moves = (getBishopMoves(board, index, color));
+					moves = (getBishopMoves(board, index, color) & board.bitboards[enemy]);
 					bishopAttacks[color] |= moves;
 				} else if ((square & rooks) != 0) {
-					moves = (getRookMoves(board, index, color));
+					moves = (getRookMoves(board, index, color) & board.bitboards[enemy]);
 					rookAttacks[color] |= moves;
 				} else if ((square & queens) != 0) {
-					moves = (getBishopMoves(board, index, color) | getRookMoves(board, index, color));
+					moves = (getBishopMoves(board, index, color) | getRookMoves(board, index, color))
+							& board.bitboards[enemy];
 					queenAttacks[color] |= moves;
 				} else if ((square & kings) != 0) {
-					moves = CoreConstants.KING_TABLE[index];
+					moves = CoreConstants.KING_TABLE[index] & board.bitboards[enemy];
 					kingAttacks[color] |= moves;
 				}
 				attacksFromSquares[index] = moves;

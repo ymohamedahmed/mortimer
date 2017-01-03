@@ -23,22 +23,22 @@ public class Evaluation extends EvalConstants {
 	private int[] scaleFactor = { 0 };
 
 	public int evaluate(BitBoard board, int color) {
-		//System.out.println("EVAL START");
+		// System.out.println("EVAL START");
 		int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
-		int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
-		int whiteBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_BISHOP]);
-		int whiteRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_ROOK]);
-		int whiteQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_QUEEN]);
-
 		int blackPawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_PAWN]);
+		int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
 		int blackKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_KNIGHT]);
+		int whiteBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_BISHOP]);
 		int blackBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_BISHOP]);
+		int whiteRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_ROOK]);
 		int blackRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_ROOK]);
+		int whiteQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_QUEEN]);
 		int blackQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_QUEEN]);
 
 		int endgameValue = Endgame.evaluate(board, scaleFactor, whitePawns, blackPawns, whiteKnights, blackKnights,
 				whiteBishops, blackBishops, whiteRooks, blackRooks, whiteQueens, blackQueens);
 		if (endgameValue != NO_VALUE) {
+			System.out.println("ENDGAME");
 			return endgameValue;
 		}
 		pawnMat[0] = whitePawns * PIECE_VALUE_PHASE[PAWN];
@@ -53,27 +53,41 @@ public class Evaluation extends EvalConstants {
 		int gamePhase = nonPawnMaterial >= MAT_MIDGAME_MAX ? PHASE_MIDGAME
 				: (nonPawnMaterial <= MAT_ENDGAME_MIN) ? PHASE_ENDGAME
 						: ((nonPawnMaterial - MAT_ENDGAME_MIN) * PHASE_MIDGAME) / (MAT_MIDGAME_MAX - MAT_ENDGAME_MIN);
+		pieceSquare[0] = 0;
+		pieceSquare[1] = 0;
+		positional[0] = 0;
+		positional[1] = 0;
+		mobility[0] = 0;
+		mobility[1] = 0;
+		kingAttackedCount[0] = 0;
+		kingAttackedCount[1] = 0;
+		kingSafety[0] = 0;
+		kingSafety[1] = 0;
+		pawnStruct[0] = 0;
+		pawnStruct[1] = 0;
+		passedPawns[0] = 0;
+		passedPawns[1] = 0;
 		mobilitySquares[0] = ~board.bitboards[CoreConstants.WHITE];
 		mobilitySquares[1] = ~board.bitboards[CoreConstants.BLACK];
-		long whitePawnsBoard = board.bitboards[CoreConstants.WHITE_PAWN];
-		long blackPawnsBoard = board.bitboards[CoreConstants.BLACK_PAWN];
-		long pawns = whitePawnsBoard | blackPawnsBoard;
 		EvalInfo ei = new EvalInfo();
 		ei.generate(board);
+		long whitePawnsBoard = board.bitboards[CoreConstants.WHITE_PAWN];
+		long blackPawnsBoard = board.bitboards[CoreConstants.BLACK_PAWN];
+
 		if (gamePhase > 0) {
 			long whiteSafe = WHITE_SPACE & ~ei.pawnAttacks[1] & (~ei.attackedSquares[1] | ei.attackedSquares[0]);
 			long blackSafe = BLACK_SPACE & ~ei.pawnAttacks[0] & (~ei.attackedSquares[0] | ei.attackedSquares[1]);
 			long whiteBehindPawn = ((whitePawnsBoard >>> 8) | (whitePawnsBoard >>> 16) | (whitePawnsBoard >>> 24));
-			long blackBehindPawns = ((blackPawnsBoard << 8) | (blackPawnsBoard << 16) | (blackPawnsBoard << 24));
+			long blackBehindPawn = ((blackPawnsBoard << 8) | (blackPawnsBoard << 16) | (blackPawnsBoard << 24));
 			spatial[0] = SPACE
 					* (((BitBoard.hammingWeight(whiteSafe) + BitBoard.hammingWeight(whiteSafe & whiteBehindPawn))
 							* (whiteKnights + whiteBishops)) / 4);
 			spatial[1] = SPACE
-					* (((BitBoard.hammingWeight(blackSafe) + BitBoard.hammingWeight(blackSafe & blackBehindPawns))
+					* (((BitBoard.hammingWeight(blackSafe) + BitBoard.hammingWeight(blackSafe & blackBehindPawn))
 							* (blackKnights + blackBishops)) / 4);
 		} else {
 			spatial[0] = 0;
-			spatial[1] = 1;
+			spatial[1] = 0;
 		}
 		pawnCanAttack[0] = ei.pawnAttacks[0];
 		pawnCanAttack[1] = ei.pawnAttacks[1];
@@ -90,17 +104,26 @@ public class Evaluation extends EvalConstants {
 			pawnCanAttack[1] |= ((blackPawnsBoard & ~CoreConstants.FILE_H) >>> 9)
 					| ((blackPawnsBoard & ~CoreConstants.FILE_A) >>> 7);
 		}
-		/*attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
-		attacks[1] = evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);*/
+		/*
+		 * attacks[0] = evalAttacks(board, ei, 0,
+		 * board.bitboards[CoreConstants.BLACK]); attacks[1] =
+		 * evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);
+		 */
 		kingZone[0] = CoreConstants.KING_TABLE[ei.kingIndex[0]];
 		kingZone[0] |= (kingZone[0] << 8);
 		kingZone[1] = CoreConstants.KING_TABLE[ei.kingIndex[1]];
 		kingZone[1] |= (kingZone[1] >>> 8);
 		long all = board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK];
 		long pieceAttacks, safeAttacks, kingAttacks;
+		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
+		long knights = board.bitboards[CoreConstants.WHITE_KNIGHT] | board.bitboards[CoreConstants.BLACK_KNIGHT];
+		long bishops = board.bitboards[CoreConstants.WHITE_BISHOP] | board.bitboards[CoreConstants.BLACK_BISHOP];
+		long rooks = board.bitboards[CoreConstants.WHITE_ROOK] | board.bitboards[CoreConstants.BLACK_ROOK];
+		long queens = board.bitboards[CoreConstants.WHITE_QUEEN] | board.bitboards[CoreConstants.BLACK_QUEEN];
+		long kings = board.bitboards[CoreConstants.WHITE_KING] | board.bitboards[CoreConstants.BLACK_KING];
 		long square = 1;
 		for (int index = 0; index < 64; index++) {
-			//System.out.println("INDEX: " + index);
+			// System.out.println("INDEX: " + index);
 			if ((square & all) != 0) {
 				boolean isWhite = ((board.bitboards[CoreConstants.WHITE] & square) != 0);
 				int col = isWhite ? 0 : 1;
@@ -113,7 +136,7 @@ public class Evaluation extends EvalConstants {
 				int relativeRank = isWhite ? rank : 7 - rank;
 				pieceAttacks = ei.attacksFromSquares[index];
 				if ((square & pawns) != 0) {
-					pieceSquare[0] += POS_PAWN[pieceIndex];
+					pieceSquare[col] += POS_PAWN[pieceIndex];
 					long myPawns = pawns & mines;
 					long otherPawns = pawns & others;
 					long adjacentFiles = CoreConstants.ADJACENT_FILE[file];
@@ -173,10 +196,7 @@ public class Evaluation extends EvalConstants {
 						}
 
 					} else {
-						long rooks = board.bitboards[CoreConstants.WHITE_BISHOP]
-								| board.bitboards[CoreConstants.BLACK_BISHOP];
-						long queens = board.bitboards[CoreConstants.WHITE_QUEEN]
-								| board.bitboards[CoreConstants.BLACK_QUEEN];
+
 						long backFile = (getRookMoves(board, index, col) & board.bitboards[enemy]) & pawnFile
 								& CoreConstants.ROW_BACKWARD[col][rank];
 						long attackedNotDefendedRoute = ((routeToPromotion & ei.attackedSquares[enemy])
@@ -213,14 +233,13 @@ public class Evaluation extends EvalConstants {
 							passedPawns[col] += PAWN_PASSER_MOBILE[relativeRank];
 						}
 					}
-					long kings = board.bitboards[CoreConstants.WHITE_KING] | board.bitboards[CoreConstants.BLACK_KING];
+
 					if (gamePhase > 0 && (pawnFile & ~ranksForward & kingZone[col] & ~CoreConstants.FILE_D
 							& ~CoreConstants.FILE_E) != 0) {
 						pawnStruct[col] += (pawnFile & kings & mines) != 0 ? PAWN_SHIELD_CENTER[relativeRank]
 								: PAWN_SHIELD[relativeRank];
 					}
-				} else if ((square & (board.bitboards[CoreConstants.WHITE_KNIGHT]
-						| board.bitboards[CoreConstants.BLACK_KNIGHT])) != 0) {
+				} else if ((square & knights) != 0) {
 					pieceSquare[col] += POS_KNIGHT[pieceIndex];
 					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy];
 					mobility[col] += MOBILITY[KNIGHT][BitBoard.hammingWeight(safeAttacks & mobilitySquares[col])];
@@ -228,12 +247,11 @@ public class Evaluation extends EvalConstants {
 					if (kingAttacks != 0) {
 						kingSafety[col] += PIECE_ATTACKS_KING[KNIGHT] * BitBoard.hammingWeight(kingAttacks);
 						kingAttackedCount[col]++;
-						if ((square & OUTPOST_MASK[col] & ~pawnCanAttack[enemy]) != 0) {
-							positional[col] += KNIGHT_OUTPOST[(square * ei.pawnAttacks[col]) != 0 ? 1 : 0];
-						}
 					}
-				} else if ((square & (board.bitboards[CoreConstants.WHITE_BISHOP]
-						| board.bitboards[CoreConstants.BLACK_BISHOP])) != 0) {
+					if ((square & OUTPOST_MASK[col] & ~pawnCanAttack[enemy]) != 0) {
+						positional[col] += KNIGHT_OUTPOST[(square * ei.pawnAttacks[col]) != 0 ? 1 : 0];
+					}
+				} else if ((square & bishops) != 0) {
 					pieceSquare[col] += POS_BISHOP[pieceIndex];
 					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy];
 					mobility[col] += MOBILITY[BISHOP][BitBoard.hammingWeight(safeAttacks & mobilitySquares[col])];
@@ -251,8 +269,7 @@ public class Evaluation extends EvalConstants {
 						mobility[col] -= BISHOP_TRAPPED_PENALTY[(BISHOP_TRAPPING_GUARD[index] & pawns & others) != 0 ? 1
 								: 0];
 					}
-				} else if ((square & (board.bitboards[CoreConstants.WHITE_ROOK]
-						| board.bitboards[CoreConstants.BLACK_ROOK])) != 0) {
+				} else if ((square & rooks) != 0) {
 					pieceSquare[col] += POS_ROOK[pieceIndex];
 					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy] & ~ei.knightAttacks[enemy]
 							& ~ei.bishopAttacks[enemy];
@@ -280,8 +297,7 @@ public class Evaluation extends EvalConstants {
 							&& mobilityCount < ROOK_TRAPPED_PENALTY.length) {
 						positional[col] -= ROOK_TRAPPED_PENALTY[mobilityCount];
 					}
-				} else if ((square & (board.bitboards[CoreConstants.WHITE_QUEEN]
-						| board.bitboards[CoreConstants.BLACK_QUEEN])) != 0) {
+				} else if ((square & queens) != 0) {
 					pieceSquare[col] += POS_QUEEN[pieceIndex];
 					safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy] & ~ei.knightAttacks[enemy]
 							& ~ei.bishopAttacks[enemy] & ~ei.rookAttacks[enemy];
@@ -291,21 +307,25 @@ public class Evaluation extends EvalConstants {
 						kingSafety[col] += PIECE_ATTACKS_KING[QUEEN] * BitBoard.hammingWeight(kingAttacks);
 						kingAttackedCount[col]++;
 					}
-				} else if ((square & (board.bitboards[CoreConstants.WHITE_KING]
-						| board.bitboards[CoreConstants.BLACK_KING])) != 0) {
+				} else if ((square & kings) != 0) {
 					pieceSquare[col] += POS_KING[pieceIndex];
 				}
 			}
 			square <<= 1;
-			
+
 		}
-		//System.out.println("LOOP END");
+		// System.out.println("LOOP END");
 		boolean white2Move = board.toMove == 0;
-		/*int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
-				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
-				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
-				- passedPawns[1] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]
-						- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);*/
+		/*
+		 * int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] -
+		 * pawnMat[1] + nonPawnMat[0] - nonPawnMat[1] + pieceSquare[0] -
+		 * pieceSquare[1] + spatial[0] - spatial[1] + positional[0] -
+		 * positional[1] + attacks[0] - attacks[1] + mobility[0] - mobility[1] +
+		 * pawnStruct[0] - pawnStruct[1] + passedPawns[0] - passedPawns[1] +
+		 * openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] *
+		 * kingSafety[0] - KING_SAFETY_PONDER[kingAttackedCount[1]] *
+		 * kingSafety[1]);
+		 */
 		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
 				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
 				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
@@ -313,7 +333,7 @@ public class Evaluation extends EvalConstants {
 		int value = (gamePhase * open(openingAndEnding)
 				+ (PHASE_MIDGAME - gamePhase) * end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
 				/ PHASE_MIDGAME;
-		//System.out.println("EVAL END");
+		// System.out.println("EVAL END");
 		assert Math.abs(value) < KNOWN_WIN : "Value is outside bounds";
 		return color * value;
 	}

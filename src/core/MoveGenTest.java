@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import eval.Board;
+import eval.Evaluation;
 
 public class MoveGenTest {
 	BitBoard board = new BitBoard();
@@ -23,9 +23,8 @@ public class MoveGenTest {
 		moveGen.initialisePawnLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
-		
-
 		endTime = System.currentTimeMillis();
+		System.out.println(new Evaluation().evaluate(board, 1));
 		System.out.println("lookup table init time: " + (endTime - startTime) + "ms");
 
 		startTime = System.currentTimeMillis();

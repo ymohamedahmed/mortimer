@@ -162,9 +162,9 @@ public class MainController {
 		int side = move.getPieceType() % 2;
 		int colorFactor = side == 0 ? 1 : -1;
 		if (move.isPromotion() && side == PLAYER_COLOR) {
-			pawnPromotion(move.getOldPos(), colorFactor, board, true);
+			pawnPromotion(move.getOldPos(),move.getFinalPos(), colorFactor, board, true);
 		} else if (move.isPromotion() && side == AI_COLOR) {
-			pawnPromotion(move.getOldPos(), colorFactor, board, false);
+			pawnPromotion(move.getOldPos(),move.getFinalPos(), colorFactor, board, false);
 		}
 		if (repaint) {
 			// Clear the canvas and then repaint it
@@ -183,9 +183,8 @@ public class MainController {
 		return moveGen.generateMoves(board, removeCheck);
 	}
 
-	private void pawnPromotion(int pawnOldPos, int side, BitBoard board, boolean display) {
+	private void pawnPromotion(int pawnOldPos,int newPos,  int side, BitBoard board, boolean display) {
 		int colorFactor = (side == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
-		int newPos = pawnOldPos + (colorFactor * 8);
 		board.removePiece(pawnOldPos);
 		if (display) {
 			String choice = new String();
@@ -204,7 +203,7 @@ public class MainController {
 			if (result.isPresent()) {
 				choice = result.get();
 			} else {
-				pawnPromotion(pawnOldPos, side, board, display);
+				pawnPromotion(pawnOldPos, newPos, side, board, display);
 			}
 			switch (choice) {
 			case "Queen":
