@@ -342,25 +342,28 @@ public class Evaluation extends EvalConstants {
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
 		long attackedPawn = ei.pawnAttacks[color] & enemy & ~pawns;
 		while (attackedPawn != 0) {
-			long leastSigBit = 1 << BitBoard.bitScanForward(attackedPawn);
-			attacks += PAWN_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard.bitScanForward(attackedPawn)]]];
+			long leastSigBit = lsb(attackedPawn);
+			attacks += PAWN_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard.bitScanForward(leastSigBit)]]];
 			attackedPawn &= ~leastSigBit;
+			System.out.println("Attacked pawn");
 		}
 		long otherWeak = ei.attackedSquares[color] & enemy & ~ei.pawnAttacks[1 - color];
 		if (otherWeak != 0) {
 			long attackedByMinor = (ei.knightAttacks[color] | ei.bishopAttacks[color]) & otherWeak;
 			while (attackedByMinor != 0) {
-				long leastSigBit = 1 << BitBoard.bitScanForward(attackedByMinor);
+				long leastSigBit = lsb(attackedByMinor);
 				attacks += MINOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
-						.bitScanForward(attackedByMinor)]]];
+						.bitScanForward(leastSigBit)]]];
 				attackedByMinor &= ~leastSigBit;
+				System.out.println("Attacked minor");
 			}
 			long attackedByMajor = (ei.rookAttacks[color] | ei.queenAttacks[color]) & otherWeak;
 			while (attackedByMajor != 0) {
-				long leastSigBit = 1 << BitBoard.bitScanForward(attackedByMajor);
+				long leastSigBit = lsb(attackedByMajor);
 				attacks += MAJOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
-						.bitScanForward(attackedByMajor)]]];
+						.bitScanForward(leastSigBit)]]];
 				attackedByMajor &= ~leastSigBit;
+				System.out.println("Attacked major");
 			}
 		}
 		long rooks = board.bitboards[CoreConstants.WHITE_BISHOP] | board.bitboards[CoreConstants.BLACK_BISHOP];
@@ -378,7 +381,9 @@ public class Evaluation extends EvalConstants {
 		}
 		return attacks;
 	}
-
+	private long lsb(long squares){
+		return squares &  (-squares);
+	}
 	public int open(int phase) {
 		return (phase + 0x8000) >> 16;
 	}
