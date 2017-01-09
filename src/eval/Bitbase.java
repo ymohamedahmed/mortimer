@@ -18,9 +18,9 @@ public class Bitbase {
 	}
 
 	public boolean probe(BitBoard board) {
-		int wKingIndex = Board.mirrorIndex(board.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]));
-		int bKingIndex = Board.mirrorIndex(board.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]));
-		int pIndex = Board.mirrorIndex(board
+		int wKingIndex = Board.mirrorIndex(BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]));
+		int bKingIndex = Board.mirrorIndex(BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]));
+		int pIndex = Board.mirrorIndex(BitBoard
 				.bitScanForward(board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN]));
 		boolean white2Move = board.toMove == 0;
 		if (board.bitboards[CoreConstants.BLACK_PAWN] != 0) {

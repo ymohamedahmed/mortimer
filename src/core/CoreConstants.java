@@ -76,7 +76,7 @@ public class CoreConstants {
 			ROW_8, 
 			0 
 	};
-	public static final long[] ROW_UPDWARD_INCLUSIVE = { 
+	public static final long[] ROW_UPWARD_INCLUSIVE = { 
 			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
 			ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8, 
 			ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
@@ -109,8 +109,8 @@ public class CoreConstants {
 	public static final long[] ROW = {ROW_1, ROW_2, ROW_3, ROW_4,ROW_5,ROW_6,ROW_7,ROW_8};
 	public static final long[][] ROW_FORWARD = {ROW_UPWARD, ROW_DOWNARD};
 	public static final long[][] ROW_BACKWARD = {ROW_DOWNARD, ROW_UPWARD};
-	public static final long[][] ROW_FORWARD_INCLUSIVE = {ROW_UPDWARD_INCLUSIVE, ROW_DOWNARD_INCLUSIVE};
-	public static final long[][] ROW_BACKWARD_INCLUSIVE = {ROW_DOWNARD_INCLUSIVE, ROW_UPDWARD_INCLUSIVE};
+	public static final long[][] ROW_FORWARD_INCLUSIVE = {ROW_UPWARD_INCLUSIVE, ROW_DOWNARD_INCLUSIVE};
+	public static final long[][] ROW_BACKWARD_INCLUSIVE = {ROW_DOWNARD_INCLUSIVE, ROW_UPWARD_INCLUSIVE};
 
 	// Castling moves
 	public static final long bqueenside = 0x0400_0000_0000_0000L;
@@ -129,6 +129,8 @@ public class CoreConstants {
 	public static long KNIGHT_TABLE[] = new long[64];
 	public static long KING_TABLE[] = new long[64];
 	public static long PAWN_ATTACKS_TABLE[][] = new long[2][64];
+	public static long BISHOP_TABLE[] = new long[64];
+	public static long ROOK_TABLE[] = new long[64];
 
 	// Occupancy Mask
 	// Manipulated from http://www.rivalchess.com/magic-bitboards/ to match my

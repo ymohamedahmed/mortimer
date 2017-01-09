@@ -455,12 +455,12 @@ public class BitBoard {
 		System.out.println(result);
 	}
 
-	public int bitScanForward(long bb) {
+	public static int bitScanForward(long bb) {
 		int pos = Long.numberOfTrailingZeros(bb);
 		return pos == 64 ? -1 : pos;
 	}
 
-	public int bitScanBackward(long bb) {
+	public static int bitScanBackward(long bb) {
 		int pos = Long.numberOfLeadingZeros(bb);
 
 		return pos == 64 ? -1 : 63 - pos;

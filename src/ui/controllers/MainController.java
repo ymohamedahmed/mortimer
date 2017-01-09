@@ -38,6 +38,7 @@ public class MainController {
 		moveGen.initialiseKnightLookupTable();
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
+		moveGen.initialiseBishopAndRookEvalLookupTable();
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 		BitBoard.initialiseZobrist();
@@ -184,7 +185,6 @@ public class MainController {
 	}
 
 	private void pawnPromotion(int pawnOldPos,int newPos,  int side, BitBoard board, boolean display) {
-		int colorFactor = (side == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
 		board.removePiece(pawnOldPos);
 		if (display) {
 			String choice = new String();

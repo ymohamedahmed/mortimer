@@ -104,11 +104,10 @@ public class Evaluation extends EvalConstants {
 			pawnCanAttack[1] |= ((blackPawnsBoard & ~CoreConstants.FILE_H) >>> 9)
 					| ((blackPawnsBoard & ~CoreConstants.FILE_A) >>> 7);
 		}
-		/*
-		 * attacks[0] = evalAttacks(board, ei, 0,
-		 * board.bitboards[CoreConstants.BLACK]); attacks[1] =
-		 * evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);
-		 */
+
+		attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
+		attacks[1] = evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);
+
 		kingZone[0] = CoreConstants.KING_TABLE[ei.kingIndex[0]];
 		kingZone[0] |= (kingZone[0] << 8);
 		kingZone[1] = CoreConstants.KING_TABLE[ei.kingIndex[1]];
@@ -161,8 +160,8 @@ public class Evaluation extends EvalConstants {
 						boolean backward = !isolated && !candidate && myPawnsBesideAndBehindAdjacent == 0
 								&& (pieceAttacks & otherPawns) == 0
 								&& (CoreConstants.ROW_BACKWARD_INCLUSIVE[col][isWhite
-										? (int) board.bitScanForward(myPawnsAheadAdjacent) / 8
-										: (int) board.bitScanBackward(myPawnsAheadAdjacent) / 8] & routeToPromotion
+										? (int) BitBoard.bitScanForward(myPawnsAheadAdjacent) / 8
+										: (int) BitBoard.bitScanBackward(myPawnsAheadAdjacent) / 8] & routeToPromotion
 										& (pawns | ei.pawnAttacks[enemy])) != 0;
 						if (backward) {
 							pawnStruct[col] -= PAWN_BACKWARDS[opposed ? 1 : 0];
@@ -316,20 +315,20 @@ public class Evaluation extends EvalConstants {
 		}
 		// System.out.println("LOOP END");
 		boolean white2Move = board.toMove == 0;
+
+		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
+				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
+				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
+				- passedPawns[1] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]
+						- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);
+
 		/*
 		 * int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] -
 		 * pawnMat[1] + nonPawnMat[0] - nonPawnMat[1] + pieceSquare[0] -
 		 * pieceSquare[1] + spatial[0] - spatial[1] + positional[0] -
 		 * positional[1] + attacks[0] - attacks[1] + mobility[0] - mobility[1] +
-		 * pawnStruct[0] - pawnStruct[1] + passedPawns[0] - passedPawns[1] +
-		 * openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] *
-		 * kingSafety[0] - KING_SAFETY_PONDER[kingAttackedCount[1]] *
-		 * kingSafety[1]);
+		 * pawnStruct[0] - pawnStruct[1] + passedPawns[0] - passedPawns[1];
 		 */
-		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
-				+ pieceSquare[0] - pieceSquare[1] + spatial[0] - spatial[1] + positional[0] - positional[1] + attacks[0]
-				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
-				- passedPawns[1];
 		int value = (gamePhase * open(openingAndEnding)
 				+ (PHASE_MIDGAME - gamePhase) * end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
 				/ PHASE_MIDGAME;
@@ -343,22 +342,24 @@ public class Evaluation extends EvalConstants {
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
 		long attackedPawn = ei.pawnAttacks[color] & enemy & ~pawns;
 		while (attackedPawn != 0) {
-			long leastSigBit = 1 << board.bitScanForward(attackedPawn);
-			attacks += PAWN_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[board.bitScanForward(attackedPawn)]]];
+			long leastSigBit = 1 << BitBoard.bitScanForward(attackedPawn);
+			attacks += PAWN_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard.bitScanForward(attackedPawn)]]];
 			attackedPawn &= ~leastSigBit;
 		}
 		long otherWeak = ei.attackedSquares[color] & enemy & ~ei.pawnAttacks[1 - color];
 		if (otherWeak != 0) {
 			long attackedByMinor = (ei.knightAttacks[color] | ei.bishopAttacks[color]) & otherWeak;
 			while (attackedByMinor != 0) {
-				long leastSigBit = 1 << board.bitScanForward(attackedByMinor);
-				attacks += MINOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[board.bitScanForward(attackedByMinor)]]];
+				long leastSigBit = 1 << BitBoard.bitScanForward(attackedByMinor);
+				attacks += MINOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
+						.bitScanForward(attackedByMinor)]]];
 				attackedByMinor &= ~leastSigBit;
 			}
 			long attackedByMajor = (ei.rookAttacks[color] | ei.queenAttacks[color]) & otherWeak;
 			while (attackedByMajor != 0) {
-				long leastSigBit = 1 << board.bitScanForward(attackedByMajor);
-				attacks += MAJOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[board.bitScanForward(attackedByMajor)]]];
+				long leastSigBit = 1 << BitBoard.bitScanForward(attackedByMajor);
+				attacks += MAJOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
+						.bitScanForward(attackedByMajor)]]];
 				attackedByMajor &= ~leastSigBit;
 			}
 		}
@@ -370,6 +371,10 @@ public class Evaluation extends EvalConstants {
 		int numberSuperiorAttacks = BitBoard.hammingWeight(superiorAttacks);
 		if (numberSuperiorAttacks >= 2) {
 			attacks += numberSuperiorAttacks * HUNG_PIECES;
+		}
+		long pinnedNotPawn = ei.pinnedPieces & ~pawns & enemy;
+		if (pinnedNotPawn != 0) {
+			attacks += PINNED_PIECE & BitBoard.hammingWeight(pinnedNotPawn);
 		}
 		return attacks;
 	}

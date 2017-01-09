@@ -63,8 +63,8 @@ public class Endgame extends EvalConstants {
 
 	private static int endgameKXK(BitBoard board, boolean wDominating, int knights, int bishops, int rooks,
 			int queens) {
-		int wKingIndex = board.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
-		int bKingIndex = board.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
+		int wKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
+		int bKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
 		int value = KNOWN_WIN + (knights * PIECE_VALUE[KNIGHT]) + (bishops * PIECE_VALUE[BISHOP])
 				+ (rooks * PIECE_VALUE[ROOK]) + (queens * PIECE_VALUE[QUEEN])
 				+ CLOSER_SQUARES[Board.distance(wKingIndex, bKingIndex)]
@@ -73,8 +73,8 @@ public class Endgame extends EvalConstants {
 	}
 
 	private static int endgameKBNK(BitBoard board, boolean wDominating) {
-		int wKingIndex = board.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
-		int bKingIndex = board.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
+		int wKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
+		int bKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
 		long bishops = board.bitboards[CoreConstants.WHITE_BISHOP] | board.bitboards[CoreConstants.BLACK_BISHOP];
 		if ((bishops & BLACK_SQUARES) != 0) {
 			wKingIndex = Board.flipHorizontalIndex(wKingIndex);
@@ -91,25 +91,24 @@ public class Endgame extends EvalConstants {
 			return DRAW;
 		}
 		return wDominating
-				? KNOWN_WIN + PAWN + (int) board.bitScanForward(board.bitboards[CoreConstants.WHITE_PAWN]) / 8
+				? KNOWN_WIN + PAWN + (int) BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_PAWN]) / 8
 				: -KNOWN_WIN - PIECE_VALUE[PAWN]
-						- (7 - (int) board.bitScanForward(board.bitboards[CoreConstants.BLACK_PAWN]) / 8);
+						- (7 - (int) BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_PAWN]) / 8);
 	}
 
 	private static int scaleKRPKR(BitBoard board, boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int nonDomCol = domCol == 0 ? 1 : 0;
-		long domRook = board.bitboards[CoreConstants.ROOK + domCol];
 		long otherRook = board.bitboards[CoreConstants.ROOK + nonDomCol];
 		long domKing = board.bitboards[CoreConstants.KING + domCol];
 		long otherKing = board.bitboards[CoreConstants.KING + nonDomCol];
-		int domkingIndex = board.bitScanForward(domKing);
+		int domkingIndex = BitBoard.bitScanForward(domKing);
 		int rank8 = wDominating ? 7 : 0;
 		int rank7 = wDominating ? 6 : 1;
 		int rank6 = wDominating ? 5 : 2;
 		int rank2 = wDominating ? 1 : 6;
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
-		int pIndex = board.bitScanForward(pawns);
+		int pIndex = BitBoard.bitScanForward(pawns);
 		int pFileIndex = pIndex % 8;
 		long pFile = CoreConstants.FILE[pFileIndex];
 		long fileAndAdjacent = CoreConstants.FILE[pFileIndex] | CoreConstants.ADJACENT_FILE[pFileIndex];
@@ -160,8 +159,8 @@ public class Endgame extends EvalConstants {
 		}
 		long domKing = board.bitboards[domCol + CoreConstants.KING];
 		long enemyKing = board.bitboards[enemyCol + CoreConstants.KING];
-		int domKingIndex = board.bitScanForward(domKing);
-		int pIndex = board.bitScanForward(pawns);
+		int domKingIndex = BitBoard.bitScanForward(domKing);
+		int pIndex = BitBoard.bitScanForward(pawns);
 		if ((pawnZone & enemyKing) != 0 && Board.distance(domKingIndex, pIndex) >= 1) {
 			return DRAW;
 		}
@@ -175,7 +174,7 @@ public class Endgame extends EvalConstants {
 		long domBishop = board.bitboards[domCol + CoreConstants.BISHOP];
 		long domBishopSquares = ((domBishop & WHITE_SQUARES) != 0) ? WHITE_SQUARES : BLACK_SQUARES;
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
-		int index = board.bitScanForward(pawns);
+		int index = BitBoard.bitScanForward(pawns);
 		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index / 8] & CoreConstants.FILE[index % 8];
 		long otherKing = board.bitboards[CoreConstants.KING + enemyCol];
 		if ((pawnRoute & otherKing) != 0 && (domBishopSquares & otherKing) == 0) {
@@ -200,7 +199,7 @@ public class Endgame extends EvalConstants {
 		long otherBishop = board.bitboards[enemyCol + CoreConstants.BISHOP];
 		long domBishopSquares = ((domBishop & WHITE_SQUARES) != 0) ? WHITE_SQUARES : BLACK_SQUARES;
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
-		int index = board.bitScanForward(pawns);
+		int index = BitBoard.bitScanForward(pawns);
 		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index / 8] & CoreConstants.FILE[index % 8];
 		long otherKing = board.bitboards[CoreConstants.KING + enemyCol];
 		if ((pawnRoute & otherKing) != 0 && (domBishopSquares & otherKing) == 0) {
@@ -208,7 +207,7 @@ public class Endgame extends EvalConstants {
 		}
 		long otherBishopSquares = ((otherBishop & WHITE_SQUARES) != 0) ? WHITE_SQUARES : BLACK_SQUARES;
 		if (domBishopSquares != otherBishopSquares) {
-			int otherBishopIndex = board.bitScanForward(otherBishop);
+			int otherBishopIndex = BitBoard.bitScanForward(otherBishop);
 			if ((otherBishop & pawnRoute) != 0 || (getBishopMoves(board, otherBishopIndex, enemyCol)
 					& board.bitboards[enemyCol] & pawnRoute) != 0) {
 				return DRAW;
@@ -224,7 +223,7 @@ public class Endgame extends EvalConstants {
 		int[] pawnIndices = { 0, 0 };
 		int i = 0;
 		while (domPawns != 0) {
-			pawnIndices[i] = board.bitScanForward(domPawns);
+			pawnIndices[i] = BitBoard.bitScanForward(domPawns);
 			domPawns &= domPawns - 1;
 			i++;
 		}

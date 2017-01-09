@@ -60,6 +60,10 @@ public class MoveGenTest {
 		assertEquals(63, moveGen.mirrorIndex(7));
 		assertEquals(48, moveGen.mirrorIndex(8));
 		assertEquals(40, moveGen.mirrorIndex(16));
+		assertEquals(3, BitBoard.hammingWeight(0b010101));
+		assertEquals(1, BitBoard.hammingWeight(0b010));
+		assertEquals(5, BitBoard.hammingWeight(0b01010111));
+		assertEquals(9, BitBoard.hammingWeight(0b010101111111));
 	}
 
 	public long perft(MoveGen moveGen, int depth) {
