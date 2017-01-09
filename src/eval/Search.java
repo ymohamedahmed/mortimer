@@ -22,7 +22,7 @@ public class Search {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
 			double firstGuess = 0;
-			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d++) {
+			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d+=2) {
 				System.out.println("DEPTH: " + d);
 				firstGuess = mtdf(board, firstGuess, d, color);
 				System.out.println("Time : " + (System.currentTimeMillis() - startTime));

@@ -93,7 +93,6 @@ public class EvalInfo {
 		for (int index = 0; index < 64; index++) {
 			if ((square & all) != 0) {
 				long moves = 0;
-
 				int color = (board.bitboards[CoreConstants.WHITE] & square) != 0 ? CoreConstants.WHITE
 						: CoreConstants.BLACK;
 				long pinnedSquares = (square & pinnedPieces) != 0 ? pinnedMobility[index]
@@ -115,13 +114,12 @@ public class EvalInfo {
 					queenAttacks[color] |= moves & pinnedSquares;
 				} else if ((square & kings) != 0) {
 					moves = CoreConstants.KING_TABLE[index];
-					kingAttacks[color] |= moves & pinnedPieces;
+					kingAttacks[color] |= moves;
 				}
-				attacksFromSquares[index] = moves;
+				attacksFromSquares[index] = moves & pinnedSquares;
 			} else {
 				attacksFromSquares[index] = 0;
 			}
-			index++;
 			square <<= 1;
 		}
 		attackedSquares[0] = pawnAttacks[0] | knightAttacks[0] | bishopAttacks[0] | rookAttacks[0] | queenAttacks[0]

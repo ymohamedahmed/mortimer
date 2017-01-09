@@ -345,7 +345,6 @@ public class Evaluation extends EvalConstants {
 			long leastSigBit = lsb(attackedPawn);
 			attacks += PAWN_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard.bitScanForward(leastSigBit)]]];
 			attackedPawn &= ~leastSigBit;
-			System.out.println("Attacked pawn");
 		}
 		long otherWeak = ei.attackedSquares[color] & enemy & ~ei.pawnAttacks[1 - color];
 		if (otherWeak != 0) {
@@ -355,7 +354,6 @@ public class Evaluation extends EvalConstants {
 				attacks += MINOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
 						.bitScanForward(leastSigBit)]]];
 				attackedByMinor &= ~leastSigBit;
-				System.out.println("Attacked minor");
 			}
 			long attackedByMajor = (ei.rookAttacks[color] | ei.queenAttacks[color]) & otherWeak;
 			while (attackedByMajor != 0) {
@@ -363,7 +361,6 @@ public class Evaluation extends EvalConstants {
 				attacks += MAJOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
 						.bitScanForward(leastSigBit)]]];
 				attackedByMajor &= ~leastSigBit;
-				System.out.println("Attacked major");
 			}
 		}
 		long rooks = board.bitboards[CoreConstants.WHITE_BISHOP] | board.bitboards[CoreConstants.BLACK_BISHOP];
