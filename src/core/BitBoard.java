@@ -161,7 +161,7 @@ public class BitBoard {
 		}
 
 	}
-
+	
 	public void storeHistory() {
 		whiteHistory[moveNumber] = bitboards[0];
 		blackHistory[moveNumber] = bitboards[1];
@@ -288,10 +288,10 @@ public class BitBoard {
 			}
 			// Consider kingside
 			castling[side] &= 0b10111;
-			if (board[63] == CoreConstants.WHITE_ROOK) {
+			if (board[63] == CoreConstants.BLACK_ROOK) {
 				if (board[62] == CoreConstants.EMPTY) {
 					if (board[61] == CoreConstants.EMPTY) {
-						if (board[60] == CoreConstants.WHITE_KING) {
+						if (board[60] == CoreConstants.BLACK_KING) {
 							if (!((castling[side] & 0b00100) == 4)) {
 								if (!((castling[side] & 0b00001) == 1)) {
 									if (!isSquareAttacked(60, side)) {
@@ -325,7 +325,7 @@ public class BitBoard {
 				| (CoreConstants.KNIGHT_TABLE[kingIndex] & enemyKnights)
 				| (bishopAttacks(occupiedBoard, kingIndex, side) & enemyBishopQueen)
 				| (rookAttacks(occupiedBoard, kingIndex, side) & enemyRookQueen);
-		return (bitScanForward(result) != -1);
+		return (BitBoard.bitScanForward(result) != -1);
 	}
 
 	public boolean isSquareAttacked(int index, int side) {
@@ -340,7 +340,7 @@ public class BitBoard {
 				| (CoreConstants.KNIGHT_TABLE[index] & enemyKnights)
 				| (bishopAttacks(occupiedBoard, index, side) & enemyBishopQueen)
 				| (rookAttacks(occupiedBoard, index, side) & enemyRookQueen);
-		return (bitScanForward(result) != -1);
+		return (BitBoard.bitScanForward(result) != -1);
 	}
 
 	// Bishop and Rook attacks for purpose of determing status of check

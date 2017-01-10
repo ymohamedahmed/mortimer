@@ -24,35 +24,39 @@ public class MoveGenTest {
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 		endTime = System.currentTimeMillis();
-		System.out.println(new Evaluation().evaluate(board, 1));
 		System.out.println("lookup table init time: " + (endTime - startTime) + "ms");
 
 		startTime = System.currentTimeMillis();
-		System.out.println("perft 1: " + perft(moveGen, 1));
+		long perft1 =  perft(moveGen, 1);
+		System.out.println("perft 1: " + perft1);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 1 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		System.out.println("perft 2: " + perft(moveGen, 2));
+		long perft2 = perft(moveGen, 2);
+		System.out.println("perft 2: " + perft2);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 2 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		System.out.println("perft 3: " + perft(moveGen, 3));
+		long perft3 = perft(moveGen, 3);
+		System.out.println("perft 3: " + perft3);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 3 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		System.out.println("perft 4: " + perft(moveGen, 4));
+		long perft4 = perft(moveGen, 4);
+		System.out.println("perft 4: " + perft4);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 4 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		System.out.println("perft 5: " + perft(moveGen, 5));
+		long perft5 = perft(moveGen, 5);
+		System.out.println("perft 5: " + perft5);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 5 time: " + (endTime - startTime) + "ms");
 
@@ -64,6 +68,11 @@ public class MoveGenTest {
 		assertEquals(1, BitBoard.hammingWeight(0b010));
 		assertEquals(5, BitBoard.hammingWeight(0b01010111));
 		assertEquals(9, BitBoard.hammingWeight(0b010101111111));
+		assertEquals(20, perft1);
+		assertEquals(400, perft2);
+		assertEquals(8902, perft3);
+		assertEquals(197281, perft4);
+		assertEquals(4865609, perft5);
 	}
 
 	public long perft(MoveGen moveGen, int depth) {

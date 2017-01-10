@@ -129,18 +129,26 @@ public class EvalInfo {
 	}
 
 	private long getBishopMoves(BitBoard board, long all, int index, int side) {
-		long bishopBlockers = all & CoreConstants.occupancyMaskBishop[index];
-		int lookupIndex = (int) ((bishopBlockers
-				* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
-		long moveSquares = CoreConstants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
-		return moveSquares;
+		if (index != -1) {
+			long bishopBlockers = all & CoreConstants.occupancyMaskBishop[index];
+			int lookupIndex = (int) ((bishopBlockers
+					* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
+			long moveSquares = CoreConstants.magicMovesBishop[index][lookupIndex] & ~board.bitboards[side];
+			return moveSquares;
+		} else {
+			return 0;
+		}
 	}
 
 	private long getRookMoves(BitBoard board, long all, int index, int side) {
-		long rookBlockers = all & CoreConstants.occupancyMaskRook[index];
-		int lookupIndex = (int) ((rookBlockers
-				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
-		long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
-		return moveSquares;
+		if (index != -1) {
+			long rookBlockers = all & CoreConstants.occupancyMaskRook[index];
+			int lookupIndex = (int) ((rookBlockers
+					* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
+			long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
+			return moveSquares;
+		} else {
+			return 0;
+		}
 	}
 }

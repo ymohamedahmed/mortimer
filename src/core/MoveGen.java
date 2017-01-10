@@ -151,10 +151,6 @@ public class MoveGen {
 
 	private void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
-		/*
-		 * System.out.println("KING MOVES");
-		 * board.printBoard(Constants.KING_TABLE[index]);
-		 */
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KING : CoreConstants.BLACK_KING;
 		addMoves(pieceType, index, moves, moveList, false, false, CoreConstants.noCastle);
 		// Check for castling moves

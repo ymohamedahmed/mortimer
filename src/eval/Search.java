@@ -18,6 +18,9 @@ public class Search {
 		double maxScore = Double.NEGATIVE_INFINITY;
 		Move optimal = null;
 		ArrayList<Move> moves = moveGen.generateMoves(board, true);
+		long overallStartTime = System.currentTimeMillis();
+		int noOfMoves = moves.size();
+		double timePerMove = EvalConstants.MAX_TIME/noOfMoves;
 		for (Move move : moves) {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
@@ -25,13 +28,9 @@ public class Search {
 			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d+=2) {
 				System.out.println("DEPTH: " + d);
 				firstGuess = mtdf(board, firstGuess, d, color);
-				System.out.println("Time : " + (System.currentTimeMillis() - startTime));
-				System.out.println("GUESS: " + firstGuess);
-				if (System.currentTimeMillis() - startTime >= EvalConstants.MAX_TIME) {
-					System.out.println();
+				if (System.currentTimeMillis() - startTime >= timePerMove) {
 					System.out.println("FINAL DEPTH: " + d);
 					System.out.println("BREAK");
-					System.out.println();
 					break;
 				}
 			}
@@ -42,6 +41,8 @@ public class Search {
 			}
 		}
 		System.out.println("SCORE: " + maxScore);
+		System.out.println("TIME PER MOVE: " + timePerMove);
+		System.out.println("TOTAL TIME: " + (System.currentTimeMillis() - overallStartTime));
 		return optimal;
 	}
 
@@ -58,7 +59,6 @@ public class Search {
 				lowerBound = g;
 			}
 		}
-		System.out.println("MTDF");
 		return g;
 	}
 

@@ -113,10 +113,10 @@ public class CoreConstants {
 	public static final long[][] ROW_BACKWARD_INCLUSIVE = {ROW_DOWNARD_INCLUSIVE, ROW_UPWARD_INCLUSIVE};
 
 	// Castling moves
-	public static final long bqueenside = 0x0400_0000_0000_0000L;
-	public static final long bkingside = 0x4000_0000_0000_0000L;
 	public static final long wqueenside = 0x0000_0000_0000_0004L;
 	public static final long wkingside = 0x0000_0000_0000_0040L;
+	public static final long bqueenside = 0x0400_0000_0000_0000L;
+	public static final long bkingside = 0x4000_0000_0000_0000L;
 
 	// Castling flags
 	public static final byte noCastle = 0;
