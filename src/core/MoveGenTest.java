@@ -59,6 +59,13 @@ public class MoveGenTest {
 		System.out.println("perft 5: " + perft5);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 5 time: " + (endTime - startTime) + "ms");
+		
+		board.resetToInitialSetup();
+		startTime = System.currentTimeMillis();
+		long perft6 = perft(moveGen, 6);
+		System.out.println("perft 6: " + perft6);
+		endTime = System.currentTimeMillis();
+		System.out.println("perft 6 time: " + (endTime - startTime) + "ms");
 
 		assertEquals(56, moveGen.mirrorIndex(0));
 		assertEquals(63, moveGen.mirrorIndex(7));
@@ -77,11 +84,11 @@ public class MoveGenTest {
 
 	public long perft(MoveGen moveGen, int depth) {
 		long nodes = 0;
-		if (depth == 0) {
-			return 1;
-		}
 		ArrayList<Move> moveList = moveGen.generateMoves(board, true);
 		int nMoves = moveList.size();
+		if (depth == 1) {
+			return nMoves;
+		}
 
 		for (int i = 0; i < nMoves; i++) {
 			board.move(moveList.get(i));

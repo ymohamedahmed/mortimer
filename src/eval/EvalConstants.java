@@ -5,7 +5,7 @@ import core.CoreConstants;
 public class EvalConstants {
 
 	// Max move 'thinking' time (ms)
-	public static final double MAX_TIME = 300.0;
+	public static final double MAX_TIME = 30.0;
 	// Max search depth
 	public static final double MAX_DEPTH = 15;
 
