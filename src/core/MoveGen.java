@@ -55,6 +55,36 @@ public class MoveGen {
 		return moves;
 	}
 
+	private boolean kingInKingSquare(BitBoard board, int side) {
+		int myKingIndex = BitBoard.bitScanForward(board.bitboards[12 + side]);
+		int enemyKingIndex = BitBoard.bitScanForward(board.bitboards[12 + ((side == 0) ? 1 : 0)]);
+		if (myKingIndex + 1 == enemyKingIndex) {
+			return true;
+		}
+		if (myKingIndex - 1 == enemyKingIndex) {
+			return true;
+		}
+		if (myKingIndex + 8 == enemyKingIndex) {
+			return true;
+		}
+		if (myKingIndex - 8 == enemyKingIndex) {
+			return true;
+		}
+		if (myKingIndex + 7 == enemyKingIndex) {
+			return true;
+		}
+		if (myKingIndex - 7 == enemyKingIndex) {
+			return true;
+		}
+		if (myKingIndex + 9 == enemyKingIndex) {
+			return true;
+		}
+		if (myKingIndex - 9 == enemyKingIndex) {
+			return true;
+		}
+		return false;
+	}
+
 	private ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
 
 		// Iterator has to be used to avoid concurrent modification exception
@@ -66,8 +96,9 @@ public class MoveGen {
 			if (pieceSide == side) {
 				board.move(move);
 				boolean check = board.check(side);
+				boolean kingInKingSquare = kingInKingSquare(board, side);
 				board.undo();
-				if (check) {
+				if (check | kingInKingSquare) {
 					iter.remove();
 				}
 			}
