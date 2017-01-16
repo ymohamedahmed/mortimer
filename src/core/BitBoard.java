@@ -161,7 +161,7 @@ public class BitBoard {
 		}
 
 	}
-	
+
 	public void storeHistory() {
 		whiteHistory[moveNumber] = bitboards[0];
 		blackHistory[moveNumber] = bitboards[1];
@@ -325,18 +325,7 @@ public class BitBoard {
 				| (CoreConstants.KNIGHT_TABLE[kingIndex] & enemyKnights)
 				| (bishopAttacks(occupiedBoard, kingIndex, side) & enemyBishopQueen)
 				| (rookAttacks(occupiedBoard, kingIndex, side) & enemyRookQueen);
-	/*	if((CoreConstants.PAWN_ATTACKS_TABLE[side][kingIndex] & enemyPawns) == 0){
-			if((CoreConstants.KNIGHT_TABLE[kingIndex] & enemyKnights) == 0){
-				if((bishopAttacks(occupiedBoard, kingIndex, side) & enemyBishopQueen)==0){
-					if((rookAttacks(occupiedBoard, kingIndex, side) & enemyRookQueen)==0){
-						return false;
-					}
-				}
-			}
-		}*/
-		
 		return (BitBoard.bitScanForward(result) != -1);
-		//return true;
 	}
 
 	public boolean isSquareAttacked(int index, int side) {
