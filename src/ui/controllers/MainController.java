@@ -79,7 +79,7 @@ public class MainController {
 		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
 				byte piece = board.board[(row * 8) + col];
-				if (piece != CoreConstants.EMPTY) {
+				if (piece != CoreConstants.EMPTY ) {
 					Image image = new Image(MainController.class
 							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png").toExternalForm());
 					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
@@ -293,7 +293,10 @@ public class MainController {
 				reader = new BufferedReader(new FileReader(file));
 				int noOfMoves = Integer.valueOf(reader.readLine());
 				board.setMoveNumber(noOfMoves);
-
+				char[] boardArr = reader.readLine().toCharArray();
+				for(int i = 0; i <= 63; i++){
+					board.board[i] = (byte)(Character.getNumericValue(boardArr[i]));
+				}
 				for (int i = 0; i <= 13; i++) {
 					board.bitboards[i] = Long.valueOf(reader.readLine());
 				}
@@ -321,6 +324,9 @@ public class MainController {
 					board.epHistory[0][i] = Long.valueOf(reader.readLine());
 					board.epHistory[1][i] = Long.valueOf(reader.readLine());
 				}
+				pgnTextField.setText(reader.readLine());
+				clearCanvas();
+				paintChessBoard(board);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
@@ -331,8 +337,7 @@ public class MainController {
 				}
 			}
 		}
-		clearCanvas();
-		paintChessBoard(board);
+		
 	}
 
 	@FXML
@@ -340,6 +345,11 @@ public class MainController {
 		String result = "";
 		int noOfMoves = board.getMoveNumber();
 		result += String.valueOf(noOfMoves) + "\n";
+		String boardArr = "";
+		for(int i = 0; i <= 63; i++){
+			boardArr += board.board[i];
+		}
+		result += boardArr + "\n";
 		for (int i = 0; i <= 13; i++) {
 			result += String.valueOf(board.bitboards[i]) + "\n";
 		}
@@ -366,6 +376,7 @@ public class MainController {
 			result += String.valueOf(board.epHistory[0][i]) + "\n";
 			result += String.valueOf(board.epHistory[1][i]) + "\n";
 		}
+		result += pgnTextField.getText();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
 		Stage stage = (Stage) borderPane.getScene().getWindow();
@@ -398,13 +409,16 @@ public class MainController {
 			pgnTextField.setText(pgnHistory[board.getMoveNumber() - 1]);
 			clearCanvas();
 			paintChessBoard(board);
+			moveList = moveGen.generateMoves(board, true);
 		} else if (board.toMove == CoreConstants.BLACK && board.getMoveNumber() >= 2) {
 			board.undo();
 			board.undo();
 			pgnTextField.setText(pgnHistory[board.getMoveNumber() - 1]);
 			clearCanvas();
 			paintChessBoard(board);
+			moveList = moveGen.generateMoves(board, true);
 		}
+		
 
 	}
 
