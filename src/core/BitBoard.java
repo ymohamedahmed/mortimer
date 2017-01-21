@@ -120,7 +120,7 @@ public class BitBoard {
 		removePiece(oldIndex);
 		addPiece(piece, finalIndex);
 
-		updateCastlingFlags(enemy);
+		updateCastlingFlags(side);
 		epTargetSquares[enemy] = 0;
 		if (piece == CoreConstants.WHITE_PAWN) {
 			if (finalIndex - oldIndex == 16) {
@@ -311,7 +311,7 @@ public class BitBoard {
 	}
 
 	// https://chessprogramming.wikispaces.com/Checks+and+Pinned+Pieces+(Bitboards)
-	boolean check(int side) {
+	public boolean check(int side) {
 		int kingIndex = (side == CoreConstants.WHITE) ? bitScanForward(bitboards[CoreConstants.WHITE_KING])
 				: bitScanForward(bitboards[CoreConstants.BLACK_KING]);
 		long enemyPawns = bitboards[3 - side];
@@ -326,6 +326,13 @@ public class BitBoard {
 				| (bishopAttacks(occupiedBoard, kingIndex, side) & enemyBishopQueen)
 				| (rookAttacks(occupiedBoard, kingIndex, side) & enemyRookQueen);
 		return (BitBoard.bitScanForward(result) != -1);
+	}
+	public boolean checkmate(int side){
+		if(check(side) && new MoveGen().generateMoves(this, true).size()==0){
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	public boolean isSquareAttacked(int index, int side) {
@@ -491,5 +498,8 @@ public class BitBoard {
 		x = (x & CoreConstants.m2) + ((x >> 2) & CoreConstants.m2);
 		x = (x + (x >> 4)) & CoreConstants.m4;
 		return (int) ((x * CoreConstants.h01) >> 56);
+	}
+	public int getMoveNumber(){
+		return moveNumber;
 	}
 }

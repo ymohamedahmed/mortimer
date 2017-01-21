@@ -28,7 +28,7 @@
         </MenuBar>
     </top>
     <right>
-        <TextField fx:id="pgnTextField" editable="false" prefHeight="372.0" prefWidth="180.0"
+        <TextArea fx:id="pgnTextField" editable="false" prefHeight="372.0" prefWidth="180.0"
                    BorderPane.alignment="CENTER"/>
     </right>
     <center>

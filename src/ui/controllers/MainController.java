@@ -13,6 +13,8 @@ import eval.Search;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -27,6 +29,7 @@ public class MainController {
 	public StackPane stackPane;
 	public Canvas chessPane;
 	public BorderPane borderPane;
+	public TextArea pgnTextField;
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
@@ -159,13 +162,14 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
+		updatePGNTextField(board, move);
 		board.move(move);
 		int side = move.getPieceType() % 2;
 		int colorFactor = side == 0 ? 1 : -1;
 		if (move.isPromotion() && side == PLAYER_COLOR) {
-			pawnPromotion(move.getOldPos(),move.getFinalPos(), colorFactor, board, true);
+			pawnPromotion(move.getOldPos(), move.getFinalPos(), colorFactor, board, true);
 		} else if (move.isPromotion() && side == AI_COLOR) {
-			pawnPromotion(move.getOldPos(),move.getFinalPos(), colorFactor, board, false);
+			pawnPromotion(move.getOldPos(), move.getFinalPos(), colorFactor, board, false);
 		}
 		if (repaint) {
 			// Clear the canvas and then repaint it
@@ -184,7 +188,7 @@ public class MainController {
 		return moveGen.generateMoves(board, removeCheck);
 	}
 
-	private void pawnPromotion(int pawnOldPos,int newPos,  int side, BitBoard board, boolean display) {
+	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board, boolean display) {
 		board.removePiece(pawnOldPos);
 		if (display) {
 			String choice = new String();
@@ -228,6 +232,39 @@ public class MainController {
 		int colorFactor = (AI_COLOR == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
 		Move move = search.rootNegamax(moveGen, board, colorFactor);
 		move(board, move, true);
+	}
+
+	private void updatePGNTextField(BitBoard board, Move move) {
+		String result = " ";
+		if(board.getMoveNumber()==0){
+			result = "";
+		}
+		pgnTextField.setWrapText(true);
+		int side = move.getPieceType() % 2;
+		int enemy = (side == 0) ? 1 : 0;
+		if (side == 0) {
+			result += String.valueOf((board.getMoveNumber() / 2)+1) + ". ";
+		}
+		result += CoreConstants.pieceToLetter[move.getPieceType()];
+		if (board.board[move.getFinalPos()] != CoreConstants.EMPTY) {
+			result += "x";
+		}
+		result += CoreConstants.indexToAlgebraic[move.getFinalPos()];
+
+		if (move.getCastlingFlag() != 0) {
+			if (move.getCastlingFlag() == CoreConstants.wQSide || move.getCastlingFlag() == CoreConstants.bQSide) {
+				result = " O-O";
+			} else {
+				result = " O-O-O";
+			}
+		}
+		if (board.checkmate(enemy)) {
+			result += "#";
+		}
+		else if (board.check(enemy)) {
+			result += "+";
+		}
+		pgnTextField.setText(pgnTextField.getText() + result);
 	}
 
 	private enum CellColor {

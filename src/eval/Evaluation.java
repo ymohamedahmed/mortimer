@@ -313,7 +313,6 @@ public class Evaluation extends EvalConstants {
 			square <<= 1;
 
 		}
-		// System.out.println("LOOP END");
 		boolean white2Move = board.toMove == 0;
 
 		int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1] + nonPawnMat[0] - nonPawnMat[1]
@@ -321,18 +320,9 @@ public class Evaluation extends EvalConstants {
 				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
 				- passedPawns[1] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]
 						- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);
-
-		/*
-		 * int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] -
-		 * pawnMat[1] + nonPawnMat[0] - nonPawnMat[1] + pieceSquare[0] -
-		 * pieceSquare[1] + spatial[0] - spatial[1] + positional[0] -
-		 * positional[1] + attacks[0] - attacks[1] + mobility[0] - mobility[1] +
-		 * pawnStruct[0] - pawnStruct[1] + passedPawns[0] - passedPawns[1];
-		 */
 		int value = (gamePhase * open(openingAndEnding)
 				+ (PHASE_MIDGAME - gamePhase) * end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
 				/ PHASE_MIDGAME;
-		// System.out.println("EVAL END");
 		assert Math.abs(value) < KNOWN_WIN : "Value is outside bounds";
 		return color * value;
 	}
