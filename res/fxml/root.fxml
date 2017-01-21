@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity"
-            minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/8.0.65" fx:controller="ui.controllers.MainController">
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.controllers.MainController">
     <top>
         <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close"/>
+                        <MenuItem id="loadMenuItem" mnemonicParsing="false" onAction="#handleLoadFileAction" text="Load" />
+                  <MenuItem id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveFileAction" text="Save" />
+                  <MenuItem mnemonicParsing="false" onAction="#undoAction" text="Undo" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
+                <Menu mnemonicParsing="false" text="Statistics">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete"/>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="About"/>
+                        <MenuItem id="openStatsMenuItem" mnemonicParsing="false" onAction="#displayStatisticsAction" text="Open Stats" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
     </top>
     <right>
-        <TextArea fx:id="pgnTextField" editable="false" prefHeight="372.0" prefWidth="180.0"
-                   BorderPane.alignment="CENTER"/>
+        <TextArea fx:id="pgnTextField" editable="false" prefHeight="372.0" prefWidth="180.0" BorderPane.alignment="CENTER" />
     </right>
     <center>
         <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <children>
-                <Canvas fx:id="chessPane" height="371.0" width="421.0"/>
+                <Canvas fx:id="chessPane" height="371.0" width="421.0" />
             </children>
         </StackPane>
     </center>

@@ -10,6 +10,8 @@ import core.Move;
 import core.MoveGen;
 import eval.EvalConstants;
 import eval.Search;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ChoiceDialog;
@@ -34,8 +36,9 @@ public class MainController {
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
 	private Search search = new Search();
-
+	private BitBoard board;
 	private MoveGen moveGen = new MoveGen();
+	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
 
 	public void initialize() {
 		moveGen.initialiseKnightLookupTable();
@@ -81,7 +84,7 @@ public class MainController {
 	}
 
 	private void playGame() {
-		BitBoard board = new BitBoard();
+		board = new BitBoard();
 		board.resetToInitialSetup();
 		moveList = getMoves(board, false);
 		if (AI_COLOR == CoreConstants.WHITE) {
@@ -236,14 +239,14 @@ public class MainController {
 
 	private void updatePGNTextField(BitBoard board, Move move) {
 		String result = " ";
-		if(board.getMoveNumber()==0){
+		if (board.getMoveNumber() == 0) {
 			result = "";
 		}
 		pgnTextField.setWrapText(true);
 		int side = move.getPieceType() % 2;
 		int enemy = (side == 0) ? 1 : 0;
 		if (side == 0) {
-			result += String.valueOf((board.getMoveNumber() / 2)+1) + ". ";
+			result += String.valueOf((board.getMoveNumber() / 2) + 1) + ". ";
 		}
 		result += CoreConstants.pieceToLetter[move.getPieceType()];
 		if (board.board[move.getFinalPos()] != CoreConstants.EMPTY) {
@@ -260,11 +263,42 @@ public class MainController {
 		}
 		if (board.checkmate(enemy)) {
 			result += "#";
-		}
-		else if (board.check(enemy)) {
+		} else if (board.check(enemy)) {
 			result += "+";
 		}
 		pgnTextField.setText(pgnTextField.getText() + result);
+		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();
+	}
+
+	@FXML
+	private void handleLoadFileAction(ActionEvent event) {
+
+	}
+
+	@FXML
+	private void handleSaveFileAction(ActionEvent event) {
+
+	}
+
+	@FXML
+	private void displayStatisticsAction(ActionEvent event) {
+	}
+
+	@FXML
+	private void undoAction(ActionEvent event) {
+		if (board.toMove == CoreConstants.WHITE && board.getMoveNumber() >= 1) {
+			board.undo();
+			pgnTextField.setText(pgnHistory[board.getMoveNumber()-1]);
+			clearCanvas();
+			paintChessBoard(board);
+		} else if(board.toMove == CoreConstants.BLACK && board.getMoveNumber() >= 2){
+			board.undo();
+			board.undo();
+			pgnTextField.setText(pgnHistory[board.getMoveNumber()-1]);
+			clearCanvas();
+			paintChessBoard(board);
+		}
+		
 	}
 
 	private enum CellColor {
