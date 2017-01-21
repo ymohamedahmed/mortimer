@@ -1,5 +1,11 @@
 package ui.controllers;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +22,13 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class MainController {
 	private int PLAYER_COLOR = CoreConstants.BLACK;
@@ -269,15 +276,115 @@ public class MainController {
 		pgnTextField.setText(pgnTextField.getText() + result);
 		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();
 	}
+	// File Format
+	// Current Bitboards in order
+	// History sorted by move number
 
 	@FXML
 	private void handleLoadFileAction(ActionEvent event) {
+		System.out.println("LOADING GAME");
+		Stage stage = (Stage) borderPane.getScene().getWindow();
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Game");
+		File file = fileChooser.showOpenDialog(stage);
+		BufferedReader reader = null;
+		if (file != null) {
+			try {
+				reader = new BufferedReader(new FileReader(file));
+				int noOfMoves = Integer.valueOf(reader.readLine());
+				board.setMoveNumber(noOfMoves);
 
+				for (int i = 0; i <= 13; i++) {
+					board.bitboards[i] = Long.valueOf(reader.readLine());
+				}
+
+				for (int i = 0; i < noOfMoves; i++) {
+					board.moveHistory[i] = Long.valueOf(reader.readLine());
+					board.whiteHistory[i] = Long.valueOf(reader.readLine());
+					board.blackHistory[i] = Long.valueOf(reader.readLine());
+					board.pawnHistory[0][i] = Long.valueOf(reader.readLine());
+					board.pawnHistory[1][i] = Long.valueOf(reader.readLine());
+					board.rookHistory[0][i] = Long.valueOf(reader.readLine());
+					board.rookHistory[1][i] = Long.valueOf(reader.readLine());
+					board.queenHistory[0][i] = Long.valueOf(reader.readLine());
+					board.queenHistory[1][i] = Long.valueOf(reader.readLine());
+					board.bishopHistory[0][i] = Long.valueOf(reader.readLine());
+					board.bishopHistory[1][i] = Long.valueOf(reader.readLine());
+					board.knightHistory[0][i] = Long.valueOf(reader.readLine());
+					board.knightHistory[1][i] = Long.valueOf(reader.readLine());
+					board.kingHistory[0][i] = Long.valueOf(reader.readLine());
+					board.kingHistory[1][i] = Long.valueOf(reader.readLine());
+					board.boardHistory[0][i] = Byte.valueOf(reader.readLine());
+					board.boardHistory[1][i] = Byte.valueOf(reader.readLine());
+					board.castlingHistory[0][i] = Long.valueOf(reader.readLine());
+					board.castlingHistory[1][i] = Long.valueOf(reader.readLine());
+					board.epHistory[0][i] = Long.valueOf(reader.readLine());
+					board.epHistory[1][i] = Long.valueOf(reader.readLine());
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					reader.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		clearCanvas();
+		paintChessBoard(board);
 	}
 
 	@FXML
 	private void handleSaveFileAction(ActionEvent event) {
-
+		String result = "";
+		int noOfMoves = board.getMoveNumber();
+		result += String.valueOf(noOfMoves) + "\n";
+		for (int i = 0; i <= 13; i++) {
+			result += String.valueOf(board.bitboards[i]) + "\n";
+		}
+		for (int i = 0; i < noOfMoves; i++) {
+			result += String.valueOf(board.moveHistory[i]) + "\n";
+			result += String.valueOf(board.whiteHistory[i]) + "\n";
+			result += String.valueOf(board.blackHistory[i]) + "\n";
+			result += String.valueOf(board.pawnHistory[0][i]) + "\n";
+			result += String.valueOf(board.pawnHistory[1][i]) + "\n";
+			result += String.valueOf(board.rookHistory[0][i]) + "\n";
+			result += String.valueOf(board.rookHistory[1][i]) + "\n";
+			result += String.valueOf(board.queenHistory[0][i]) + "\n";
+			result += String.valueOf(board.queenHistory[1][i]) + "\n";
+			result += String.valueOf(board.bishopHistory[0][i]) + "\n";
+			result += String.valueOf(board.bishopHistory[1][i]) + "\n";
+			result += String.valueOf(board.knightHistory[0][i]) + "\n";
+			result += String.valueOf(board.knightHistory[1][i]) + "\n";
+			result += String.valueOf(board.kingHistory[0][i]) + "\n";
+			result += String.valueOf(board.kingHistory[1][i]) + "\n";
+			result += String.valueOf(board.boardHistory[0][i]) + "\n";
+			result += String.valueOf(board.boardHistory[1][i]) + "\n";
+			result += String.valueOf(board.castlingHistory[0][i]) + "\n";
+			result += String.valueOf(board.castlingHistory[1][i]) + "\n";
+			result += String.valueOf(board.epHistory[0][i]) + "\n";
+			result += String.valueOf(board.epHistory[1][i]) + "\n";
+		}
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save Game");
+		Stage stage = (Stage) borderPane.getScene().getWindow();
+		File file = fileChooser.showSaveDialog(stage);
+		BufferedWriter writer = null;
+		if (file != null) {
+			try {
+				writer = new BufferedWriter(new FileWriter(file));
+				writer.write(result);
+			} catch (IOException ie) {
+				ie.printStackTrace();
+			} finally {
+				try {
+					writer.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@FXML
@@ -288,17 +395,17 @@ public class MainController {
 	private void undoAction(ActionEvent event) {
 		if (board.toMove == CoreConstants.WHITE && board.getMoveNumber() >= 1) {
 			board.undo();
-			pgnTextField.setText(pgnHistory[board.getMoveNumber()-1]);
+			pgnTextField.setText(pgnHistory[board.getMoveNumber() - 1]);
 			clearCanvas();
 			paintChessBoard(board);
-		} else if(board.toMove == CoreConstants.BLACK && board.getMoveNumber() >= 2){
+		} else if (board.toMove == CoreConstants.BLACK && board.getMoveNumber() >= 2) {
 			board.undo();
 			board.undo();
-			pgnTextField.setText(pgnHistory[board.getMoveNumber()-1]);
+			pgnTextField.setText(pgnHistory[board.getMoveNumber() - 1]);
 			clearCanvas();
 			paintChessBoard(board);
 		}
-		
+
 	}
 
 	private enum CellColor {

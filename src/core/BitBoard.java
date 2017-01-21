@@ -19,21 +19,19 @@ public class BitBoard {
 	public int toMove = CoreConstants.WHITE;
 	int moveNumber = 0;
 	// History arrays
-	long[] moveHistory;
-	long[] whiteHistory;
-	long[] blackHistory;
-	long[][] pawnHistory;
-	long[][] rookHistory;
-	long[][] queenHistory;
-	long[][] bishopHistory;
-	long[][] knightHistory;
-	long[][] kingHistory;
-	boolean[][] rQSideMoved;
-	boolean[][] rKSideMoved;
-	byte[][] boardHistory;
-	long[][] castlingHistory;
+	public long[] moveHistory;
+	public long[] whiteHistory;
+	public long[] blackHistory;
+	public long[][] pawnHistory;
+	public long[][] rookHistory;
+	public long[][] queenHistory;
+	public long[][] bishopHistory;
+	public long[][] knightHistory;
+	public long[][] kingHistory;
+	public byte[][] boardHistory;
+	public long[][] castlingHistory;
 	// Stores en passant target squares for each side
-	long[][] epHistory;
+	public long[][] epHistory;
 
 	public BitBoard() {
 		moveHistory = new long[CoreConstants.MAX_MOVES];
@@ -327,10 +325,11 @@ public class BitBoard {
 				| (rookAttacks(occupiedBoard, kingIndex, side) & enemyRookQueen);
 		return (BitBoard.bitScanForward(result) != -1);
 	}
-	public boolean checkmate(int side){
-		if(check(side) && new MoveGen().generateMoves(this, true).size()==0){
+
+	public boolean checkmate(int side) {
+		if (check(side) && new MoveGen().generateMoves(this, true).size() == 0) {
 			return true;
-		}else{
+		} else {
 			return false;
 		}
 	}
@@ -499,7 +498,12 @@ public class BitBoard {
 		x = (x + (x >> 4)) & CoreConstants.m4;
 		return (int) ((x * CoreConstants.h01) >> 56);
 	}
-	public int getMoveNumber(){
+
+	public int getMoveNumber() {
 		return moveNumber;
+	}
+	
+	public void setMoveNumber(int n){
+		moveNumber = n;
 	}
 }
