@@ -15,7 +15,7 @@ public class BitBoard {
 	// wQSideLegal | wKSideLegal | wKingMoved | wRQSideMoved | wRKsideMoved
 	// BLACK
 	// bQSideLegal | bKSideLegal | bKingMoved | bRQSideMoved | bRKSideMoved
-	long[] castling = new long[] { 0L, 0L };
+	public long[] castling = new long[] { 0L, 0L };
 	public int toMove = CoreConstants.WHITE;
 	int moveNumber = 0;
 	// History arrays

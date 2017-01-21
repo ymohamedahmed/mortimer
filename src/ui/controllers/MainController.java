@@ -291,11 +291,11 @@ public class MainController {
 		if (file != null) {
 			try {
 				reader = new BufferedReader(new FileReader(file));
+				board.toMove = Integer.valueOf(reader.readLine());
 				int noOfMoves = Integer.valueOf(reader.readLine());
 				board.setMoveNumber(noOfMoves);
-				char[] boardArr = reader.readLine().toCharArray();
 				for(int i = 0; i <= 63; i++){
-					board.board[i] = (byte)(Character.getNumericValue(boardArr[i]));
+					board.board[i] = (byte)((int)Integer.valueOf(reader.readLine()));
 				}
 				for (int i = 0; i <= 13; i++) {
 					board.bitboards[i] = Long.valueOf(reader.readLine());
@@ -324,9 +324,12 @@ public class MainController {
 					board.epHistory[0][i] = Long.valueOf(reader.readLine());
 					board.epHistory[1][i] = Long.valueOf(reader.readLine());
 				}
+				board.castling[0] = Integer.valueOf(reader.readLine());
+				board.castling[1] = Integer.valueOf(reader.readLine());
 				pgnTextField.setText(reader.readLine());
 				clearCanvas();
 				paintChessBoard(board);
+				moveList = moveGen.generateMoves(board, true);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
@@ -344,12 +347,11 @@ public class MainController {
 	private void handleSaveFileAction(ActionEvent event) {
 		String result = "";
 		int noOfMoves = board.getMoveNumber();
+		result += board.toMove + "\n";
 		result += String.valueOf(noOfMoves) + "\n";
-		String boardArr = "";
 		for(int i = 0; i <= 63; i++){
-			boardArr += board.board[i];
+			result += board.board[i] + "\n";
 		}
-		result += boardArr + "\n";
 		for (int i = 0; i <= 13; i++) {
 			result += String.valueOf(board.bitboards[i]) + "\n";
 		}
@@ -376,6 +378,8 @@ public class MainController {
 			result += String.valueOf(board.epHistory[0][i]) + "\n";
 			result += String.valueOf(board.epHistory[1][i]) + "\n";
 		}
+		result += board.castling[0] + "\n";
+		result += board.castling[1] + "\n";
 		result += pgnTextField.getText();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
