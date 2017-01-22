@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
@@ -24,6 +25,15 @@
                         <MenuItem id="openStatsMenuItem" mnemonicParsing="false" onAction="#displayStatisticsAction" text="Open Stats" />
                     </items>
                 </Menu>
+            <Menu mnemonicParsing="false" text="Settings">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Move Speed">
+                     <graphic>
+                        <Slider id="moveSpeedSlider" fx:id="moveSpeedSlider" snapToTicks="true" value="50.0" />
+                     </graphic>
+                  </MenuItem>
+              </items>
+            </Menu>
             </menus>
         </MenuBar>
     </top>

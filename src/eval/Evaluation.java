@@ -107,11 +107,14 @@ public class Evaluation extends EvalConstants {
 
 		attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
 		attacks[1] = evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);
+		try {
+			kingZone[0] = CoreConstants.KING_TABLE[ei.kingIndex[0]];
+			kingZone[0] |= (kingZone[0] << 8);
+			kingZone[1] = CoreConstants.KING_TABLE[ei.kingIndex[1]];
+			kingZone[1] |= (kingZone[1] >>> 8);
+		} catch (Exception e) {
 
-		kingZone[0] = CoreConstants.KING_TABLE[ei.kingIndex[0]];
-		kingZone[0] |= (kingZone[0] << 8);
-		kingZone[1] = CoreConstants.KING_TABLE[ei.kingIndex[1]];
-		kingZone[1] |= (kingZone[1] >>> 8);
+		}
 		long all = board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK];
 		long pieceAttacks, safeAttacks, kingAttacks;
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
@@ -341,15 +344,13 @@ public class Evaluation extends EvalConstants {
 			long attackedByMinor = (ei.knightAttacks[color] | ei.bishopAttacks[color]) & otherWeak;
 			while (attackedByMinor != 0) {
 				long leastSigBit = lsb(attackedByMinor);
-				attacks += MINOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
-						.bitScanForward(leastSigBit)]]];
+				attacks += MINOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard.bitScanForward(leastSigBit)]]];
 				attackedByMinor &= ~leastSigBit;
 			}
 			long attackedByMajor = (ei.rookAttacks[color] | ei.queenAttacks[color]) & otherWeak;
 			while (attackedByMajor != 0) {
 				long leastSigBit = lsb(attackedByMajor);
-				attacks += MAJOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
-						.bitScanForward(leastSigBit)]]];
+				attacks += MAJOR_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard.bitScanForward(leastSigBit)]]];
 				attackedByMajor &= ~leastSigBit;
 			}
 		}
@@ -368,9 +369,11 @@ public class Evaluation extends EvalConstants {
 		}
 		return attacks;
 	}
-	private long lsb(long squares){
-		return squares &  (-squares);
+
+	private long lsb(long squares) {
+		return squares & (-squares);
 	}
+
 	public int open(int phase) {
 		return (phase + 0x8000) >> 16;
 	}

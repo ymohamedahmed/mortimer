@@ -16,11 +16,14 @@ import core.Move;
 import core.MoveGen;
 import eval.EvalConstants;
 import eval.Search;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -39,6 +42,9 @@ public class MainController {
 	public Canvas chessPane;
 	public BorderPane borderPane;
 	public TextArea pgnTextField;
+	@FXML
+	public Slider moveSpeedSlider;
+	public Slider moveStrengthSlider;
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
@@ -49,6 +55,14 @@ public class MainController {
 
 	public void initialize() {
 		moveGen.initialiseKnightLookupTable();
+		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				double value = moveSpeedSlider.getValue();
+				EvalConstants.THINKING_TIME = EvalConstants.MAX_THINKING_TIME
+						- (value / 100 * (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
+			}
+		});
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
 		moveGen.initialiseBishopAndRookEvalLookupTable();
@@ -79,7 +93,7 @@ public class MainController {
 		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
 				byte piece = board.board[(row * 8) + col];
-				if (piece != CoreConstants.EMPTY ) {
+				if (piece != CoreConstants.EMPTY) {
 					Image image = new Image(MainController.class
 							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png").toExternalForm());
 					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
@@ -191,6 +205,9 @@ public class MainController {
 		if (side == PLAYER_COLOR) {
 			moveAI(board);
 		}
+		if(board.checkmate(0) || board.checkmate(1)){
+			
+		}
 
 	}
 
@@ -294,8 +311,8 @@ public class MainController {
 				board.toMove = Integer.valueOf(reader.readLine());
 				int noOfMoves = Integer.valueOf(reader.readLine());
 				board.setMoveNumber(noOfMoves);
-				for(int i = 0; i <= 63; i++){
-					board.board[i] = (byte)((int)Integer.valueOf(reader.readLine()));
+				for (int i = 0; i <= 63; i++) {
+					board.board[i] = (byte) ((int) Integer.valueOf(reader.readLine()));
 				}
 				for (int i = 0; i <= 13; i++) {
 					board.bitboards[i] = Long.valueOf(reader.readLine());
@@ -340,7 +357,7 @@ public class MainController {
 				}
 			}
 		}
-		
+
 	}
 
 	@FXML
@@ -349,7 +366,7 @@ public class MainController {
 		int noOfMoves = board.getMoveNumber();
 		result += board.toMove + "\n";
 		result += String.valueOf(noOfMoves) + "\n";
-		for(int i = 0; i <= 63; i++){
+		for (int i = 0; i <= 63; i++) {
 			result += board.board[i] + "\n";
 		}
 		for (int i = 0; i <= 13; i++) {
@@ -422,7 +439,6 @@ public class MainController {
 			paintChessBoard(board);
 			moveList = moveGen.generateMoves(board, true);
 		}
-		
 
 	}
 

@@ -20,17 +20,15 @@ public class Search {
 		ArrayList<Move> moves = moveGen.generateMoves(board, true);
 		long overallStartTime = System.currentTimeMillis();
 		int noOfMoves = moves.size();
-		double timePerMove = EvalConstants.MAX_TIME/noOfMoves;
+		double timePerMove = EvalConstants.THINKING_TIME / noOfMoves;
 		for (Move move : moves) {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
 			double firstGuess = 0;
-			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d+=2) {
-				System.out.println("DEPTH: " + d);
+			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d += 2) {
 				firstGuess = mtdf(board, firstGuess, d, color);
 				if (System.currentTimeMillis() - startTime >= timePerMove) {
 					System.out.println("FINAL DEPTH: " + d);
-					System.out.println("BREAK");
 					break;
 				}
 			}
@@ -79,10 +77,9 @@ public class Search {
 			}
 		}
 		if (depth == 0) {
-			return colorFactor * (eval.evaluate(board, colorFactor));
+			return colorFactor * eval.evaluate(board, colorFactor);
 		}
 		double bestValue = Double.NEGATIVE_INFINITY;
-		//ArrayList<Move> moves = sortMoves(board, moveGen.generateMoves(board, false), colorFactor);
 		ArrayList<Move> moves = moveGen.generateMoves(board, false);
 		for (Move move : moves) {
 			board.move(move);
@@ -108,56 +105,6 @@ public class Search {
 		hashtable.put(board.hash(), tEntryFinal);
 
 		return bestValue;
-	}
-
-	private ArrayList<MoveScore> quickSort(ArrayList<MoveScore> moves) {
-		if (!moves.isEmpty()) {
-			MoveScore pivot = moves.get(0);
-			ArrayList<MoveScore> less = new ArrayList<>();
-			ArrayList<MoveScore> pivotList = new ArrayList<>();
-			ArrayList<MoveScore> more = new ArrayList<>();
-
-			for (MoveScore move : moves) {
-				if (move.getScore() < pivot.getScore()) {
-					less.add(move);
-				} else if (move.getScore() > pivot.getScore()) {
-					more.add(move);
-				} else {
-					pivotList.add(move);
-				}
-			}
-			less = quickSort(less);
-			more = quickSort(more);
-
-			less.addAll(pivotList);
-			less.addAll(more);
-			return less;
-		}
-		return moves;
-	}
-
-	private ArrayList<Move> sortMoves(BitBoard board, ArrayList<Move> possibleMoves, int colorFactor) {
-		// Calculating score for each move
-		ArrayList<Move> sortedMoves = new ArrayList<>();
-		ArrayList<MoveScore> movesScore = new ArrayList<>();
-		for (Move move : possibleMoves) {
-			board.move(move);
-			MoveScore moveScore = new MoveScore(move, eval.evaluate(board, colorFactor));
-			movesScore.add(moveScore);
-			board.undo();
-		}
-		ArrayList<MoveScore> sorted = quickSort(movesScore);
-		// Descending order for white (maximiser)
-		// Ascending order for black (minimiser)
-		if (colorFactor == 1) {
-			int size = sorted.size();
-			for (int i = 0; i < size; i++) {
-				sortedMoves.add(i, sorted.get(size - 1 - i).getMove());
-			}
-		} else {
-			sorted.forEach(e -> sortedMoves.add(e.getMove()));
-		}
-		return sortedMoves;
 	}
 
 	private enum TranspositionFlag {
