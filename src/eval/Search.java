@@ -25,7 +25,7 @@ public class Search {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
 			double firstGuess = 0;
-			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d += 2) {
+			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d +=2) {
 				firstGuess = mtdf(board, firstGuess, d, color);
 				if (System.currentTimeMillis() - startTime >= timePerMove) {
 					System.out.println("FINAL DEPTH: " + d);

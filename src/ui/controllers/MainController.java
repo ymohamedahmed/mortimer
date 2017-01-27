@@ -186,7 +186,6 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
-		updatePGNTextField(board, move);
 		board.move(move);
 		int side = move.getPieceType() % 2;
 		int colorFactor = side == 0 ? 1 : -1;
@@ -208,6 +207,7 @@ public class MainController {
 		if(board.checkmate(0) || board.checkmate(1)){
 			
 		}
+		updatePGNTextField(board, move);
 
 	}
 

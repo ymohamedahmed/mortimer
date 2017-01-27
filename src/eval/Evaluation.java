@@ -23,6 +23,7 @@ public class Evaluation extends EvalConstants {
 	private int[] scaleFactor = { 0 };
 
 	public int evaluate(BitBoard board, int color) {
+		try{
 		// System.out.println("EVAL START");
 		int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
 		int blackPawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_PAWN]);
@@ -323,11 +324,19 @@ public class Evaluation extends EvalConstants {
 				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
 				- passedPawns[1] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]
 						- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);
+		/*int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[1] - pawnMat[0] + nonPawnMat[1] - nonPawnMat[0]
+				+ pieceSquare[1] - pieceSquare[0] + spatial[1] - spatial[0] + positional[1] - positional[0] + attacks[1]
+				- attacks[1] + mobility[0] - mobility[1] + pawnStruct[0] - pawnStruct[1] + passedPawns[0]
+				- passedPawns[0] + openingEndingWithShift(6, KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]
+						- KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]);*/
 		int value = (gamePhase * open(openingAndEnding)
 				+ (PHASE_MIDGAME - gamePhase) * end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
 				/ PHASE_MIDGAME;
 		assert Math.abs(value) < KNOWN_WIN : "Value is outside bounds";
 		return color * value;
+		}catch(Exception e){
+			return 0;
+		}
 	}
 
 	private int evalAttacks(BitBoard board, EvalInfo ei, int color, long enemy) {
