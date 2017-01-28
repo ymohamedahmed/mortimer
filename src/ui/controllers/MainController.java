@@ -34,8 +34,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class MainController {
-	private int PLAYER_COLOR = CoreConstants.BLACK;
-	private int AI_COLOR = CoreConstants.WHITE;
+	private int PLAYER_COLOR = CoreConstants.WHITE;
+	private int AI_COLOR = CoreConstants.BLACK;
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
 	public StackPane stackPane;
@@ -186,14 +186,16 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
+		boolean capture = board.board[move.getFinalPos()] != CoreConstants.EMPTY; 
 		board.move(move);
 		int side = move.getPieceType() % 2;
 		int colorFactor = side == 0 ? 1 : -1;
 		if (move.isPromotion() && side == PLAYER_COLOR) {
-			pawnPromotion(move.getOldPos(), move.getFinalPos(), colorFactor, board, true);
+			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, true);
 		} else if (move.isPromotion() && side == AI_COLOR) {
-			pawnPromotion(move.getOldPos(), move.getFinalPos(), colorFactor, board, false);
+			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, false);
 		}
+		updatePGNTextField(board, move, capture);
 		if (repaint) {
 			// Clear the canvas and then repaint it
 			clearCanvas();
@@ -207,7 +209,7 @@ public class MainController {
 		if(board.checkmate(0) || board.checkmate(1)){
 			
 		}
-		updatePGNTextField(board, move);
+		
 
 	}
 
@@ -251,7 +253,7 @@ public class MainController {
 				break;
 			}
 		} else {
-			board.addPiece(CoreConstants.QUEEN, newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
 		}
 	}
 
@@ -261,7 +263,7 @@ public class MainController {
 		move(board, move, true);
 	}
 
-	private void updatePGNTextField(BitBoard board, Move move) {
+	private void updatePGNTextField(BitBoard board, Move move, boolean capture) {
 		String result = " ";
 		if (board.getMoveNumber() == 0) {
 			result = "";
@@ -273,7 +275,7 @@ public class MainController {
 			result += String.valueOf((board.getMoveNumber() / 2) + 1) + ". ";
 		}
 		result += CoreConstants.pieceToLetter[move.getPieceType()];
-		if (board.board[move.getFinalPos()] != CoreConstants.EMPTY) {
+		if (capture) {
 			result += "x";
 		}
 		result += CoreConstants.indexToAlgebraic[move.getFinalPos()];
