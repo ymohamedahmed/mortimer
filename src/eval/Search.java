@@ -16,6 +16,8 @@ public class Search {
 	public Move rootNegamax(MoveGen moveGen, BitBoard board, int color) {
 		this.moveGen = moveGen;
 		double maxScore = Double.NEGATIVE_INFINITY;
+		double minScore = Double.POSITIVE_INFINITY;
+
 		Move optimal = null;
 		ArrayList<Move> moves = moveGen.generateMoves(board, true);
 		long overallStartTime = System.currentTimeMillis();
@@ -25,20 +27,27 @@ public class Search {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
 			double firstGuess = 0;
-			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d +=2) {
+			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d += 2) {
 				firstGuess = mtdf(board, firstGuess, d, color);
 				if (System.currentTimeMillis() - startTime >= timePerMove) {
-					System.out.println("FINAL DEPTH: " + d);
 					break;
 				}
+				System.out.println("SCORE: " + firstGuess);
 			}
 			board.undo();
-			if (firstGuess > maxScore) {
-				maxScore = firstGuess;
-				optimal = move;
+			if (color == EvalConstants.WHITE) {
+				if (firstGuess > maxScore) {
+					maxScore = firstGuess;
+					optimal = move;
+				}
+			} else {
+				if (firstGuess < minScore) {
+					minScore = firstGuess;
+					optimal = move;
+				}
 			}
 		}
-		System.out.println("SCORE: " + maxScore);
+		System.out.println("SCORE: " + ((color == EvalConstants.WHITE) ?  maxScore : minScore));
 		System.out.println("TIME PER MOVE: " + timePerMove);
 		System.out.println("TOTAL TIME: " + (System.currentTimeMillis() - overallStartTime));
 		return optimal;
