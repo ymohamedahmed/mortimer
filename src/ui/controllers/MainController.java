@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import core.BitBoard;
 import core.CoreConstants;
+import core.Main;
 import core.Move;
 import core.MoveGen;
 import eval.EvalConstants;
@@ -52,6 +53,7 @@ public class MainController {
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
 
 	public void initialize() {
+		System.out.println("INITIALIZE");
 		moveGen.initialiseKnightLookupTable();
 		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
@@ -103,6 +105,7 @@ public class MainController {
 	}
 
 	private void playGame() {
+		System.out.println("PLAY GAME");
 		board = new BitBoard();
 		board.resetToInitialSetup();
 		moveList = getMoves(board, false);
@@ -298,9 +301,9 @@ public class MainController {
 	// History sorted by move number
 
 	@FXML
-	private void handleLoadFileAction(ActionEvent event) {
+	public void handleLoadFileAction(ActionEvent event) {
 		System.out.println("LOADING GAME");
-		Stage stage = (Stage) borderPane.getScene().getWindow();
+		Stage stage = Main.primaryStage;
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Game");
 		File file = fileChooser.showOpenDialog(stage);
@@ -344,6 +347,8 @@ public class MainController {
 				board.castling[0] = Integer.valueOf(reader.readLine());
 				board.castling[1] = Integer.valueOf(reader.readLine());
 				pgnTextField.setText(reader.readLine());
+				PLAYER_COLOR = Integer.valueOf(reader.readLine());
+				AI_COLOR = Integer.valueOf(reader.readLine());
 				clearCanvas();
 				paintChessBoard(board);
 				moveList = moveGen.generateMoves(board, true);
@@ -397,7 +402,9 @@ public class MainController {
 		}
 		result += board.castling[0] + "\n";
 		result += board.castling[1] + "\n";
-		result += pgnTextField.getText();
+		result += pgnTextField.getText() + "\n";
+		result += String.valueOf(PLAYER_COLOR) + "\n";
+		result += String.valueOf(AI_COLOR);
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
 		Stage stage = (Stage) borderPane.getScene().getWindow();

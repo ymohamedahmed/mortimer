@@ -1,3 +1,4 @@
+package core;
 import java.io.IOException;
 
 import javafx.application.Application;
@@ -8,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+	public static Stage primaryStage;
 	public static void main(String[] args) {
 		try {
 			launch(args);
@@ -19,7 +21,8 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/root.fxml"));
+			Main.primaryStage = primaryStage;
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/start.fxml"));
 			Parent root = loader.load();
 			primaryStage.setTitle("Mortimer");
 			Scene scene = new Scene(root);
