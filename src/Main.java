@@ -24,6 +24,7 @@ public class Main extends Application {
 			primaryStage.setTitle("Mortimer");
 			Scene scene = new Scene(root);
 			primaryStage.setScene(scene);
+			primaryStage.setResizable(false);
 			primaryStage.getIcons().add(new Image(getClass().getResource("/images/logo.png").toExternalForm()));
 			primaryStage.show();
 		} catch (IOException e) {

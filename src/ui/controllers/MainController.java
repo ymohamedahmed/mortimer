@@ -28,7 +28,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -38,7 +37,6 @@ public class MainController {
 	private int AI_COLOR = CoreConstants.BLACK;
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
-	public StackPane stackPane;
 	public Canvas chessPane;
 	public BorderPane borderPane;
 	public TextArea pgnTextField;
@@ -265,7 +263,7 @@ public class MainController {
 
 	private void updatePGNTextField(BitBoard board, Move move, boolean capture) {
 		String result = " ";
-		if (board.getMoveNumber() == 0) {
+		if (board.getMoveNumber() == 1) {
 			result = "";
 		}
 		pgnTextField.setWrapText(true);

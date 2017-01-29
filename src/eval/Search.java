@@ -47,7 +47,7 @@ public class Search {
 				}
 			}
 		}
-		System.out.println("SCORE: " + ((color == EvalConstants.WHITE) ?  maxScore : minScore));
+		System.out.println("SCORE: " + ((color == EvalConstants.WHITE) ? maxScore : minScore));
 		System.out.println("TIME PER MOVE: " + timePerMove);
 		System.out.println("TOTAL TIME: " + (System.currentTimeMillis() - overallStartTime));
 		return optimal;
