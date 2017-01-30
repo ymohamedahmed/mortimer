@@ -21,7 +21,9 @@ public class StartMenuController {
 
 	public void loadGame(ActionEvent event) {
 		setupController();
-		controller.handleLoadFileAction(event);
+		controller.setupGame();
+		controller.handleLoadFileAction(null);
+		controller.playGame();
 	}
 	
 	private void setupController(){
@@ -39,6 +41,7 @@ public class StartMenuController {
 	public void playMortimer() {
 		setupController();
 		chooseColour();
+		controller.setupGame();
 		controller.playGame();
 	}
 
@@ -71,7 +74,8 @@ public class StartMenuController {
 	}
 
 	public void playHuman() {
-
+		setupController();
+		controller.playGame();
 	}
 
 }

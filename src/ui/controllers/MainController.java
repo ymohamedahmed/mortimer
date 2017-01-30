@@ -23,6 +23,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
@@ -34,8 +36,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class MainController {
-	private int playerColour = CoreConstants.WHITE;
-	private int aiColor = CoreConstants.BLACK;
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
 	public Canvas chessPane;
@@ -44,6 +44,9 @@ public class MainController {
 	@FXML
 	public Slider moveSpeedSlider;
 	public Slider moveStrengthSlider;
+
+	private int playerColour = CoreConstants.WHITE;
+	private int aiColor = CoreConstants.BLACK;
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
@@ -51,6 +54,7 @@ public class MainController {
 	private BitBoard board;
 	private MoveGen moveGen = new MoveGen();
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
+	private boolean playingAI = true;
 
 	public void initialize() {
 		System.out.println("INITIALIZE");
@@ -104,15 +108,16 @@ public class MainController {
 	}
 
 	public void playGame() {
-		System.out.println("PLAY GAME");
+		if (aiColor == CoreConstants.WHITE) {
+			moveAI(board);
+		}
+	}
+	public void setupGame(){
 		board = new BitBoard();
 		board.resetToInitialSetup();
 		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
-		if (aiColor == CoreConstants.WHITE) {
-			moveAI(board);
-		}
 	}
 
 	private void clearCanvas() {
@@ -349,7 +354,11 @@ public class MainController {
 				clearCanvas();
 				paintChessBoard(board);
 				moveList = moveGen.generateMoves(board, true);
-			} catch (IOException e) {
+			} catch (Exception e) {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error Dialog");
+				alert.setContentText("Ooops, there was an error whilst loading the save game file!");
+				alert.showAndWait();
 				e.printStackTrace();
 			} finally {
 				try {
@@ -406,10 +415,11 @@ public class MainController {
 		fileChooser.setTitle("Save Game");
 		Stage stage = (Stage) borderPane.getScene().getWindow();
 		File file = fileChooser.showSaveDialog(stage);
+		
 		BufferedWriter writer = null;
 		if (file != null) {
 			try {
-				writer = new BufferedWriter(new FileWriter(file));
+				writer = new BufferedWriter(new FileWriter(file + ( !file.getName().endsWith(".txt") ? ".txt" : "")));
 				writer.write(result);
 			} catch (IOException ie) {
 				ie.printStackTrace();
@@ -444,6 +454,10 @@ public class MainController {
 			moveList = moveGen.generateMoves(board, true);
 		}
 
+	}
+
+	public void setPlayingAI(boolean playingAI) {
+		this.playingAI = playingAI;
 	}
 
 	public void setPlayerColour(int color) {
