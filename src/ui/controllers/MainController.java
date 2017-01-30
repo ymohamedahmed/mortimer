@@ -34,8 +34,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class MainController {
-	private int PLAYER_COLOR = CoreConstants.WHITE;
-	private int AI_COLOR = CoreConstants.BLACK;
+	private int playerColour = CoreConstants.WHITE;
+	private int aiColor = CoreConstants.BLACK;
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
 	public Canvas chessPane;
@@ -69,7 +69,6 @@ public class MainController {
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 		BitBoard.initialiseZobrist();
-		playGame();
 	}
 
 	private double paintChessBoard(BitBoard board) {
@@ -104,17 +103,16 @@ public class MainController {
 		return cellSize;
 	}
 
-	private void playGame() {
+	public void playGame() {
 		System.out.println("PLAY GAME");
 		board = new BitBoard();
 		board.resetToInitialSetup();
 		moveList = getMoves(board, false);
-		if (AI_COLOR == CoreConstants.WHITE) {
-			moveAI(board);
-		}
-
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
+		if (aiColor == CoreConstants.WHITE) {
+			moveAI(board);
+		}
 	}
 
 	private void clearCanvas() {
@@ -187,13 +185,13 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
-		boolean capture = board.board[move.getFinalPos()] != CoreConstants.EMPTY; 
+		boolean capture = board.board[move.getFinalPos()] != CoreConstants.EMPTY;
 		board.move(move);
 		int side = move.getPieceType() % 2;
 		int colorFactor = side == 0 ? 1 : -1;
-		if (move.isPromotion() && side == PLAYER_COLOR) {
+		if (move.isPromotion() && side == playerColour) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, true);
-		} else if (move.isPromotion() && side == AI_COLOR) {
+		} else if (move.isPromotion() && side == aiColor) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, false);
 		}
 		updatePGNTextField(board, move, capture);
@@ -204,13 +202,12 @@ public class MainController {
 			moveList = getMoves(board, true);
 
 		}
-		if (side == PLAYER_COLOR) {
+		if (side == playerColour) {
 			moveAI(board);
 		}
-		if(board.checkmate(0) || board.checkmate(1)){
-			
+		if (board.checkmate(0) || board.checkmate(1)) {
+
 		}
-		
 
 	}
 
@@ -259,7 +256,7 @@ public class MainController {
 	}
 
 	private void moveAI(BitBoard board) {
-		int colorFactor = (AI_COLOR == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
+		int colorFactor = (aiColor == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
 		Move move = search.rootNegamax(moveGen, board, colorFactor);
 		move(board, move, true);
 	}
@@ -347,8 +344,8 @@ public class MainController {
 				board.castling[0] = Integer.valueOf(reader.readLine());
 				board.castling[1] = Integer.valueOf(reader.readLine());
 				pgnTextField.setText(reader.readLine());
-				PLAYER_COLOR = Integer.valueOf(reader.readLine());
-				AI_COLOR = Integer.valueOf(reader.readLine());
+				playerColour = Integer.valueOf(reader.readLine());
+				aiColor = Integer.valueOf(reader.readLine());
 				clearCanvas();
 				paintChessBoard(board);
 				moveList = moveGen.generateMoves(board, true);
@@ -403,8 +400,8 @@ public class MainController {
 		result += board.castling[0] + "\n";
 		result += board.castling[1] + "\n";
 		result += pgnTextField.getText() + "\n";
-		result += String.valueOf(PLAYER_COLOR) + "\n";
-		result += String.valueOf(AI_COLOR);
+		result += String.valueOf(playerColour) + "\n";
+		result += String.valueOf(aiColor);
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
 		Stage stage = (Stage) borderPane.getScene().getWindow();
@@ -447,6 +444,14 @@ public class MainController {
 			moveList = moveGen.generateMoves(board, true);
 		}
 
+	}
+
+	public void setPlayerColour(int color) {
+		playerColour = color;
+	}
+
+	public void setAIColour(int color) {
+		aiColor = color;
 	}
 
 	private enum CellColor {
