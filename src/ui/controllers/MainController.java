@@ -112,7 +112,8 @@ public class MainController {
 			moveAI(board);
 		}
 	}
-	public void setupGame(){
+
+	public void setupGame() {
 		board = new BitBoard();
 		board.resetToInitialSetup();
 		moveList = getMoves(board, false);
@@ -295,7 +296,7 @@ public class MainController {
 		} else if (board.check(enemy)) {
 			result += "+";
 		}
-		pgnTextField.setText(pgnTextField.getText() + result);
+		pgnTextField.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
 		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();
 	}
 	// File Format
@@ -415,11 +416,11 @@ public class MainController {
 		fileChooser.setTitle("Save Game");
 		Stage stage = (Stage) borderPane.getScene().getWindow();
 		File file = fileChooser.showSaveDialog(stage);
-		
+
 		BufferedWriter writer = null;
 		if (file != null) {
 			try {
-				writer = new BufferedWriter(new FileWriter(file + ( !file.getName().endsWith(".txt") ? ".txt" : "")));
+				writer = new BufferedWriter(new FileWriter(file + (!file.getName().endsWith(".txt") ? ".txt" : "")));
 				writer.write(result);
 			} catch (IOException ie) {
 				ie.printStackTrace();
@@ -439,21 +440,14 @@ public class MainController {
 
 	@FXML
 	private void undoAction(ActionEvent event) {
-		if (board.toMove == CoreConstants.WHITE && board.getMoveNumber() >= 1) {
+		if (board.getMoveNumber() >=2) {
 			board.undo();
-			pgnTextField.setText(pgnHistory[board.getMoveNumber() - 1]);
+			board.undo();
+			pgnTextField.setText(pgnHistory[board.getMoveNumber()]);
 			clearCanvas();
 			paintChessBoard(board);
 			moveList = moveGen.generateMoves(board, true);
-		} else if (board.toMove == CoreConstants.BLACK && board.getMoveNumber() >= 2) {
-			board.undo();
-			board.undo();
-			pgnTextField.setText(pgnHistory[board.getMoveNumber() - 1]);
-			clearCanvas();
-			paintChessBoard(board);
-			moveList = moveGen.generateMoves(board, true);
-		}
-
+		} 
 	}
 
 	public void setPlayingAI(boolean playingAI) {
