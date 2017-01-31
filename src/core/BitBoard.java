@@ -118,7 +118,7 @@ public class BitBoard {
 		removePiece(oldIndex);
 		addPiece(piece, finalIndex);
 
-		updateCastlingFlags(side);
+		updateCastlingFlags(enemy);
 		epTargetSquares[enemy] = 0;
 		if (piece == CoreConstants.WHITE_PAWN) {
 			if (finalIndex - oldIndex == 16) {
@@ -224,7 +224,7 @@ public class BitBoard {
 										if (!isSquareAttacked(1, side)) {
 											if (!isSquareAttacked(2, side)) {
 												if (!isSquareAttacked(3, side)) {
-													if (!isSquareAttacked(4, side)) {
+													if (!check(side)) {
 														castling[side] |= 0b10000;
 													}
 												}
@@ -245,7 +245,7 @@ public class BitBoard {
 						if (board[4] == CoreConstants.WHITE_KING) {
 							if (!((castling[side] & 0b00100) == 4)) {
 								if (!((castling[side] & 0b00001) == 1)) {
-									if (!isSquareAttacked(4, side)) {
+									if (!check(side)) {
 										if (!isSquareAttacked(5, side)) {
 											if (!isSquareAttacked(6, side)) {
 												castling[side] |= 0b01000;
@@ -271,7 +271,7 @@ public class BitBoard {
 										if (!isSquareAttacked(57, side)) {
 											if (!isSquareAttacked(58, side)) {
 												if (!isSquareAttacked(59, side)) {
-													if (!isSquareAttacked(60, side)) {
+													if (!check(side)) {
 														castling[side] |= 0b10000;
 													}
 												}
@@ -292,7 +292,7 @@ public class BitBoard {
 						if (board[60] == CoreConstants.BLACK_KING) {
 							if (!((castling[side] & 0b00100) == 4)) {
 								if (!((castling[side] & 0b00001) == 1)) {
-									if (!isSquareAttacked(60, side)) {
+									if (!check(side)) {
 										if (!isSquareAttacked(61, side)) {
 											if (!isSquareAttacked(62, side)) {
 												castling[side] |= 0b01000;
