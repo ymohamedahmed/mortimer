@@ -6,8 +6,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import eval.Evaluation;
-
 public class MoveGenTest {
 	BitBoard board = new BitBoard();
 

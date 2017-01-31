@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import core.BitBoard;
-import core.CoreConstants;
 import core.Move;
 import core.MoveGen;
 
@@ -116,7 +115,6 @@ public class Search {
 			tEntryFinal.setFlag(TranspositionFlag.EXACT);
 		}
 		tEntryFinal.setDepth(depth);
-		tEntryFinal.setValid(true);
 		hashtable.put(board.hash(), tEntryFinal);
 
 		return bestValue;
@@ -130,7 +128,6 @@ public class Search {
 		private double score;
 		private TranspositionFlag flag;
 		private int depth;
-		private boolean valid = false;
 
 		public TranspositionEntry() {
 		}
@@ -157,14 +154,6 @@ public class Search {
 
 		public void setDepth(int depth) {
 			this.depth = depth;
-		}
-
-		public boolean isValid() {
-			return valid;
-		}
-
-		public void setValid(boolean valid) {
-			this.valid = valid;
 		}
 	}
 

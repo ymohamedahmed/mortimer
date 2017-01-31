@@ -70,7 +70,6 @@ public class EvalInfo {
 		kingIndex[1] = BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
 		long square = 1L;
 		long all = board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK];
-		long mines = board.bitboards[board.toMove];
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
 		long knights = board.bitboards[CoreConstants.WHITE_KNIGHT] | board.bitboards[CoreConstants.BLACK_KNIGHT];
 		long bishops = board.bitboards[CoreConstants.WHITE_BISHOP] | board.bitboards[CoreConstants.BLACK_BISHOP];

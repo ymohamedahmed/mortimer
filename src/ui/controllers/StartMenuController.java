@@ -22,7 +22,7 @@ public class StartMenuController {
 	public void loadGame(ActionEvent event) {
 		setupController();
 		controller.setupGame();
-		controller.handleLoadFileAction(null);
+		controller.handleLoadFileAction(event);
 		controller.playGame();
 	}
 	
@@ -75,6 +75,8 @@ public class StartMenuController {
 
 	public void playHuman() {
 		setupController();
+		controller.setupGame();
+		controller.setPlayingAI(false);
 		controller.playGame();
 	}
 

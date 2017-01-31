@@ -194,7 +194,6 @@ public class MainController {
 		boolean capture = board.board[move.getFinalPos()] != CoreConstants.EMPTY;
 		board.move(move);
 		int side = move.getPieceType() % 2;
-		int colorFactor = side == 0 ? 1 : -1;
 		if (move.isPromotion() && side == playerColour) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, true);
 		} else if (move.isPromotion() && side == aiColor) {
@@ -208,7 +207,7 @@ public class MainController {
 			moveList = getMoves(board, true);
 
 		}
-		if (side == playerColour) {
+		if (side == playerColour && playingAI) {
 			moveAI(board);
 		}
 		if (board.checkmate(0) || board.checkmate(1)) {
