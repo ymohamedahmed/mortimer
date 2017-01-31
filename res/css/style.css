@@ -2,7 +2,9 @@
 	-fx-font-family: "Ubuntu";
 	-fx-font-smoothing-type: gray;
 }
-
 .start-button{
 	-fx-font-size: 35;
+}
+.menu-bar{
+	-fx-font-size: 12;
 }

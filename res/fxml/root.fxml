@@ -11,7 +11,7 @@
 
 <BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.controllers.MainController">
     <top>
-        <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+        <MenuBar fx:id="menuBar" styleClass="menu-bar" BorderPane.alignment="CENTER">
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>

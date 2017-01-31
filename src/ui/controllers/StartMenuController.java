@@ -18,13 +18,6 @@ public class StartMenuController {
 	public void initialize() {
 
 	}
-
-	public void loadGame(ActionEvent event) {
-		setupController();
-		controller.setupGame();
-		controller.handleLoadFileAction(event);
-		controller.playGame();
-	}
 	
 	private void setupController(){
 		try {
@@ -32,6 +25,7 @@ public class StartMenuController {
 			Parent root = loader.load();
 			controller = loader.<MainController>getController();
 			Scene scene = new Scene(root);
+			scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
 			Main.primaryStage.setScene(scene);
 			Main.primaryStage.setResizable(false);
 		} catch (IOException e) {
