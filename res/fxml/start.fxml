@@ -19,7 +19,7 @@
    <children>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
          <children>
-            <Button layoutX="-105.0" layoutY="27.0" mnemonicParsing="false" onAction="#playHuman" prefHeight="133.0" prefWidth="600.0" text="Play Human Locally" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <Button layoutX="-105.0" layoutY="27.0" mnemonicParsing="false" onAction="#playHuman" prefHeight="133.0" prefWidth="600.0" styleClass="start-button" text="Play Human Locally" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <font>
                   <Font name="Ubuntu" size="32.0" />
                </font>
@@ -28,7 +28,7 @@
       </AnchorPane>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
          <children>
-            <Button mnemonicParsing="false" onAction="#playMortimer" prefHeight="133.0" prefWidth="662.0" text="Play Mortimer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <Button mnemonicParsing="false" onAction="#playMortimer" prefHeight="133.0" prefWidth="662.0" styleClass="start-button" text="Play Mortimer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <font>
                   <Font name="Ubuntu" size="32.0" />
                </font>
@@ -37,7 +37,7 @@
       </AnchorPane>
       <AnchorPane prefHeight="200.0" prefWidth="200.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#loadGame" prefHeight="134.0" prefWidth="837.0" text="Load Previous Game" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <Button mnemonicParsing="false" onAction="#loadGame" prefHeight="134.0" prefWidth="837.0" styleClass="start-button" text="Load Previous Game" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <font>
                   <Font name="Ubuntu" size="32.0" />
                </font>

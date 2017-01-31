@@ -128,46 +128,50 @@ public class MainController {
 
 	private void clickListenerChessPane(BitBoard board, MouseEvent evt, double cellSize) {
 		// Get the position clicked in terms of the board
-		int column = (int) Math.floor(evt.getX() / cellSize);
-		int row = 7 - (int) Math.floor(evt.getY() / cellSize);
+		double x = evt.getX();
+		double y = evt.getY();
+		int column = (int) Math.floor(x / cellSize);
+		int row = 7 - (int) Math.floor(y/ cellSize);
 		boolean pieceMoved = false;
 		// Get the piece that was clicked
 		int index = (8 * row) + column;
-		byte piece = board.board[index];
+		if (index < 64 && x <= (8 * cellSize) && y <= (8*cellSize)) {
+			byte piece = board.board[index];
 
-		for (int square : blueSquares) {
-			if (square == index) {
-				move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
-				blueSquares.clear();
-				pieceMoved = true;
-				break;
-			}
-		}
-
-		// Clicks square with piece in it
-		if (piece != CoreConstants.EMPTY && !pieceMoved) {
-			// Get its available moves
-			ArrayList<Move> moves = getMovesPiece(index, moveList);
-			oldPos = index;
-			// Clear the canvas and then repaint it
-			clearCanvas();
-			paintChessBoard(board);
-			GraphicsContext g = chessPane.getGraphicsContext2D();
-			// Show available moves by painting a blue circle in the cells
-			blueSquares.clear();
-			for (Move move : moves) {
-				int rowMove = Math.floorDiv(move.getFinalPos(), 8);
-				int colMove = move.getFinalPos() % 8;
-				if (board.board[move.getFinalPos()] == CoreConstants.EMPTY) {
-					g.setFill(Color.BLUE);
-					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
-				} else {
-					g.setFill(Color.RED);
-					g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5, cellSize / 5);
+			for (int square : blueSquares) {
+				if (square == index) {
+					move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
+					blueSquares.clear();
+					pieceMoved = true;
+					break;
 				}
-				blueSquares.add(move.getFinalPos());
 			}
 
+			// Clicks square with piece in it
+			if (piece != CoreConstants.EMPTY && !pieceMoved) {
+				// Get its available moves
+				ArrayList<Move> moves = getMovesPiece(index, moveList);
+				oldPos = index;
+				// Clear the canvas and then repaint it
+				clearCanvas();
+				paintChessBoard(board);
+				GraphicsContext g = chessPane.getGraphicsContext2D();
+				// Show available moves by painting a blue circle in the cells
+				blueSquares.clear();
+				for (Move move : moves) {
+					int rowMove = Math.floorDiv(move.getFinalPos(), 8);
+					int colMove = move.getFinalPos() % 8;
+					if (board.board[move.getFinalPos()] == CoreConstants.EMPTY) {
+						g.setFill(Color.BLUE);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
+					} else {
+						g.setFill(Color.RED);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5, cellSize / 5);
+					}
+					blueSquares.add(move.getFinalPos());
+				}
+
+			}
 		}
 	}
 
@@ -439,14 +443,14 @@ public class MainController {
 
 	@FXML
 	private void undoAction(ActionEvent event) {
-		if (board.getMoveNumber() >=2) {
+		if (board.getMoveNumber() >= 2) {
 			board.undo();
 			board.undo();
 			pgnTextField.setText(pgnHistory[board.getMoveNumber()]);
 			clearCanvas();
 			paintChessBoard(board);
 			moveList = moveGen.generateMoves(board, true);
-		} 
+		}
 	}
 
 	public void setPlayingAI(boolean playingAI) {

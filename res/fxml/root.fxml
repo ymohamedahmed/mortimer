@@ -40,14 +40,14 @@
    <right>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-              <TextArea fx:id="pgnTextField" editable="false" layoutX="-42.0" prefHeight="571.0" prefWidth="242.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-42.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+              <TextArea fx:id="pgnTextField" editable="false" layoutX="-42.0" prefHeight="571.0" prefWidth="242.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-42.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
          </children>
       </AnchorPane>
    </right>
    <center>
-      <AnchorPane prefHeight="121.0" prefWidth="47.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="571.0" prefWidth="587.0" BorderPane.alignment="CENTER">
          <children>
-                <Canvas fx:id="chessPane" height="571.0" layoutX="25.0" layoutY="14.0" width="659.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="41.0" AnchorPane.topAnchor="0.0" />
+                <Canvas fx:id="chessPane" height="571.0" layoutX="25.0" layoutY="14.0" width="660.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
          </children>
       </AnchorPane>
    </center>

@@ -26,6 +26,7 @@ public class Main extends Application {
 			Parent root = loader.load();
 			primaryStage.setTitle("Mortimer");
 			Scene scene = new Scene(root);
+			scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
 			primaryStage.setScene(scene);
 			primaryStage.setResizable(false);
 			primaryStage.getIcons().add(new Image(getClass().getResource("/images/logo.png").toExternalForm()));
