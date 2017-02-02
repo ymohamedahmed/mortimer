@@ -49,8 +49,8 @@ public class BitBoard {
 		castlingHistory = new long[2][CoreConstants.MAX_MOVES];
 	}
 
-	public void loadFen(String fen) {
-		String board = fen.substring(0, fen.indexOf(' ') == -1 ? fen.length() : fen.indexOf(' '));
+	public void loadFen(String board) {
+		reset();
 		board = board.replace("/", "");
 		board = board.replace("1", " ");
 		board = board.replace("2", "  ");
@@ -63,7 +63,7 @@ public class BitBoard {
 		int index = 0;
 		while (index <= 63) {
 			int blackPiece = !Character.isUpperCase(board.charAt(index)) ? 1 : 0;
-			int littleEndianIndex = 56 + (2*(index%8))- index;
+			int littleEndianIndex = 56 + (2 * (index % 8)) - index;
 			switch (Character.toLowerCase(board.charAt(index))) {
 			case 'p':
 				addPiece((byte) (CoreConstants.WHITE_PAWN + blackPiece), littleEndianIndex);
@@ -85,6 +85,11 @@ public class BitBoard {
 				break;
 			}
 			index++;
+		}
+		if (index + 1 < board.length()) {
+			char toMoveChar = board.charAt(index + 1);
+			toMove = (toMoveChar == 'w') ? 0 : 1;
+			System.out.println("TO MOVE: " + toMove);
 		}
 	}
 

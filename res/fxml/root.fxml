@@ -23,6 +23,7 @@
                     <items>
                   <MenuItem mnemonicParsing="false" onAction="#undoAction" text="Undo" />
                   <MenuItem id="restartMenuItem" mnemonicParsing="false" onAction="#restartGame" text="Restart" />
+                  <MenuItem mnemonicParsing="false" onAction="#loadFenMenuItem" text="Load FEN " />
                     </items>
                 </Menu>
             <Menu mnemonicParsing="false" text="Settings">

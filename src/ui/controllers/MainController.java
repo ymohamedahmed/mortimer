@@ -28,6 +28,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -115,8 +116,7 @@ public class MainController {
 
 	public void setupGame() {
 		board = new BitBoard();
-		//board.resetToInitialSetup();
-		board.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+		board.resetToInitialSetup();
 		pgnTextField.setText("");
 		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);
@@ -438,7 +438,7 @@ public class MainController {
 			}
 		}
 	}
-	
+
 	@FXML
 	private void restartGame(ActionEvent event) {
 		setupGame();
@@ -455,6 +455,27 @@ public class MainController {
 			paintChessBoard(board);
 			moveList = moveGen.generateMoves(board, true);
 		}
+	}
+
+	@FXML
+	private void loadFenMenuItem(ActionEvent event) {
+		Stage stage = Main.primaryStage;
+		TextInputDialog dialog = new TextInputDialog("");
+		dialog.setTitle("Input FEN Notation");
+		dialog.setContentText("Please enter FEN of board to be loaded");
+
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent()) {
+			try {
+				board.loadFen(result.get());
+				moveList = moveGen.generateMoves(board, true);
+				clearCanvas();
+				paintChessBoard(board);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	public void setPlayingAI(boolean playingAI) {
