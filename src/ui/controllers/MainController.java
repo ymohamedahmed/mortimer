@@ -115,7 +115,8 @@ public class MainController {
 
 	public void setupGame() {
 		board = new BitBoard();
-		board.resetToInitialSetup();
+		//board.resetToInitialSetup();
+		board.loadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 		pgnTextField.setText("");
 		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);

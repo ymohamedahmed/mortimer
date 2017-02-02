@@ -49,6 +49,45 @@ public class BitBoard {
 		castlingHistory = new long[2][CoreConstants.MAX_MOVES];
 	}
 
+	public void loadFen(String fen) {
+		String board = fen.substring(0, fen.indexOf(' ') == -1 ? fen.length() : fen.indexOf(' '));
+		board = board.replace("/", "");
+		board = board.replace("1", " ");
+		board = board.replace("2", "  ");
+		board = board.replace("3", "   ");
+		board = board.replace("4", "    ");
+		board = board.replace("5", "     ");
+		board = board.replace("6", "      ");
+		board = board.replace("7", "       ");
+		board = board.replace("8", "        ");
+		int index = 0;
+		while (index <= 63) {
+			int blackPiece = !Character.isUpperCase(board.charAt(index)) ? 1 : 0;
+			int littleEndianIndex = 56 + (2*(index%8))- index;
+			switch (Character.toLowerCase(board.charAt(index))) {
+			case 'p':
+				addPiece((byte) (CoreConstants.WHITE_PAWN + blackPiece), littleEndianIndex);
+				break;
+			case 'n':
+				addPiece((byte) (CoreConstants.WHITE_KNIGHT + blackPiece), littleEndianIndex);
+				break;
+			case 'b':
+				addPiece((byte) (CoreConstants.WHITE_BISHOP + blackPiece), littleEndianIndex);
+				break;
+			case 'r':
+				addPiece((byte) (CoreConstants.WHITE_ROOK + blackPiece), littleEndianIndex);
+				break;
+			case 'q':
+				addPiece((byte) (CoreConstants.WHITE_QUEEN + blackPiece), littleEndianIndex);
+				break;
+			case 'k':
+				addPiece((byte) (CoreConstants.WHITE_KING + blackPiece), littleEndianIndex);
+				break;
+			}
+			index++;
+		}
+	}
+
 	boolean isEmpty() {
 		return 0 == ~(bitboards[CoreConstants.WHITE] | bitboards[CoreConstants.BLACK]);
 	}
@@ -502,8 +541,8 @@ public class BitBoard {
 	public int getMoveNumber() {
 		return moveNumber;
 	}
-	
-	public void setMoveNumber(int n){
+
+	public void setMoveNumber(int n) {
 		moveNumber = n;
 	}
 }
