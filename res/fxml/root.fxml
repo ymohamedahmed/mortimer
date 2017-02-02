@@ -17,12 +17,12 @@
                     <items>
                         <MenuItem id="loadMenuItem" mnemonicParsing="false" onAction="#handleLoadFileAction" text="Load" />
                   <MenuItem id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveFileAction" text="Save" />
-                  <MenuItem mnemonicParsing="false" onAction="#undoAction" text="Undo" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Statistics">
+                <Menu mnemonicParsing="false" text="Game">
                     <items>
-                        <MenuItem id="openStatsMenuItem" mnemonicParsing="false" onAction="#displayStatisticsAction" text="Open Stats" />
+                  <MenuItem mnemonicParsing="false" onAction="#undoAction" text="Undo" />
+                  <MenuItem id="restartMenuItem" mnemonicParsing="false" onAction="#restartGame" text="Restart" />
                     </items>
                 </Menu>
             <Menu mnemonicParsing="false" text="Settings">

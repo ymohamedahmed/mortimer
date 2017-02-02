@@ -116,6 +116,7 @@ public class MainController {
 	public void setupGame() {
 		board = new BitBoard();
 		board.resetToInitialSetup();
+		pgnTextField.setText("");
 		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
@@ -131,11 +132,11 @@ public class MainController {
 		double x = evt.getX();
 		double y = evt.getY();
 		int column = (int) Math.floor(x / cellSize);
-		int row = 7 - (int) Math.floor(y/ cellSize);
+		int row = 7 - (int) Math.floor(y / cellSize);
 		boolean pieceMoved = false;
 		// Get the piece that was clicked
 		int index = (8 * row) + column;
-		if (index < 64 && x <= (8 * cellSize) && y <= (8*cellSize)) {
+		if (index < 64 && x <= (8 * cellSize) && y <= (8 * cellSize)) {
 			byte piece = board.board[index];
 
 			for (int square : blueSquares) {
@@ -436,9 +437,11 @@ public class MainController {
 			}
 		}
 	}
-
+	
 	@FXML
-	private void displayStatisticsAction(ActionEvent event) {
+	private void restartGame(ActionEvent event) {
+		setupGame();
+		playGame();
 	}
 
 	@FXML
