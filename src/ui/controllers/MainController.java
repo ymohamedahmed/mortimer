@@ -329,7 +329,7 @@ public class MainController {
 					board.bitboards[i] = Long.valueOf(reader.readLine());
 				}
 
-				for (int i = 0; i < noOfMoves; i++) {
+				for (int i = 0; i < noOfMoves - 1; i++) {
 					board.moveHistory[i] = Long.valueOf(reader.readLine());
 					board.whiteHistory[i] = Long.valueOf(reader.readLine());
 					board.blackHistory[i] = Long.valueOf(reader.readLine());
