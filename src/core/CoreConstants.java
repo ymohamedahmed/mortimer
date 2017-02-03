@@ -216,7 +216,8 @@ public class CoreConstants {
 			"a7","b7","c7","d7","e7","f7","g7","h7",
 			"a8","b8","c8","d8","e8","f8","g8","h8"
 	};
-	public static String[] pieceToLetter = 
+	public static String[] pieceToLetterCapital = 
 		{"","","","","N","N","R","R","B","B","Q","Q","K","K"};
-
+	public static String[] pieceToLetterFen = 
+		{"","","P","p", "N","n","R","r","B","b","Q","q","K","k"};
 }

@@ -26,6 +26,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
@@ -45,6 +46,7 @@ public class MainController {
 	@FXML
 	public Slider moveSpeedSlider;
 	public Slider moveStrengthSlider;
+	public ComboBox colourComboBox;
 
 	private int playerColour = CoreConstants.WHITE;
 	private int aiColor = CoreConstants.BLACK;
@@ -56,9 +58,9 @@ public class MainController {
 	private MoveGen moveGen = new MoveGen();
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
 	private boolean playingAI = true;
+	private BoardColour boardColour = BoardColour.CLASSIC;
 
 	public void initialize() {
-		System.out.println("INITIALIZE");
 		moveGen.initialiseKnightLookupTable();
 		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
@@ -283,7 +285,7 @@ public class MainController {
 		if (side == 0) {
 			result += String.valueOf((board.getMoveNumber() / 2) + 1) + ". ";
 		}
-		result += CoreConstants.pieceToLetter[move.getPieceType()];
+		result += CoreConstants.pieceToLetterCapital[move.getPieceType()];
 		if (capture) {
 			result += "x";
 		}
@@ -309,7 +311,7 @@ public class MainController {
 	// History sorted by move number
 
 	@FXML
-	public void handleLoadFileAction(ActionEvent event) {
+	private void handleLoadFileAction(ActionEvent event) {
 		System.out.println("LOADING GAME");
 		Stage stage = Main.primaryStage;
 		FileChooser fileChooser = new FileChooser();
@@ -459,7 +461,6 @@ public class MainController {
 
 	@FXML
 	private void loadFenMenuItem(ActionEvent event) {
-		Stage stage = Main.primaryStage;
 		TextInputDialog dialog = new TextInputDialog("");
 		dialog.setTitle("Input FEN Notation");
 		dialog.setContentText("Please enter FEN of board to be loaded");
@@ -469,6 +470,7 @@ public class MainController {
 			try {
 				board.loadFen(result.get());
 				moveList = moveGen.generateMoves(board, true);
+				pgnTextField.setText("");
 				clearCanvas();
 				paintChessBoard(board);
 			} catch (Exception e) {
@@ -478,6 +480,30 @@ public class MainController {
 
 	}
 
+	@FXML
+	private void exportFenMenuItem(ActionEvent event) {
+		String fen = board.exportFen();
+		TextInputDialog alert = new TextInputDialog(fen);
+		alert.setTitle("Export FEN");
+		alert.setHeaderText("The FEN notation for the current board");
+		alert.getEditor().setEditable(false);
+		alert.showAndWait();
+	}
+	@FXML
+	private void boardColourMenuItem(ActionEvent event){
+		List<String> choices = new ArrayList<>();
+		choices.add("Classic");
+		choices.add("Moss Green");
+
+		ChoiceDialog<String> dialog = new ChoiceDialog<>(boardColour.getColour(), choices);
+		dialog.setHeaderText("Choose a Colour Theme");
+		dialog.setTitle("Choose Board Colour");
+
+		// Traditional way to get the response value.
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent()){
+		}
+	}
 	public void setPlayingAI(boolean playingAI) {
 		this.playingAI = playingAI;
 	}
@@ -489,7 +515,19 @@ public class MainController {
 	public void setAIColour(int color) {
 		aiColor = color;
 	}
-
+	
+	private enum BoardColour{
+		CLASSIC, MOSS_GREEN;
+		public String getColour(){
+			if(this == BoardColour.CLASSIC){
+				return "Classic";
+			}else if(this == BoardColour.MOSS_GREEN){
+				return "Moss Green";
+			}else{
+				return "";
+			}
+		}
+	}
 	private enum CellColor {
 		COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
 		private Color color;

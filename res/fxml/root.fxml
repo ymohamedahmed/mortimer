@@ -24,6 +24,7 @@
                   <MenuItem mnemonicParsing="false" onAction="#undoAction" text="Undo" />
                   <MenuItem id="restartMenuItem" mnemonicParsing="false" onAction="#restartGame" text="Restart" />
                   <MenuItem mnemonicParsing="false" onAction="#loadFenMenuItem" text="Load FEN " />
+                  <MenuItem mnemonicParsing="false" onAction="#exportFenMenuItem" text="Export FEN" />
                     </items>
                 </Menu>
             <Menu mnemonicParsing="false" text="Settings">
@@ -33,6 +34,7 @@
                         <Slider id="moveSpeedSlider" fx:id="moveSpeedSlider" snapToTicks="true" value="50.0" />
                      </graphic>
                   </MenuItem>
+                  <MenuItem mnemonicParsing="false" onAction="#boardColourMenuItem" text="Colour" />
               </items>
             </Menu>
             </menus>
@@ -41,7 +43,7 @@
    <right>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-              <TextArea fx:id="pgnTextField" editable="false" layoutX="-42.0" prefHeight="571.0" prefWidth="242.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-42.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+              <TextArea fx:id="pgnTextField" editable="false" layoutX="-42.0" prefHeight="571.0" prefWidth="242.0" styleClass="text-area" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-42.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
          </children>
       </AnchorPane>
    </right>

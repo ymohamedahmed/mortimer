@@ -93,6 +93,32 @@ public class BitBoard {
 		}
 	}
 
+	public String exportFen() {
+		String result = "";
+		for (int row = 56; row >= 0; row -= 8) {
+			int spaceCount = 0;
+			for (int col = 0; col <= 7; col++) {
+				int index = row + col;
+				if (board[index] == CoreConstants.EMPTY) {
+					spaceCount++;
+				} else {
+					if (spaceCount != 0) {
+						result += String.valueOf(spaceCount);
+						spaceCount = 0;
+					}
+					result += CoreConstants.pieceToLetterFen[board[index]];
+				}
+			}
+			if (spaceCount != 0) {
+				result += String.valueOf(spaceCount);
+			}
+			if (row != 0) {
+				result += "/";
+			}
+		}
+		return result;
+	}
+
 	boolean isEmpty() {
 		return 0 == ~(bitboards[CoreConstants.WHITE] | bitboards[CoreConstants.BLACK]);
 	}
