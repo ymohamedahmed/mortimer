@@ -403,7 +403,13 @@ public class BitBoard {
 			return false;
 		}
 	}
-
+	public boolean stalemate(int sideToMove){
+		if(!checkmate(sideToMove) && new MoveGen().generateMoves(this, true).size()==0){
+			return true;
+		}else{
+			return false;
+		}
+	}
 	public boolean isSquareAttacked(int index, int side) {
 		long enemyPawns = bitboards[3 - side];
 		long enemyKnights = bitboards[5 - side];

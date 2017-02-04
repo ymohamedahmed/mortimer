@@ -213,11 +213,18 @@ public class MainController {
 			moveList = getMoves(board, true);
 
 		}
-		if (side == playerColour && playingAI) {
+		boolean aiLost = board.checkmate(aiColor);
+		boolean playerLost = board.checkmate(playerColour);
+		if (side == playerColour && playingAI && !aiLost) {
 			moveAI(board);
 		}
-		if (board.checkmate(0) || board.checkmate(1)) {
+		if (aiLost || playerLost || board.stalemate(board.toMove)) {
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Game Over");
+			alert.setHeaderText(null);
+			alert.setContentText("The game has finished");
 
+			alert.showAndWait();
 		}
 
 	}

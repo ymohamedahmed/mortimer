@@ -71,6 +71,8 @@ public class MoveGenTest {
 		assertEquals(8902, perft3);
 		assertEquals(197281, perft4);
 		assertEquals(4865609, perft5);
+		board.loadFen("7k/5K2/6Q1/8/8/8/8/8 b");
+		assertEquals(true, board.stalemate(1));
 	}
 
 	public long perft(MoveGen moveGen, int depth) {
