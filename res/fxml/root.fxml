@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.controllers.MainController">
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.controllers.MainController">
     <top>
         <MenuBar fx:id="menuBar" styleClass="menu-bar" BorderPane.alignment="CENTER">
             <menus>
@@ -41,16 +41,16 @@
         </MenuBar>
     </top>
    <right>
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="571.0" prefWidth="167.0" BorderPane.alignment="CENTER">
          <children>
-              <TextArea fx:id="pgnTextField" editable="false" layoutX="-42.0" prefHeight="571.0" prefWidth="242.0" styleClass="text-area" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-42.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+              <TextArea fx:id="pgnTextField" editable="false" layoutX="20.0" prefHeight="571.0" prefWidth="167.0" styleClass="text-area" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
          </children>
       </AnchorPane>
    </right>
    <center>
-      <AnchorPane prefHeight="571.0" prefWidth="587.0" BorderPane.alignment="CENTER">
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="500.0" BorderPane.alignment="CENTER">
          <children>
-                <Canvas fx:id="chessPane" height="571.0" layoutX="25.0" layoutY="14.0" width="660.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0" />
+                <Canvas fx:id="chessPane" height="504.0" layoutX="-2.0" layoutY="-4.0" width="503.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="-4.0" />
          </children>
       </AnchorPane>
    </center>
