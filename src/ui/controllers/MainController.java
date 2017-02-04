@@ -26,7 +26,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
@@ -46,7 +45,6 @@ public class MainController {
 	@FXML
 	public Slider moveSpeedSlider;
 	public Slider moveStrengthSlider;
-	public ComboBox colourComboBox;
 
 	private int playerColour = CoreConstants.WHITE;
 	private int aiColor = CoreConstants.BLACK;
@@ -88,9 +86,9 @@ public class MainController {
 			int x = squareNo % 8;
 			int y = squareNo / 8;
 			if ((x % 2 == 0 && y % 2 == 0) || (x % 2 == 1 && y % 2 == 1)) {
-				g.setFill(CellColor.COLOR1.getColor());
+				g.setFill(boardColour.getColourPrimary());
 			} else {
-				g.setFill(CellColor.COLOR2.getColor());
+				g.setFill(boardColour.getColourSecondary());
 			}
 			g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 			squareNo++;
@@ -489,21 +487,37 @@ public class MainController {
 		alert.getEditor().setEditable(false);
 		alert.showAndWait();
 	}
+
 	@FXML
-	private void boardColourMenuItem(ActionEvent event){
+	private void boardColourMenuItem(ActionEvent event) {
 		List<String> choices = new ArrayList<>();
 		choices.add("Classic");
 		choices.add("Moss Green");
+		choices.add("Grey");
 
-		ChoiceDialog<String> dialog = new ChoiceDialog<>(boardColour.getColour(), choices);
+		ChoiceDialog<String> dialog = new ChoiceDialog<>(boardColour.getColourName(), choices);
 		dialog.setHeaderText("Choose a Colour Theme");
 		dialog.setTitle("Choose Board Colour");
 
 		// Traditional way to get the response value.
 		Optional<String> result = dialog.showAndWait();
-		if (result.isPresent()){
+		if (result.isPresent()) {
+			switch (result.get()) {
+				case "Classic":
+					boardColour = BoardColour.CLASSIC;
+					break;
+				case "Moss Green":
+					boardColour = BoardColour.MOSS_GREEN;
+					break;
+				case "Grey":
+					boardColour = BoardColour.GREY;
+					break;
+			}
 		}
+		clearCanvas();
+		paintChessBoard(board);
 	}
+
 	public void setPlayingAI(boolean playingAI) {
 		this.playingAI = playingAI;
 	}
@@ -515,30 +529,45 @@ public class MainController {
 	public void setAIColour(int color) {
 		aiColor = color;
 	}
-	
-	private enum BoardColour{
-		CLASSIC, MOSS_GREEN;
-		public String getColour(){
-			if(this == BoardColour.CLASSIC){
+
+	private enum BoardColour {
+		CLASSIC, MOSS_GREEN, GREY;
+		public String getColourName() {
+			if (this == BoardColour.CLASSIC) {
 				return "Classic";
-			}else if(this == BoardColour.MOSS_GREEN){
+			} else if (this == BoardColour.MOSS_GREEN) {
 				return "Moss Green";
-			}else{
+			} else if (this == BoardColour.GREY) {
+				return "Grey";
+			} else {
 				return "";
 			}
 		}
-	}
-	private enum CellColor {
-		COLOR1(Color.rgb(140, 82, 66)), COLOR2(Color.rgb(255, 255, 206));
-		private Color color;
 
-		CellColor(Color color) {
-			this.color = color;
+		public Color getColourPrimary() {
+			if (this == BoardColour.CLASSIC) {
+				return Color.rgb(140, 82, 66);
+			} else if (this == BoardColour.MOSS_GREEN) {
+				return Color.rgb(175, 212, 144);
+			} else if (this == BoardColour.GREY) {
+				return Color.rgb(167, 171, 164);
+			} else {
+				return BoardColour.CLASSIC.getColourPrimary();
+			}
 		}
 
-		public Color getColor() {
-			return color;
+		public Color getColourSecondary() {
+			if (this == BoardColour.CLASSIC) {
+				return Color.rgb(255, 255, 206);
+			} else if (this == BoardColour.MOSS_GREEN) {
+				return Color.rgb(255, 255, 255);
+			} else if (this == BoardColour.GREY) {
+				return Color.rgb(255, 255, 255);
+			} else {
+				return BoardColour.CLASSIC.getColourSecondary();
+			}
 		}
+
 	}
 
 }

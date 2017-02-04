@@ -34,7 +34,7 @@
                         <Slider id="moveSpeedSlider" fx:id="moveSpeedSlider" snapToTicks="true" value="50.0" />
                      </graphic>
                   </MenuItem>
-                  <MenuItem mnemonicParsing="false" onAction="#boardColourMenuItem" text="Colour" />
+                  <MenuItem mnemonicParsing="false" onAction="#boardColourMenuItem" text="Change Board Theme" />
               </items>
             </Menu>
             </menus>
