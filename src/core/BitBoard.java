@@ -452,6 +452,8 @@ public class BitBoard {
 		}
 	}
 
+	// Almost identical to the check method, except this takes the index of a
+	// piece instead
 	public boolean isSquareAttacked(int index, int side) {
 		long enemyPawns = bitboards[3 - side];
 		long enemyKnights = bitboards[5 - side];
@@ -485,6 +487,8 @@ public class BitBoard {
 	}
 
 	public void removePiece(int square) {
+		// Remove piece from the board array, the colour bitboard and piece type
+		// bitboard
 		byte piece = board[square];
 		board[square] = CoreConstants.EMPTY;
 		long bitboard = ~((square == 63) ? 0x8000_0000_0000_0000L : (long) Math.pow(2, square));
@@ -493,6 +497,7 @@ public class BitBoard {
 	}
 
 	void reset() {
+		// Set all bitbooards to zero and board to empty
 		for (int i = 0; i < 64; i++) {
 			board[i] = CoreConstants.EMPTY;
 		}
@@ -503,8 +508,9 @@ public class BitBoard {
 		toMove = CoreConstants.WHITE;
 	}
 
+	// The board setup before starting a vanilla chess match
 	public void resetToInitialSetup() {
-
+		// Begin by setting all indexes to empty
 		for (int index = 0; index < 64; index++) {
 			board[index] = CoreConstants.EMPTY;
 		}
@@ -534,6 +540,8 @@ public class BitBoard {
 		// Adding kings
 		board[0 + 4] = CoreConstants.WHITE_KING;
 		board[56 + 4] = CoreConstants.BLACK_KING;
+
+		// Bitboards in hexadecimal for each of the piece types
 		bitboards[CoreConstants.WHITE] = 0x000000000000FFFFL;
 		bitboards[CoreConstants.BLACK] = 0xFFFF000000000000L;
 		bitboards[CoreConstants.WHITE_PAWN] = 0x000000000000FF00L;
@@ -553,43 +561,20 @@ public class BitBoard {
 		castling[1] = 0L;
 	}
 
-	byte getType(int square) {
-		return board[square];
-	}
-
-	long getBitboard(int type) {
-		return bitboards[type];
-	}
-
-	void printBoard(long board) {
-		String result = "";
-		byte[] boardArr = new byte[64];
-		while (board != 0) {
-			int index = bitScanForward(board);
-			boardArr[index] = 1;
-			board &= board - 1;
-		}
-		for (int row = 7; row >= 0; row--) {
-			String line = "";
-			for (int col = 0; col <= 7; col++) {
-				line += String.valueOf(boardArr[(8 * row) + col]);
-			}
-			result += (line + "\n");
-		}
-		System.out.println(result);
-	}
-
+	// Finds the index of the least significant set bit in a binary number
 	public static int bitScanForward(long bb) {
 		int pos = Long.numberOfTrailingZeros(bb);
 		return pos == 64 ? -1 : pos;
 	}
 
+	// Finds the index of the most significant set bit in a binary number
 	public static int bitScanBackward(long bb) {
 		int pos = Long.numberOfLeadingZeros(bb);
 
 		return pos == 64 ? -1 : 63 - pos;
 	}
 
+	// Zobrist hashing is the hash function used in the evaluation system
 	public static void initialiseZobrist() {
 		for (int x = 0; x <= 63; x++) {
 			for (int y = 0; y <= 11; y++) {
@@ -598,7 +583,11 @@ public class BitBoard {
 		}
 	}
 
-	// assuming zobrist has been initialised
+	// Assuming zobrist has been initialised
+	// Function uses XOR with a randomly initialised 2-D array to produce a hash
+	// for the board
+	// Used with a hash table in the evaluation system to store previously
+	// computed values
 	public int hash() {
 		int hash = 0;
 		for (int index = 0; index < 64; index++) {
@@ -610,6 +599,7 @@ public class BitBoard {
 		return hash;
 	}
 
+	// Returns the number of set bits in a binary number
 	public static int hammingWeight(long x) {
 		x -= (x >> 1) & CoreConstants.m1;
 		x = (x & CoreConstants.m2) + ((x >> 2) & CoreConstants.m2);
@@ -617,10 +607,12 @@ public class BitBoard {
 		return (int) ((x * CoreConstants.h01) >> 56);
 	}
 
+	// Gets the number of moves played so far
 	public int getMoveNumber() {
 		return moveNumber;
 	}
 
+	// Change the number of moves played
 	public void setMoveNumber(int n) {
 		moveNumber = n;
 	}
