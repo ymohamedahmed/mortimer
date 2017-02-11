@@ -18,6 +18,7 @@ public class BitBoard {
 	public long[] castling = new long[] { 0L, 0L };
 	public int toMove = CoreConstants.WHITE;
 	int moveNumber = 0;
+
 	// History arrays
 	public long[] moveHistory;
 	public long[] whiteHistory;
@@ -34,6 +35,7 @@ public class BitBoard {
 	public long[][] epHistory;
 
 	public BitBoard() {
+		// Instantiate the history arrays
 		moveHistory = new long[CoreConstants.MAX_MOVES];
 		whiteHistory = new long[CoreConstants.MAX_MOVES];
 		blackHistory = new long[CoreConstants.MAX_MOVES];
@@ -50,8 +52,11 @@ public class BitBoard {
 	}
 
 	public void loadFen(String board) {
+		// Start by resetting the board
 		reset();
+		// "/" represent end of row on the board
 		board = board.replace("/", "");
+		// Replace number of empty squares with spaces
 		board = board.replace("1", " ");
 		board = board.replace("2", "  ");
 		board = board.replace("3", "   ");
@@ -61,9 +66,16 @@ public class BitBoard {
 		board = board.replace("7", "       ");
 		board = board.replace("8", "        ");
 		int index = 0;
+		// Consider each index in the manipulated FEN notation
 		while (index <= 63) {
+			// If it is lowercase (i.e. not upper case then the piece is black
 			int blackPiece = !Character.isUpperCase(board.charAt(index)) ? 1 : 0;
+			// FEN notation uses different indexing so conversion to our system
+			// (Little Endian) is required
 			int littleEndianIndex = 56 + (2 * (index % 8)) - index;
+			// Check each case for the different types of pieces
+			// Note the id number for a black piece is 1 + the white identifier
+			// for the same type
 			switch (Character.toLowerCase(board.charAt(index))) {
 			case 'p':
 				addPiece((byte) (CoreConstants.WHITE_PAWN + blackPiece), littleEndianIndex);
@@ -86,68 +98,64 @@ public class BitBoard {
 			}
 			index++;
 		}
+		// Check if the user included an additional character indicating who is
+		// next to move
 		if (index + 1 < board.length()) {
 			char toMoveChar = board.charAt(index + 1);
 			toMove = (toMoveChar == 'w') ? 0 : 1;
-			System.out.println("TO MOVE: " + toMove);
 		}
 	}
 
 	public String exportFen() {
 		String result = "";
+		// Loop through the board in the order used in FEN notation
 		for (int row = 56; row >= 0; row -= 8) {
-			int spaceCount = 0;
+			int emptyCount = 0;
 			for (int col = 0; col <= 7; col++) {
 				int index = row + col;
 				if (board[index] == CoreConstants.EMPTY) {
-					spaceCount++;
+					// If empty increment the number of empty squares
+					emptyCount++;
 				} else {
-					if (spaceCount != 0) {
-						result += String.valueOf(spaceCount);
-						spaceCount = 0;
+					if (emptyCount != 0) {
+						// Include empty count when you reach a non-empty square
+						result += String.valueOf(emptyCount);
+						emptyCount = 0;
 					}
+					// Convert piece type to the FEN letter e.g. King to K etc.
 					result += CoreConstants.pieceToLetterFen[board[index]];
 				}
 			}
-			if (spaceCount != 0) {
-				result += String.valueOf(spaceCount);
+			if (emptyCount != 0) {
+				// If you reach end of line and there were empty squares append
+				// to string
+				result += String.valueOf(emptyCount);
 			}
 			if (row != 0) {
+				// Add / to indicate end of row
 				result += "/";
 			}
 		}
 		return result;
 	}
 
-	boolean isEmpty() {
-		return 0 == ~(bitboards[CoreConstants.WHITE] | bitboards[CoreConstants.BLACK]);
-	}
-
 	public void addPiece(byte piece, int square) {
+		// Add the piece to the board array
 		board[square] = piece;
 		long bitboard = (long) Math.pow(2, square);
 		if (square == 63) {
 			bitboard = 0x8000_0000_0000_0000L;
 		}
-		// printBoard(bitboard);
+		// Add the board to the bitboard for its piece and colour
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
 	}
 
-	public void printBoardArray(byte[] board) {
-		String line = "";
-		for (int row = 56; row >= 0; row -= 8) {
-			for (int col = 0; col < 8; col++) {
-				line += " " + board[row + col];
-			}
-			System.out.println(line);
-			line = "";
-		}
-	}
-
 	public void move(Move move) {
+		// Store the current board
 		storeHistory();
 		moveNumber++;
+		// Switch the moving player
 		toMove = (toMove == 0) ? 1 : 0;
 
 		int finalIndex = move.getFinalPos();
@@ -155,9 +163,13 @@ public class BitBoard {
 		byte piece = board[oldIndex];
 		int side = piece % 2;
 		int enemy = (piece == 0) ? 1 : 0;
+		// If the piece is moving to a non-empty square then it is a capture
+		// move
 		boolean capture = board[finalIndex] != CoreConstants.EMPTY;
 
-		// update rook castling flag
+		// Update rook castling flag
+		// If a rook just move then record this in the flag
+		// Makes sure that castling is only allowed at the right time
 		if (piece == CoreConstants.WHITE_ROOK) {
 			if (oldIndex == 0) {
 				castling[side] |= 0b010;
@@ -172,23 +184,30 @@ public class BitBoard {
 			if (oldIndex == 63) {
 				castling[side] |= 0b001;
 			}
+			// If a king is moving edit the castling flag accordingly
 		} else if (piece == CoreConstants.WHITE_KING) {
 			castling[side] |= 0b100;
 		} else if (piece == CoreConstants.BLACK_KING) {
 			castling[side] |= 0b100;
 		}
-
+		// Remove the piece being captured
 		if (capture) {
 			removePiece(finalIndex);
 		}
+		// Remove the piece 'behind' the pawn if it is an en passant move
 		if (move.isEnPassant()) {
 			int offset = (side == 0) ? -8 : 8;
 			removePiece(finalIndex + offset);
 		}
+		// Otherwise simply remove the piece being moved
 		removePiece(oldIndex);
+		// Then readd the piece at the new position
 		addPiece(piece, finalIndex);
-
+		// Update the castling flags for the next player to move i.e. the enemy
 		updateCastlingFlags(enemy);
+
+		// If a pawn makes a double push, store the square behind as being
+		// attackable using en passant
 		epTargetSquares[enemy] = 0;
 		if (piece == CoreConstants.WHITE_PAWN) {
 			if (finalIndex - oldIndex == 16) {
@@ -201,36 +220,44 @@ public class BitBoard {
 				epTargetSquares[0] = 1L << square;
 			}
 		}
-		// TODO move rook during castling
+		// Check if the current move is a castling move
+		// If so check which type of castlin g and move the rook accordingly
 		byte castle = move.getCastlingFlag();
 		if (castle != 0) {
 			int rookOldIndex = 0;
 			int rookFinalIndex = 0;
 			switch (castle) {
+			// Queenside white
 			case CoreConstants.wQSide:
 				rookOldIndex = 0;
 				rookFinalIndex = 3;
 				break;
+			// Kingside white
 			case CoreConstants.wKSide:
 				rookOldIndex = 7;
 				rookFinalIndex = 5;
 				break;
+			// Queenside black
 			case CoreConstants.bQSide:
 				rookOldIndex = 56;
 				rookFinalIndex = 59;
 				break;
+			// Kingside black
 			case CoreConstants.bKSide:
 				rookOldIndex = 63;
 				rookFinalIndex = 61;
 				break;
 			}
+			// Remove the rook being moved
 			removePiece(rookOldIndex);
+			// Move it to its new position
 			addPiece((castle <= 2) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK, rookFinalIndex);
 		}
 
 	}
 
 	public void storeHistory() {
+		// Add the relevant bitboards to the history
 		whiteHistory[moveNumber] = bitboards[0];
 		blackHistory[moveNumber] = bitboards[1];
 		pawnHistory[0][moveNumber] = bitboards[2];
@@ -253,6 +280,7 @@ public class BitBoard {
 	}
 
 	public void undo() {
+		// Update the current bitboards from the history arrays
 		moveNumber--;
 		bitboards[0] = whiteHistory[moveNumber];
 		bitboards[1] = blackHistory[moveNumber];
@@ -279,10 +307,16 @@ public class BitBoard {
 
 	void updateCastlingFlags(int side) {
 		if (side == 0) {
-			// Consider queenside(conditions required for castling)
-			// Checking if squares are attacked
-			// Then test whether king would be in check (more expensive
-			// calculation)
+			// Consider queenside white
+			// Conditions for castling:
+			// Position of rook
+			// Emptiness of squares between rook and king
+			// Position of king
+			// King and rook haven't moved before (consired by the AND mask on
+			// the castling flag
+			// Squares between king and rook can't be attacked
+			// Cannot be in check
+			// Performed as cascading statements to improve performance
 			castling[side] &= 0b01111;
 			if (board[0] == CoreConstants.WHITE_ROOK) {
 				if (board[1] == CoreConstants.EMPTY) {
@@ -307,7 +341,7 @@ public class BitBoard {
 					}
 				}
 			}
-			// Consider kingside
+			// Consider kingside white
 			castling[side] &= 0b10111;
 			if (board[7] == CoreConstants.WHITE_ROOK) {
 				if (board[6] == CoreConstants.EMPTY) {
@@ -329,7 +363,7 @@ public class BitBoard {
 				}
 			}
 		} else {
-			// Consider queenside(conditions required for castling denoted by c)
+			// Consider queenside black
 			castling[side] &= 0b01111;
 			if (board[56] == CoreConstants.BLACK_ROOK) {
 				if (board[57] == CoreConstants.EMPTY) {
@@ -354,7 +388,7 @@ public class BitBoard {
 					}
 				}
 			}
-			// Consider kingside
+			// Consider kingside black
 			castling[side] &= 0b10111;
 			if (board[63] == CoreConstants.BLACK_ROOK) {
 				if (board[62] == CoreConstants.EMPTY) {
@@ -378,7 +412,9 @@ public class BitBoard {
 		}
 	}
 
+	// Based on
 	// https://chessprogramming.wikispaces.com/Checks+and+Pinned+Pieces+(Bitboards)
+	// Effectively works backwards from the king position to see if
 	public boolean check(int side) {
 		int kingIndex = (side == CoreConstants.WHITE) ? bitScanForward(bitboards[CoreConstants.WHITE_KING])
 				: bitScanForward(bitboards[CoreConstants.BLACK_KING]);
@@ -396,6 +432,8 @@ public class BitBoard {
 		return (BitBoard.bitScanForward(result) != -1);
 	}
 
+	// If there are no available moves and the player is in check, then it is
+	// checkmate
 	public boolean checkmate(int side) {
 		if (check(side) && new MoveGen().generateMoves(this, true).size() == 0) {
 			return true;
@@ -403,13 +441,17 @@ public class BitBoard {
 			return false;
 		}
 	}
-	public boolean stalemate(int sideToMove){
-		if(!checkmate(sideToMove) && new MoveGen().generateMoves(this, true).size()==0){
+
+	// Player has no available moves and is not in check then the game is
+	// stalemate
+	public boolean stalemate(int sideToMove) {
+		if (!check(sideToMove) && new MoveGen().generateMoves(this, true).size() == 0) {
 			return true;
-		}else{
+		} else {
 			return false;
 		}
 	}
+
 	public boolean isSquareAttacked(int index, int side) {
 		long enemyPawns = bitboards[3 - side];
 		long enemyKnights = bitboards[5 - side];
