@@ -57,7 +57,7 @@ public class MoveGenTest {
 		System.out.println("perft 5: " + perft5);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 5 time: " + (endTime - startTime) + "ms");
-
+		
 		assertEquals(56, moveGen.mirrorIndex(0));
 		assertEquals(63, moveGen.mirrorIndex(7));
 		assertEquals(48, moveGen.mirrorIndex(8));

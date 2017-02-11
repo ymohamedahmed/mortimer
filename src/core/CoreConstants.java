@@ -1,10 +1,12 @@
 package core;
 
 public class CoreConstants {
-	// Image filenames
+	// Uses the index based on the piece type to return the file name for the image of the piece
 	public static final String[] FILE_NAMES = { null, null, "wp", "bp", "wn", "bn", "wr", "br", "wb", "bb", "wq", "bq",
 			"wk", "bk" };
+	// Max number of moves in a game
 	public static final int MAX_MOVES = 1024;
+	// ID values for each piece type
 	public static final byte WHITE_PAWN = 2;
 	public static final byte BLACK_PAWN = 3;
 	public static final byte WHITE_KNIGHT = 4;
@@ -17,16 +19,13 @@ public class CoreConstants {
 	public static final byte BLACK_QUEEN = 11;
 	public static final byte WHITE_KING = 12;
 	public static final byte BLACK_KING = 13;
+	// Empty square value
 	public static final byte EMPTY = 0;
+	// Constants for identifying each colour
 	public static final byte WHITE = 0;
 	public static final byte BLACK = 1;
-	public static final byte PAWN = 2;
-	public static final byte KNIGHT = 4;
-	public static final byte ROOK = 6;
-	public static final byte BISHOP = 8;
-	public static final byte QUEEN = 10;
-	public static final byte KING = 12;
-	public static final int NULL_SQUARE = 64;
+	
+	// Binary values representing each of the rows and files (columns)
 	public static final long ROW_1 = 0x0000_0000_0000_00FFL;
 	public static final long ROW_2 = 0x0000_0000_0000_FF00L;
 	public static final long ROW_3 = 0x0000_0000_00FF_0000L;
@@ -43,9 +42,12 @@ public class CoreConstants {
 	public static final long FILE_F = 0x0101_0101_0101_0101L << 5;
 	public static final long FILE_G = 0x0101_0101_0101_0101L << 6;
 	public static final long FILE_H = 0x0101_0101_0101_0101L << 7;
+	// Return binary number for each file
 	public static final long[] FILE = { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
+	// Return the adjacent files to a particular file
 	public static final long[] ADJACENT_FILE = { FILE_B, FILE_A | FILE_C, FILE_B | FILE_D, FILE_C | FILE_E,
 			FILE_D | FILE_F, FILE_E | FILE_G, FILE_F | FILE_H, FILE_G };
+	// Return all the files to the left of a column
 	public static final long[] LEFT_FILES = {
 			0,
 			FILE_A,
@@ -56,6 +58,7 @@ public class CoreConstants {
 			FILE_A | FILE_B | FILE_C | FILE_D | FILE_E | FILE_F,
 			FILE_A | FILE_B | FILE_C | FILE_D | FILE_E | FILE_F | FILE_G
 	};
+	// Return all the files to the right of a column
 	public static final long[] RIGHT_FILES = {
 			FILE_A | FILE_B | FILE_C | FILE_D | FILE_E | FILE_F | FILE_G,
 			FILE_B | FILE_C | FILE_D | FILE_E | FILE_F | FILE_G,
@@ -66,6 +69,7 @@ public class CoreConstants {
 			FILE_G,
 			0
 	};
+	// Return all the rows above a row
 	public static final long[] ROW_UPWARD = { 
 			ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
 			ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
@@ -76,6 +80,7 @@ public class CoreConstants {
 			ROW_8, 
 			0 
 	};
+	// Return all the rows above and including the current row
 	public static final long[] ROW_UPWARD_INCLUSIVE = { 
 			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
 			ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8, 
@@ -86,6 +91,7 @@ public class CoreConstants {
 			ROW_7 | ROW_8, 
 			ROW_8 
 	};
+	// Return all the rows below a row
 	public static final long[] ROW_DOWNARD = {
 		0,
 		ROW_1,
@@ -96,6 +102,7 @@ public class CoreConstants {
 		ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6,
 		ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7,
 	};
+	// Return all the rows below a row and including the current row
 	public static final long[] ROW_DOWNARD_INCLUSIVE = {
 			ROW_1,
 			ROW_1 | ROW_2,
@@ -106,13 +113,16 @@ public class CoreConstants {
 			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7,
 			ROW_1 | ROW_2 | ROW_3 | ROW_4 | ROW_5 | ROW_6 | ROW_7 | ROW_8,
 	};
+	// Return a binary number representing each row
 	public static final long[] ROW = {ROW_1, ROW_2, ROW_3, ROW_4,ROW_5,ROW_6,ROW_7,ROW_8};
+	// Zeroth index is for white so forward is upward and backward is downward for white
+	// The opposite is true for black (1st index)
 	public static final long[][] ROW_FORWARD = {ROW_UPWARD, ROW_DOWNARD};
 	public static final long[][] ROW_BACKWARD = {ROW_DOWNARD, ROW_UPWARD};
 	public static final long[][] ROW_FORWARD_INCLUSIVE = {ROW_UPWARD_INCLUSIVE, ROW_DOWNARD_INCLUSIVE};
 	public static final long[][] ROW_BACKWARD_INCLUSIVE = {ROW_DOWNARD_INCLUSIVE, ROW_UPWARD_INCLUSIVE};
 
-	// Castling moves
+	// The final position of the king for each type of castling
 	public static final long wqueenside = 0x0000_0000_0000_0004L;
 	public static final long wkingside = 0x0000_0000_0000_0040L;
 	public static final long bqueenside = 0x0400_0000_0000_0000L;
@@ -135,6 +145,7 @@ public class CoreConstants {
 	// Occupancy Mask
 	// Manipulated from http://www.rivalchess.com/magic-bitboards/ to match my
 	// board representation
+	// Index is the position of the rook/bishop and returns all the positions which could block the rook/bishop from moving
 	public static final long occupancyMaskRook[] = { 0x101010101017eL, 0x202020202027cL, 0x404040404047aL,
 			0x8080808080876L, 0x1010101010106eL, 0x2020202020205eL, 0x4040404040403eL, 0x8080808080807eL,
 			0x1010101017e00L, 0x2020202027c00L, 0x4040404047a00L, 0x8080808087600L, 0x10101010106e00L,
@@ -161,6 +172,8 @@ public class CoreConstants {
 			0x40004020100800L, 0x20408102000L, 0x40810204000L, 0xa1020400000L, 0x142240000000L, 0x284402000000L,
 			0x500804020000L, 0x201008040200L, 0x402010080400L, 0x2040810204000L, 0x4081020400000L, 0xa102040000000L,
 			0x14224000000000L, 0x28440200000000L, 0x50080402000000L, 0x20100804020000L, 0x40201008040200L };
+	// Magic number is used to access a lookup table with pre-computed moves
+	// These pre-computed values were generated by rival chess and were included in their tutorial
 	public static final long magicNumbersRook[] = { 0xa180022080400230L, 0x40100040022000L, 0x80088020001002L,
 			0x80080280841000L, 0x4200042010460008L, 0x4800a0003040080L, 0x400110082041008L, 0x8000a041000880L,
 			0x10138001a080c010L, 0x804008200480L, 0x10011012000c0L, 0x22004128102200L, 0x200081201200cL,
@@ -189,6 +202,7 @@ public class CoreConstants {
 			0x9431801010068L, 0x1040c20806108040L, 0x804901403022a40L, 0x2400202602104000L, 0x208520209440204L,
 			0x40c000022013020L, 0x2000104000420600L, 0x400000260142410L, 0x800633408100500L, 0x2404080a1410L,
 			0x138200122002900L };
+	// Shifts are used with magic numbers to index pre-computed moves
 	public static final long magicShiftRook[] = { 52, 53, 53, 53, 53, 53, 53, 52, 53, 54, 54, 54, 54, 54, 54, 53, 53,
 			54, 54, 54, 54, 54, 54, 53, 53, 54, 54, 54, 54, 54, 54, 53, 53, 54, 54, 54, 54, 54, 54, 53, 53, 54, 54, 54,
 			54, 54, 54, 53, 53, 54, 54, 54, 54, 54, 54, 53, 52, 53, 53, 53, 53, 53, 53, 52 };
@@ -196,6 +210,7 @@ public class CoreConstants {
 			59, 57, 57, 57, 57, 59, 59, 59, 59, 57, 55, 55, 57, 59, 59, 59, 59, 57, 55, 55, 57, 59, 59, 59, 59, 57, 57,
 			57, 57, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58, 59, 59, 59, 59, 59, 59, 58 };
 	public static long occupancyVariation[][] = new long[64][4096];
+	//Lookup table filled at running of program
 	public static long magicMovesRook[][] = new long[64][4096];
 	public static long magicMovesBishop[][] = new long[64][1024];
 
@@ -205,7 +220,7 @@ public class CoreConstants {
 	public static long m4 = 0x0f0f0f0f0f0f0f0fL;
 	public static long h01 = 0x0101010101010101L;
 	
-	//Used to convert Move to PGN 
+	//Used to convert Move to PGN notation
 	public static String[] indexToAlgebraic = {
 			"a1","b1","c1","d1","e1","f1","g1","h1",
 			"a2","b2","c2","d2","e2","f2","g2","h2",

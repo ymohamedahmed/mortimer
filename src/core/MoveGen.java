@@ -208,7 +208,7 @@ public class MoveGen {
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
 		long[] startWithMask = { CoreConstants.ROW_3, CoreConstants.ROW_6 };
 		int offset = offsets[side];
-		long pawns = board.bitboards[side | CoreConstants.PAWN];
+		long pawns = board.bitboards[side | CoreConstants.WHITE_PAWN];
 		long emptySquares = ~(board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK]);
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
 		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false, CoreConstants.noCastle,
