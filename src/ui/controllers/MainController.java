@@ -42,7 +42,6 @@ public class MainController {
 	public Canvas chessPane;
 	public BorderPane borderPane;
 	public TextArea pgnTextField;
-	@FXML
 	public Slider moveSpeedSlider;
 	public Slider moveStrengthSlider;
 
@@ -280,9 +279,9 @@ public class MainController {
 	}
 
 	private void updatePGNTextField(BitBoard board, Move move, boolean capture) {
-		String result = " ";
-		if (board.getMoveNumber() == 1) {
-			result = "";
+		String result = "";
+		if (board.getMoveNumber() % 2 == 0) {
+			result = " ";
 		}
 		pgnTextField.setWrapText(true);
 		int side = move.getPieceType() % 2;
@@ -298,15 +297,18 @@ public class MainController {
 
 		if (move.getCastlingFlag() != 0) {
 			if (move.getCastlingFlag() == CoreConstants.wQSide || move.getCastlingFlag() == CoreConstants.bQSide) {
-				result = " O-O";
+				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O";
 			} else {
-				result = " O-O-O";
+				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O-O";
 			}
 		}
 		if (board.checkmate(enemy)) {
 			result += "#";
 		} else if (board.check(enemy)) {
 			result += "+";
+		}
+		if(board.getMoveNumber()%2 == 0 && board.getMoveNumber() != 0){
+			result += "\n";
 		}
 		pgnTextField.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
 		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();

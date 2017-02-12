@@ -4,9 +4,18 @@ import core.BitBoard;
 import core.CoreConstants;
 
 public class Endgame extends EvalConstants {
+	// The purpose of this class is to consider various potential endgames and
+	// to evaluate the board as such
+	// This class is based on the Endgame class in Carballo
+	// https://github.com/albertoruibal/carballo
+
+	// This method takes the board and decides based on the remaining pieces
+	// which method is bessed for evaluation
 	public static int evaluate(BitBoard board, int[] scaleFactor, int wPawns, int bPawns, int wKnights, int bKnights,
 			int wBishops, int bBishops, int wRooks, int bRooks, int wQueens, int bQueens) {
 		scaleFactor[0] = SCALE_FACTOR_DEFAULT;
+		// The number of pieces remaining is used to decide which evaluation
+		// method is appropriate
 		int wNonPawnMat = wKnights + wBishops + wRooks + wQueens;
 		int bNonPawnMat = bKnights + bBishops + bRooks + bQueens;
 		int wMat = wNonPawnMat + wPawns;
@@ -15,8 +24,11 @@ public class Endgame extends EvalConstants {
 		if (wPawns == 0 && bPawns == 0) {
 			if ((bMat == 0 && wMat == 2 && wKnights == 1 && wBishops == 1)
 					|| (wMat == 0 && bMat == 2 && bKnights == 1 && bBishops == 1)) {
-				return Endgame.endgameKBNK(board, wMat > bMat);
+				// If there is a bishop and knight on one side
+				return Endgame.endgameKingBishopKnightKing(board, wMat > bMat);
 			}
+			// If both sides have the same number of pieces it is approximated
+			// to a draw
 			if (wMat == 1 && bMat == 1) {
 				if (wRooks == 1 && bRooks == 1) {
 					return DRAW;
@@ -27,44 +39,62 @@ public class Endgame extends EvalConstants {
 			}
 		} else if ((wPawns == 1 && bPawns == 0) || (wPawns == 0 && bPawns == 1)) {
 			if (wNonPawnMat == 0 && bNonPawnMat == 0) {
-				return Endgame.endgameKPK(board, wMat > bMat);
+				// If one player has a pawn and the other no pieces
+				return Endgame.endgameKingPawnKing(board, wMat > bMat);
 			}
 			if ((wNonPawnMat == 1 && bNonPawnMat == 0) || (wNonPawnMat == 0 && bNonPawnMat == 1)) {
 				if ((wQueens == 1 && bPawns == 1) || (bQueens == 1 && wPawns == 1)) {
-					return endgameKQKP(board, wQueens > bQueens);
+					// If one player has a pawn and the other a queen
+					return endgameKingQueenKingPawn(board, wQueens > bQueens);
 				}
 			}
 			if (wNonPawnMat == 1 && bNonPawnMat == 1) {
 				if (wRooks == 1 && bRooks == 1) {
-					scaleFactor[0] = scaleKRPKR(board, wPawns > bPawns);
+					// Scale factor is used to manipulate final value
+					// accordingly
+					scaleFactor[0] = scaleKingRookPawnKingRook(board, wPawns > bPawns);
 				}
 				if (wBishops == 1 && bBishops == 1) {
-					return endgameKBPKB(board, wPawns > bPawns);
+					// One side has a bishop and pawn and the other one bishop
+					return endgameKingBishopPawnKingBishop(board, wPawns > bPawns);
 				}
 				if ((wBishops == 1 && wPawns == 1 && bKnights == 1)
 						|| (bBishops == 1 && bPawns == 1 && wKnights == 1)) {
-					return endgameKBPKN(board, wPawns > bPawns);
+					// One side has a bishop and pawn and the other one knights
+					return endgameKingBishopPawnKingKnight(board, wPawns > bPawns);
 				}
 			}
 		}
 		if (bMat == 0 && (wBishops >= 2 || wRooks > 0 || wQueens > 0)
 				|| wMat == 0 && (bBishops >= 2 || bRooks > 0 || bQueens > 9)) {
-			return Endgame.endgameKXK(board, wMat > bMat, wKnights + bKnights, wBishops + bBishops, wRooks + bRooks,
-					wQueens + bQueens);
+			// One side has no pieces (except king) and the other has a few
+			// significant pieces
+			// i.e. two or more bishops
+			// or a queen or rook
+			return Endgame.endgameKingWithNoPieces(board, wMat > bMat, wKnights + bKnights, wBishops + bBishops,
+					wRooks + bRooks, wQueens + bQueens);
 		}
 		if (wRooks == 1 && bRooks == 1 && ((wPawns == 2 && bPawns == 1) || (wPawns == 1 && bPawns == 2))) {
-			scaleFactor[0] = scaleKRPPKRP(board, wPawns > bPawns);
+			scaleFactor[0] = scaleKingRookPawnPawnKingRookPawn(board, wPawns > bPawns);
 		}
 		if (scaleFactor[0] == SCALE_FACTOR_DRAW) {
 			return DRAW;
 		}
+		// If none of these conditions are met, then the game isn't in the
+		// endgame yet so return no value
 		return NO_VALUE;
 	}
 
-	private static int endgameKXK(BitBoard board, boolean wDominating, int knights, int bishops, int rooks,
+	// NOTE: for all these methods the negative value is returned if it is being
+	// evaluated from the black perspective, this is important for the minimax
+	// search (check Search.java)
+	private static int endgameKingWithNoPieces(BitBoard board, boolean wDominating, int knights, int bishops, int rooks,
 			int queens) {
 		int wKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
 		int bKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
+		// This is a very strong position hence return a value of known win with
+		// some added components based on specifically which pieces the player
+		// has
 		int value = KNOWN_WIN + (knights * PIECE_VALUE[KNIGHT]) + (bishops * PIECE_VALUE[BISHOP])
 				+ (rooks * PIECE_VALUE[ROOK]) + (queens * PIECE_VALUE[QUEEN])
 				+ CLOSER_SQUARES[Board.distance(wKingIndex, bKingIndex)]
@@ -72,10 +102,12 @@ public class Endgame extends EvalConstants {
 		return (wDominating ? value : -value);
 	}
 
-	private static int endgameKBNK(BitBoard board, boolean wDominating) {
+	private static int endgameKingBishopKnightKing(BitBoard board, boolean wDominating) {
 		int wKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
 		int bKingIndex = BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
 		long bishops = board.bitboards[CoreConstants.WHITE_BISHOP] | board.bitboards[CoreConstants.BLACK_BISHOP];
+		// Flip index is used so that the internal board representation can
+		// match the pre-computed values used
 		if ((bishops & BLACK_SQUARES) != 0) {
 			wKingIndex = Board.flipHorizontalIndex(wKingIndex);
 			bKingIndex = Board.flipHorizontalIndex(bKingIndex);
@@ -85,8 +117,10 @@ public class Endgame extends EvalConstants {
 		return (wDominating ? value : -value);
 	}
 
-	private static int endgameKPK(BitBoard board, boolean wDominating) {
+	private static int endgameKingPawnKing(BitBoard board, boolean wDominating) {
 		Bitbase bitbase = new Bitbase();
+		// Posibilities are stored in an array since King Pawn King situation
+		// doesn't have too many permutations
 		if (!bitbase.probe(board)) {
 			return DRAW;
 		}
@@ -96,7 +130,7 @@ public class Endgame extends EvalConstants {
 						- (7 - (int) BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_PAWN]) / 8);
 	}
 
-	private static int scaleKRPKR(BitBoard board, boolean wDominating) {
+	private static int scaleKingRookPawnKingRook(BitBoard board, boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int nonDomCol = domCol == 0 ? 1 : 0;
 		long otherRook = board.bitboards[CoreConstants.WHITE_ROOK + nonDomCol];
@@ -139,7 +173,7 @@ public class Endgame extends EvalConstants {
 		return SCALE_FACTOR_DEFAULT;
 	}
 
-	private static int endgameKQKP(BitBoard board, boolean wDominating) {
+	private static int endgameKingQueenKingPawn(BitBoard board, boolean wDominating) {
 		long row1And2 = wDominating ? CoreConstants.ROW_1 | CoreConstants.ROW_2
 				: CoreConstants.ROW_7 | CoreConstants.ROW_8;
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN] | board.bitboards[CoreConstants.BLACK_PAWN];
@@ -168,7 +202,7 @@ public class Endgame extends EvalConstants {
 		return NO_VALUE;
 	}
 
-	private static int endgameKBPKN(BitBoard board, boolean wDominating) {
+	private static int endgameKingBishopPawnKingKnight(BitBoard board, boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int enemyCol = domCol == 0 ? 1 : 0;
 		long domBishop = board.bitboards[domCol + CoreConstants.WHITE_BISHOP];
@@ -192,7 +226,7 @@ public class Endgame extends EvalConstants {
 		return moveSquares;
 	}
 
-	private static int endgameKBPKB(BitBoard board, boolean wDominating) {
+	private static int endgameKingBishopPawnKingBishop(BitBoard board, boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int enemyCol = domCol == 0 ? 1 : 0;
 		long domBishop = board.bitboards[domCol + CoreConstants.WHITE_BISHOP];
@@ -216,7 +250,7 @@ public class Endgame extends EvalConstants {
 		return NO_VALUE;
 	}
 
-	private static int scaleKRPPKRP(BitBoard board, boolean wDominating) {
+	private static int scaleKingRookPawnPawnKingRookPawn(BitBoard board, boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int enemyCol = domCol == 0 ? 1 : 0;
 		long domPawns = board.bitboards[CoreConstants.WHITE_PAWN + domCol];
@@ -232,11 +266,11 @@ public class Endgame extends EvalConstants {
 		long inFrontOfPawn2 = CoreConstants.ROW_FORWARD[domCol][(int) pawnIndices[1] / 8]
 				& (CoreConstants.FILE[pawnIndices[1] % 8] | CoreConstants.ADJACENT_FILE[pawnIndices[1] % 8]);
 		long otherPawn = board.bitboards[CoreConstants.WHITE_PAWN + enemyCol];
-		if((inFrontOfPawn1 & otherPawn) == 0 || (inFrontOfPawn2& otherPawn) == 0){
+		if ((inFrontOfPawn1 & otherPawn) == 0 || (inFrontOfPawn2 & otherPawn) == 0) {
 			return SCALE_FACTOR_DEFAULT;
 		}
 		long otherKing = board.bitboards[CoreConstants.WHITE_KING + enemyCol];
-		if((inFrontOfPawn1 & otherKing) != 0 && (inFrontOfPawn1 & otherKing) != 1){
+		if ((inFrontOfPawn1 & otherKing) != 0 && (inFrontOfPawn1 & otherKing) != 1) {
 			return SCALE_FACTOR_DRAWISH;
 		}
 		return SCALE_FACTOR_DEFAULT;
