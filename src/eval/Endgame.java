@@ -137,6 +137,8 @@ public class Endgame extends EvalConstants {
 		long domKing = board.bitboards[CoreConstants.WHITE_KING + domCol];
 		long otherKing = board.bitboards[CoreConstants.WHITE_KING + nonDomCol];
 		int domkingIndex = BitBoard.bitScanForward(domKing);
+		//Get various ranks (rows) relative to the piece moving
+		// I.e. the '8th' rank for black is rank 0 whereas for white it is rank 7
 		int rank8 = wDominating ? 7 : 0;
 		int rank7 = wDominating ? 6 : 1;
 		int rank6 = wDominating ? 5 : 2;
