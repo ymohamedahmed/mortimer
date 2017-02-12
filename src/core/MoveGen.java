@@ -7,41 +7,54 @@ public class MoveGen {
 
 	public ArrayList<Move> generateMoves(BitBoard board, boolean legal) {
 		ArrayList<Move> moves = new ArrayList<>();
-		// Add pawn moves first
+		// Generate moves only for the next side to move
 		int side = board.toMove;
+		// Start by adding forward pawn moves, known as pushes
 		addPawnPushes(board, moves, side);
 		long pawnBoard = board.bitboards[side + 2];
 		while (pawnBoard != 0) {
-			addPawnAttacks(board, moves, bitScanForward(pawnBoard), side);
+			// Add moves for each pawn of one of the players
+			addPawnAttacks(board, moves, BitBoard.bitScanForward(pawnBoard), side);
 			pawnBoard &= pawnBoard - 1;
 		}
 		long knightBoard = board.bitboards[side + 4];
 		while (knightBoard != 0) {
-			addKnightMoves(board, moves, bitScanForward(knightBoard), side);
+			// Add moves for each knight
+			addKnightMoves(board, moves, BitBoard.bitScanForward(knightBoard), side);
 			knightBoard &= knightBoard - 1;
 		}
 		long rookBoard = board.bitboards[side + 6];
 		while (rookBoard != 0) {
-			addRookMoves(board, moves, bitScanForward(rookBoard), side);
+			// Add moves for each rook
+			addRookMoves(board, moves, BitBoard.bitScanForward(rookBoard), side);
 			rookBoard &= rookBoard - 1;
 		}
 		long bishopBoard = board.bitboards[side + 8];
 		while (bishopBoard != 0) {
-			addBishopMoves(board, moves, bitScanForward(bishopBoard), side);
+			// Add moves for each bishop
+			addBishopMoves(board, moves, BitBoard.bitScanForward(bishopBoard), side);
 			bishopBoard &= bishopBoard - 1;
 		}
 		long queenBoard = board.bitboards[side + 10];
 		while (queenBoard != 0) {
-			addQueenMoves(board, moves, bitScanForward(queenBoard), side);
+			// Add moves for each queen
+			addQueenMoves(board, moves, BitBoard.bitScanForward(queenBoard), side);
 			queenBoard &= queenBoard - 1;
 		}
 		long kingBoard = board.bitboards[side + 12];
 		while (kingBoard != 0) {
-			addKingMoves(board, moves, bitScanForward(kingBoard), side);
+			// Add moves for the king
+			addKingMoves(board, moves, BitBoard.bitScanForward(kingBoard), side);
 			kingBoard &= kingBoard - 1;
 		}
 
 		Iterator<Move> iter = moves.iterator();
+		// No move can go directly to the position of a king, so remove these
+		// moves from the arraylist
+		// NOTE: iterator is used to avoid concurrent modification exception
+		// i.e.
+		// you can't loop through an arraylist and remove elements at the same
+		// time
 		while (iter.hasNext()) {
 			Move move = iter.next();
 			if (board.board[move.getFinalPos()] == CoreConstants.WHITE_KING
@@ -49,15 +62,21 @@ public class MoveGen {
 				iter.remove();
 			}
 		}
+		// If strictly legal moves are being generated, remove all the moves
+		// which result in the player's own king being in check
 		if (legal) {
 			moves = removeCheckMoves(board, moves, side);
 		}
 		return moves;
 	}
 
+	// Method to check if a king is inside another king's set of moves
+	// I.e. if one king is inside the 3x3 square around the other king
 	private boolean kingInKingSquare(BitBoard board, int side) {
 		int myKingIndex = BitBoard.bitScanForward(board.bitboards[12 + side]);
 		int enemyKingIndex = BitBoard.bitScanForward(board.bitboards[12 + ((side == 0) ? 1 : 0)]);
+		// + or - 1,8,7,9 represent the indices of the 8 squares surrounding the
+		// king
 		if (myKingIndex + 1 == enemyKingIndex) {
 			return true;
 		}
@@ -95,12 +114,16 @@ public class MoveGen {
 			int pieceSide = move.getPieceType() % 2;
 			if (pieceSide == side) {
 				board.move(move);
+				// If it results in check for the player's king
+				// Or the king moves in the square surrounding another king
+				// The move is invalid and hence removed
 				boolean check = board.check(side);
 				boolean kingInKingSquare = kingInKingSquare(board, side);
 				board.undo();
 				if (check | kingInKingSquare) {
 					iter.remove();
 				}
+
 			}
 		}
 		return moveList;
@@ -109,7 +132,10 @@ public class MoveGen {
 	private void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList, boolean enPassant,
 			boolean promotion, byte castling) {
 		while (moves != 0) {
-			Move move = new Move(pieceType, index, bitScanForward(moves));
+			// Each set bit in the long moves represents a positon where the
+			// piece could move
+			// Each move is added to an arraylist containing all the moves
+			Move move = new Move(pieceType, index, BitBoard.bitScanForward(moves));
 			move.setCastling(castling);
 			move.setPromotion(promotion);
 			move.setEnPassant(enPassant);
@@ -118,10 +144,12 @@ public class MoveGen {
 		}
 	}
 
+	// Used by the pawn move generation since black and white move in different
+	// directions an offset is used
 	private void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList, boolean enPassant,
 			boolean promotion, byte castling, int offset) {
 		while (moves != 0) {
-			int to = bitScanForward(moves);
+			int to = BitBoard.bitScanForward(moves);
 			int from = (to - offset) % 64;
 			if (from < 0) {
 				from = 64 + from;
@@ -137,14 +165,23 @@ public class MoveGen {
 
 	private void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK;
+		// Blockers is all the positions which could stop the rook from moving
+		// further
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
 				& CoreConstants.occupancyMaskRook[index];
+		// Using the blockers array and pre-computed values we can lookup the
+		// moves of the rook from an array generated when the program is
+		// executed
 		int lookupIndex = (int) ((rookBlockers
 				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
+		// Rook can't move to a square where another piece from its same colour
+		// is, so remove these instances by performing AND on the NOT of where
+		// all those pieces are
 		long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex] & ~board.bitboards[side];
 		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
+	// Equivalent to the algorithm above
 	private void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
@@ -155,9 +192,11 @@ public class MoveGen {
 		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
+	// The moves of the queen are just the moves of a rook as well as the moves
+	// of a bishop in that position
+	// Hence we calculate both of those and then OR the result
 	private void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN;
-		// Or of the rook moves and bishop moves are the queen moves
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK])
 				& CoreConstants.occupancyMaskRook[index];
 		int lookupIndexRook = (int) ((rookBlockers
@@ -174,17 +213,25 @@ public class MoveGen {
 		addMoves(pieceType, index, queenMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
+	// Simply lookup the moves of the knight since it is unaffected by the
+	// pieces around it so can be pre-computed easily
+	// Then remove the moves that would 'capture' a friendly piece
 	private void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT;
 		long knightMoves = CoreConstants.KNIGHT_TABLE[index] & ~board.bitboards[side];
 		addMoves(pieceType, index, knightMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
+	// Similary to the knight, king moves can just be looked up
+	// However castling moves have to be calculateds
 	private void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KING : CoreConstants.BLACK_KING;
 		addMoves(pieceType, index, moves, moveList, false, false, CoreConstants.noCastle);
 		// Check for castling moves
+		// Check the castling flags (descirbed in the BitBoard class)
+		// If some have set bits in the correct position castling is legal, if
+		// so add moves accordingly
 		if (side == CoreConstants.WHITE) {
 			if ((board.castling[side] & 0b10000) == 16) {
 				addMoves(pieceType, index, CoreConstants.wqueenside, moveList, false, false, CoreConstants.wQSide);
@@ -202,19 +249,34 @@ public class MoveGen {
 		}
 	}
 
+	// Based on a tutorial in C++ by Peter Ellis Jones on
+	// https://github.com/peterellisjones/Checkmate
 	private void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
+		// If side is 0, then the piece is white
 		int pieceType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
+		// Offsets used to add correct moves for white and black
 		int[] offsets = { 8, 56 };
+		// Masks allow promotion moves to be separated
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
+		// If a white can move to row 3, then it might be able to double push
 		long[] startWithMask = { CoreConstants.ROW_3, CoreConstants.ROW_6 };
 		int offset = offsets[side];
-		long pawns = board.bitboards[side | CoreConstants.WHITE_PAWN];
+		long pawns = board.bitboards[side + CoreConstants.WHITE_PAWN];
+		// Empty squares i.e. the squares where there is neither a white piece
+		// nor a black piece
+		// Hence NOT (white OR black)
 		long emptySquares = ~(board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK]);
+		// Circular left shift is equivalent to moving each pawn forward one
+		// square
+		// If it is empty then the push is valid
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
 		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false, CoreConstants.noCastle,
 				offset);
+		// Isolate which moves are promotions
 		long promotions = pushes & promotions_mask[side];
 		addMovesWithOffset(pieceType, promotions, moveList, false, true, CoreConstants.noCastle, offset);
+		// If the push led to row 3 if white or row 8 if black and the square
+		// ahead is empty then double push is possible
 		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
 		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, CoreConstants.noCastle, offset + offset);
 	}
@@ -223,35 +285,16 @@ public class MoveGen {
 		int enemy = (side == 0) ? 1 : 0;
 		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
+		// Lookup pawn attacks from lookup table, only valid if it captures an
+		// enemy piece
 		long attacks = CoreConstants.PAWN_ATTACKS_TABLE[side][index] & board.bitboards[enemy];
 		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, false, CoreConstants.noCastle);
+		// Isolate the promotion moves
 		long promotions = attacks & promotions_mask[side];
 		addMoves(pawnType, index, promotions, moveList, false, true, CoreConstants.noCastle);
+		// Isolate the en passant moves
 		long enPassant = CoreConstants.PAWN_ATTACKS_TABLE[side][index] & board.epTargetSquares[side];
 		addMoves(pawnType, index, enPassant, moveList, true, false, CoreConstants.noCastle);
-	}
-
-	private long getPawnEastAttacks(long board, int side) {
-		long result;
-		// WHITE
-		if (side == 0) {
-			result = ((board << 9) & ~CoreConstants.FILE_A);
-
-		} else {
-			result = ((board >>> 7) & ~CoreConstants.FILE_A);
-		}
-		return result;
-	}
-
-	private long getPawnWestAttacks(long board, int side) {
-		long result;
-		// WHITE
-		if (side == 0) {
-			result = ((board << 7) & ~CoreConstants.FILE_H);
-		} else {
-			result = ((board >>> 9) & ~CoreConstants.FILE_H);
-		}
-		return result;
 	}
 
 	private long circularLeftShift(long target, int shift) {
@@ -260,6 +303,8 @@ public class MoveGen {
 
 	// Modified algorithm based on tutorial from
 	// http://www.rivalchess.com/magic-bitboards/
+	// Used to fill a lookup table for rook and bishop moves
+	// This is crucial as it allows for fast move generation
 	public void generateMoveDatabase(boolean rook) {
 		long validMoves = 0;
 		int variations;
@@ -270,14 +315,14 @@ public class MoveGen {
 		int[] setBitsMask = new int[64];
 		int[] setBitsIndex = new int[64];
 		int bitCount = 0;
-
+		// Loop through each index in the board
 		for (index = 0; index < 64; index++) {
 
 			mask = rook ? CoreConstants.occupancyMaskRook[index] : CoreConstants.occupancyMaskBishop[index];
 			getIndexSetBits(setBitsMask, mask);
 			bitCount = Long.bitCount(mask);
 			varCount = (int) (1L << bitCount);
-
+			// Go through each possible variation
 			for (i = 0; i < varCount; i++) {
 				CoreConstants.occupancyVariation[index][i] = 0;
 				getIndexSetBits(setBitsIndex, i);
@@ -285,7 +330,11 @@ public class MoveGen {
 					CoreConstants.occupancyVariation[index][i] |= (1L << setBitsMask[setBitsIndex[j]]);
 				}
 			}
-
+			// Generate moves for the piece considering each possible
+			// variation
+			// Then add moves to the lookup table
+			// Indexed by the the position of the piece and a second index based
+			// on the precomputed magic numbers
 			variations = (int) (1L << bitCount);
 			for (i = 0; i < variations; i++) {
 				validMoves = 0;
@@ -351,6 +400,7 @@ public class MoveGen {
 		}
 	}
 
+	// Updates each index in the setbits array where the board has a set bit
 	void getIndexSetBits(int[] setBits, long board) {
 		int onBits = 0;
 		while (board != 0) {
@@ -360,17 +410,16 @@ public class MoveGen {
 		setBits[onBits] = -1;
 	}
 
-	int bitScanForward(long bb) {
-		int pos = Long.numberOfTrailingZeros(bb);
-		return pos == 64 ? -1 : pos;
-	}
-
+	// Generate a lookup table for knight moves
 	public void initialiseKnightLookupTable() {
 		for (int square = 0; square < 64; square++) {
 			long target = (long) Math.pow(2, square);
 			if (square == 63) {
 				target = 0x8000_0000_0000_0000L;
 			}
+			// Each direction of the knight moves considered
+			// The AND operator is used to stop moves from wrapping around the
+			// board
 			long NNE = (target << 17) & ~CoreConstants.FILE_A;
 			long NEE = (target << 10) & ~CoreConstants.FILE_A & ~CoreConstants.FILE_B;
 			long SEE = (target >>> 6) & ~CoreConstants.FILE_A & ~CoreConstants.FILE_B;
@@ -390,6 +439,9 @@ public class MoveGen {
 			if (square == 63) {
 				target = 0x8000_0000_0000_0000L;
 			}
+			// Each directions is considered.
+			// Similarly to the knight lookup method, the AND operator stops the
+			// moves from wrapping around the board
 			long N = (target << 8) & ~CoreConstants.ROW_1;
 			long S = (target >>> 8) & ~CoreConstants.ROW_8;
 			long E = (target << 1) & ~CoreConstants.FILE_A;
@@ -403,21 +455,47 @@ public class MoveGen {
 	}
 
 	public void initialisePawnLookupTable() {
-		// Complete for white then use symmetry to complete for white
 		for (int side = 0; side <= 1; side++) {
 			for (int index = 0; index < 64; index++) {
 				long board = (long) Math.pow(2, index);
 				if (index == 63) {
 					board = 0x8000_0000_0000_0000L;
 				}
+				// OR of east and west moves is all the attacks available to a
+				// pawn at a particular index
 				CoreConstants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(board, side)
 						| getPawnWestAttacks(board, side);
 			}
 		}
 
 	}
-	// LOOKUP TABLES FOR BISHOP AND ROOK ARE USED DURING EVALUATION ONLY
 
+	// Returns the attacks to the east of the piece, also stops the move from
+	// wrapping around the board
+	private long getPawnEastAttacks(long board, int side) {
+		long result;
+		if (side == 0) {
+			result = ((board << 9) & ~CoreConstants.FILE_A);
+
+		} else {
+			result = ((board >>> 7) & ~CoreConstants.FILE_A);
+		}
+		return result;
+	}
+
+	// Returns the attacks to the west of the piece, also stops the move from
+	// wrapping around the board
+	private long getPawnWestAttacks(long board, int side) {
+		long result;
+		if (side == 0) {
+			result = ((board << 7) & ~CoreConstants.FILE_H);
+		} else {
+			result = ((board >>> 9) & ~CoreConstants.FILE_H);
+		}
+		return result;
+	}
+
+	// LOOKUP TABLES FOR BISHOP AND ROOK ARE USED DURING EVALUATION ONLY
 	public void initialiseBishopAndRookEvalLookupTable() {
 		long square = 1;
 		int index = 0;
@@ -450,17 +528,4 @@ public class MoveGen {
 		return ret;
 	}
 
-	int mirrorIndex(int index) {
-		int row = Math.floorDiv(index, 8);
-		int offset = (index < 32) ? 56 - (16 * row) : (16 * row) - 56;
-		return index + offset;
-	}
-
-	// For Debugging
-
-	public void printMoveList(ArrayList<Move> moves) {
-		for (Move move : moves) {
-			System.out.println(move.getOldPos() + " TO " + move.getFinalPos());
-		}
-	}
 }
