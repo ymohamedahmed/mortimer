@@ -11,12 +11,15 @@ public class Bitbase {
 				+ ((6 - (pIndex >> 3)) << 15);
 	}
 
+	// Pre-computed values are analysed to determine the best move
 	public boolean probe(int wKingIndex, int bKingIndex, int wPawnIndex, boolean white2Move) {
 		int index = index(white2Move, Board.mirrorIndex(wKingIndex), Board.mirrorIndex(bKingIndex),
 				Board.mirrorIndex(wPawnIndex));
 		return ((EvalConstants.BITBASE[index / 32] & (1 << (index & 0x1F)))) != 0;
 	}
 
+	// Another probe function which doesn't require the indices of the pieces to
+	// be passed
 	public boolean probe(BitBoard board) {
 		int wKingIndex = Board.mirrorIndex(BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]));
 		int bKingIndex = Board.mirrorIndex(BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]));

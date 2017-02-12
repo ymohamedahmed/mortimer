@@ -52,13 +52,6 @@ public class Evaluation extends EvalConstants {
 					: (nonPawnMaterial <= MAT_ENDGAME_MIN) ? PHASE_ENDGAME
 							: ((nonPawnMaterial - MAT_ENDGAME_MIN) * PHASE_MIDGAME)
 									/ (MAT_MIDGAME_MAX - MAT_ENDGAME_MIN);
-			/*
-			 * pieceSquare[0] = 0; pieceSquare[1] = 0; positional[0] = 0;
-			 * positional[1] = 0; mobility[0] = 0; mobility[1] = 0;
-			 * kingAttackedCount[0] = 0; kingAttackedCount[1] = 0; kingSafety[0]
-			 * = 0; kingSafety[1] = 0; pawnStruct[0] = 0; pawnStruct[1] = 0;
-			 * passedPawns[0] = 0; passedPawns[1] = 0;
-			 */
 			mobilitySquares[0] = ~board.bitboards[CoreConstants.WHITE];
 			mobilitySquares[1] = ~board.bitboards[CoreConstants.BLACK];
 			EvalInfo ei = new EvalInfo();

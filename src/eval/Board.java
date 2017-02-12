@@ -1,7 +1,7 @@
 package eval;
 
 public class Board {
-	// Squares
+	// Bitboards containing a set bit for each square on the board
 	public static final long A1 = 1L;
 	public static final long B1 = A1 << 1;
 	public static final long C1 = A1 << 2;
@@ -74,15 +74,20 @@ public class Board {
 	public static final long G8 = A1 << 62;
 	public static final long H8 = A1 << 63;
 
+	// Used to flip the the column component of the index
 	private static int[] flipIndex = { 7, 5, 3, 1, -1, -3, -5, -7 };
 
+	// Mirror function is important since this program uses a different indexing
+	// system to Carballo which is where some of the evaluation constants where
+	// derived
 	public static int mirrorIndex(int index) {
 		return index + (flipIndex[index % 8]);
 	}
-
+	//Returns the distance between two pieces
 	public static int distance(int a, int b) {
 		return Math.max(Math.abs((a & 7) - (b & 7)), Math.abs((a >> 3) - (b >> 3)));
 	}
+	
 	public static int flipHorizontalIndex(int index) {
 		return (index & 0xF8) | (7 - (index & 7));
 	}
