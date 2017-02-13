@@ -31,7 +31,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -40,10 +39,8 @@ public class MainController {
 	// Variables loaded from the fxml file
 	// Must be global so that they can be loaded from the fxml file
 	public Canvas chessPane;
-	public BorderPane borderPane;
 	public TextArea pgnTextField;
 	public Slider moveSpeedSlider;
-	public Slider moveStrengthSlider;
 
 	private int playerColour = CoreConstants.WHITE;
 	private int aiColor = CoreConstants.BLACK;
@@ -58,20 +55,26 @@ public class MainController {
 	private BoardColour boardColour = BoardColour.CLASSIC;
 
 	public void initialize() {
+		// Intialise all the various lookup tables used by the AI
 		moveGen.initialiseKnightLookupTable();
+		// This allows the user to change how long it takes for the AI to select
+		// moves
 		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+					Number newValue) {
 				double value = moveSpeedSlider.getValue();
-				EvalConstants.THINKING_TIME = EvalConstants.MAX_THINKING_TIME
-						- (value / 100 * (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
+				EvalConstants.THINKING_TIME = EvalConstants.MAX_THINKING_TIME - (value / 100
+						* (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
 			}
 		});
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
 		moveGen.initialiseBishopAndRookEvalLookupTable();
+		// Lookup tables for rooks (true) and bishops (false)
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
+		// Initialise the hash function
 		BitBoard.initialiseZobrist();
 	}
 
@@ -81,24 +84,30 @@ public class MainController {
 		double height = chessPane.getHeight();
 		double cellSize = Math.ceil(Math.min(width / 8.0, height / 8.0));
 		int squareNo = 0;
+		// Considers each square
 		while (squareNo <= 63) {
-			int x = squareNo % 8;
-			int y = squareNo / 8;
-			if ((x % 2 == 0 && y % 2 == 0) || (x % 2 == 1 && y % 2 == 1)) {
+			int col = squareNo % 8;
+			int row = squareNo / 8;
+			// Selects the colour of the square based on the row and column
+			if ((col % 2 == 0 && row % 2 == 0) || (col % 2 == 1 && row % 2 == 1)) {
 				g.setFill(boardColour.getColourPrimary());
 			} else {
 				g.setFill(boardColour.getColourSecondary());
 			}
-			g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+			// Paints the square
+			g.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
 			squareNo++;
 		}
 
 		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
 				byte piece = board.board[(row * 8) + col];
+				// If the square is not empty it draws the image based on the
+				// type of piece
 				if (piece != CoreConstants.EMPTY) {
 					Image image = new Image(MainController.class
-							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png").toExternalForm());
+							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png")
+							.toExternalForm());
 					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
 				}
 			}
@@ -108,6 +117,7 @@ public class MainController {
 	}
 
 	public void playGame() {
+		// If the ai is the first to move
 		if (aiColor == CoreConstants.WHITE) {
 			moveAI(board);
 		}
@@ -119,6 +129,7 @@ public class MainController {
 		pgnTextField.setText("");
 		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);
+		// Make sure there is an active action listener
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
 	}
 
@@ -138,7 +149,6 @@ public class MainController {
 		int index = (8 * row) + column;
 		if (index < 64 && x <= (8 * cellSize) && y <= (8 * cellSize)) {
 			byte piece = board.board[index];
-
 			for (int square : blueSquares) {
 				if (square == index) {
 					move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
@@ -147,7 +157,6 @@ public class MainController {
 					break;
 				}
 			}
-
 			// Clicks square with piece in it
 			if (piece != CoreConstants.EMPTY && !pieceMoved) {
 				// Get its available moves
@@ -164,10 +173,14 @@ public class MainController {
 					int colMove = move.getFinalPos() % 8;
 					if (board.board[move.getFinalPos()] == CoreConstants.EMPTY) {
 						g.setFill(Color.BLUE);
-						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize,
+								cellSize);
 					} else {
+						// If the move is a capture move draw a red circle in
+						// the corner
 						g.setFill(Color.RED);
-						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5, cellSize / 5);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5,
+								cellSize / 5);
 					}
 					blueSquares.add(move.getFinalPos());
 				}
@@ -176,15 +189,19 @@ public class MainController {
 		}
 	}
 
+	// Returns the move based on the piece, where it came from and where it's
+	// going
 	public Move getMove(ArrayList<Move> moves, int piece, int oldIndex, int finalIndex) {
 		for (Move move : moves) {
-			if (move.getPieceType() == piece && move.getOldPos() == oldIndex && move.getFinalPos() == finalIndex) {
+			if (move.getPieceType() == piece && move.getOldPos() == oldIndex
+					&& move.getFinalPos() == finalIndex) {
 				return move;
 			}
 		}
 		return null;
 	}
 
+	// Gets all the moves available to a particular piece
 	private ArrayList<Move> getMovesPiece(int oldPos, ArrayList<Move> moveList) {
 		ArrayList<Move> result = new ArrayList<>();
 		for (Move move : moveList) {
@@ -232,7 +249,8 @@ public class MainController {
 		return moveGen.generateMoves(board, removeCheck);
 	}
 
-	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board, boolean display) {
+	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board,
+			boolean display) {
 		board.removePiece(pawnOldPos);
 		if (display) {
 			String choice = new String();
@@ -255,20 +273,27 @@ public class MainController {
 			}
 			switch (choice) {
 			case "Queen":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
+						newPos);
 				break;
 			case "Rook":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK, newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK,
+						newPos);
 				break;
 			case "Bishop":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP, newPos);
+				board.addPiece(
+						(side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP,
+						newPos);
 				break;
 			case "Knight":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT, newPos);
+				board.addPiece(
+						(side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT,
+						newPos);
 				break;
 			}
 		} else {
-			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
+					newPos);
 		}
 	}
 
@@ -296,7 +321,8 @@ public class MainController {
 		result += CoreConstants.indexToAlgebraic[move.getFinalPos()];
 
 		if (move.getCastlingFlag() != 0) {
-			if (move.getCastlingFlag() == CoreConstants.wQSide || move.getCastlingFlag() == CoreConstants.bQSide) {
+			if (move.getCastlingFlag() == CoreConstants.wQSide
+					|| move.getCastlingFlag() == CoreConstants.bQSide) {
 				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O";
 			} else {
 				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O-O";
@@ -307,10 +333,11 @@ public class MainController {
 		} else if (board.check(enemy)) {
 			result += "+";
 		}
-		if(board.getMoveNumber()%2 == 0 && board.getMoveNumber() != 0){
+		if (board.getMoveNumber() % 2 == 0 && board.getMoveNumber() != 0) {
 			result += "\n";
 		}
-		pgnTextField.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
+		pgnTextField
+				.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
 		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();
 	}
 	// File Format
@@ -372,7 +399,8 @@ public class MainController {
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("Error Dialog");
-				alert.setContentText("Ooops, there was an error whilst loading the save game file!");
+				alert.setContentText(
+						"Ooops, there was an error whilst loading the save game file!");
 				alert.showAndWait();
 				e.printStackTrace();
 			} finally {
@@ -428,13 +456,14 @@ public class MainController {
 		result += String.valueOf(aiColor);
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
-		Stage stage = (Stage) borderPane.getScene().getWindow();
+		Stage stage = Main.primaryStage;
 		File file = fileChooser.showSaveDialog(stage);
 
 		BufferedWriter writer = null;
 		if (file != null) {
 			try {
-				writer = new BufferedWriter(new FileWriter(file + (!file.getName().endsWith(".txt") ? ".txt" : "")));
+				writer = new BufferedWriter(
+						new FileWriter(file + (!file.getName().endsWith(".txt") ? ".txt" : "")));
 				writer.write(result);
 			} catch (IOException ie) {
 				ie.printStackTrace();
@@ -512,15 +541,15 @@ public class MainController {
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()) {
 			switch (result.get()) {
-				case "Classic":
-					boardColour = BoardColour.CLASSIC;
-					break;
-				case "Moss Green":
-					boardColour = BoardColour.MOSS_GREEN;
-					break;
-				case "Grey":
-					boardColour = BoardColour.GREY;
-					break;
+			case "Classic":
+				boardColour = BoardColour.CLASSIC;
+				break;
+			case "Moss Green":
+				boardColour = BoardColour.MOSS_GREEN;
+				break;
+			case "Grey":
+				boardColour = BoardColour.GREY;
+				break;
 			}
 		}
 		clearCanvas();

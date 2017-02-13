@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import core.CoreConstants;
 import core.Main;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,11 +14,12 @@ import javafx.scene.control.ChoiceDialog;
 
 public class StartMenuController {
 	private MainController controller;
-	public void initialize() {
 
+	public void initialize() {
 	}
-	
-	private void setupController(){
+
+	// Loads the main chess game interface
+	private void setupController() {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/root.fxml"));
 			Parent root = loader.load();
@@ -32,6 +32,8 @@ public class StartMenuController {
 			e.printStackTrace();
 		}
 	}
+
+	// Executed if the user presses 'Play Mortimer'
 	public void playMortimer() {
 		setupController();
 		chooseColour();
@@ -39,6 +41,8 @@ public class StartMenuController {
 		controller.playGame();
 	}
 
+	// Displays a dialog allowing the user to select which colour they wish to
+	// play with
 	private void chooseColour() {
 		String choice = new String();
 		List<String> choices = new ArrayList<>();
@@ -67,6 +71,7 @@ public class StartMenuController {
 		}
 	}
 
+	// Executed if the user chooses to play against another human
 	public void playHuman() {
 		setupController();
 		controller.setupGame();
