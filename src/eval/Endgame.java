@@ -291,7 +291,7 @@ public class Endgame extends EvalConstants {
 				/ 8] & CoreConstants.FILE[index % 8];
 		long otherKing = board.bitboards[CoreConstants.WHITE_KING
 				+ enemyCol];
-		// If the other king is blocking the pawn, or the king is blocking the
+		// If the other king is blocking the pawn and the king is blocking the
 		// bishop then a draw is likely
 		if ((pawnRoute & otherKing) != 0
 				&& (domBishopSquares & otherKing) == 0) {
@@ -330,6 +330,7 @@ public class Endgame extends EvalConstants {
 				/ 8] & CoreConstants.FILE[index % 8];
 		long otherKing = board.bitboards[CoreConstants.WHITE_KING
 				+ enemyCol];
+		// If king is blocking pawn's route and the bishop, a draw is probable
 		if ((pawnRoute & otherKing) != 0
 				&& (domBishopSquares & otherKing) == 0) {
 			return DRAW;
@@ -339,6 +340,8 @@ public class Endgame extends EvalConstants {
 		if (domBishopSquares != otherBishopSquares) {
 			int otherBishopIndex = BitBoard
 					.bitScanForward(otherBishop);
+			// The other player's bishop is blocking the pawn or it has a move
+			// which could potentially capture a pawn, then a draw is probable
 			if ((otherBishop & pawnRoute) != 0
 					|| (getBishopMoves(board, otherBishopIndex,
 							enemyCol) & board.bitboards[enemyCol]
@@ -353,6 +356,8 @@ public class Endgame extends EvalConstants {
 			BitBoard board, boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int enemyCol = domCol == 0 ? 1 : 0;
+		// Return the pawns of the dominating player (i.e. the player with the
+		// greater piece values)
 		long domPawns = board.bitboards[CoreConstants.WHITE_PAWN
 				+ domCol];
 		int[] pawnIndices = { 0, 0 };
@@ -372,6 +377,7 @@ public class Endgame extends EvalConstants {
 				& (CoreConstants.FILE[pawnIndices[1] % 8]
 						| CoreConstants.ADJACENT_FILE[pawnIndices[1]
 								% 8]);
+		// Bitboard of the other pawn
 		long otherPawn = board.bitboards[CoreConstants.WHITE_PAWN
 				+ enemyCol];
 		if ((inFrontOfPawn1 & otherPawn) == 0
@@ -380,6 +386,7 @@ public class Endgame extends EvalConstants {
 		}
 		long otherKing = board.bitboards[CoreConstants.WHITE_KING
 				+ enemyCol];
+		// If the king is directly in front of the pawn then a draw is probable
 		if ((inFrontOfPawn1 & otherKing) != 0
 				&& (inFrontOfPawn1 & otherKing) != 1) {
 			return SCALE_FACTOR_DRAWISH;

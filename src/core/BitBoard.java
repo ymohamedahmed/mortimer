@@ -69,8 +69,8 @@ public class BitBoard {
 		// Consider each index in the manipulated FEN notation
 		while (index <= 63) {
 			// If it is lowercase (i.e. not upper case then the piece is black
-			int blackPiece = !Character
-					.isUpperCase(board.charAt(index)) ? 1 : 0;
+			int blackPiece = !Character.isUpperCase(board.charAt(
+					index)) ? 1 : 0;
 			// FEN notation uses different indexing so conversion to our system
 			// (Little Endian) is required
 			int littleEndianIndex = 56 + (2 * (index % 8)) - index;
@@ -258,10 +258,8 @@ public class BitBoard {
 			// Remove the rook being moved
 			removePiece(rookOldIndex);
 			// Move it to its new position
-			addPiece(
-					(castle <= 2) ? CoreConstants.WHITE_ROOK
-							: CoreConstants.BLACK_ROOK,
-					rookFinalIndex);
+			addPiece((castle <= 2) ? CoreConstants.WHITE_ROOK
+					: CoreConstants.BLACK_ROOK, rookFinalIndex);
 		}
 
 	}
@@ -456,13 +454,12 @@ public class BitBoard {
 		enemyRookQueen |= bitboards[7 - side];
 		enemyBishopQueen |= bitboards[9 - side];
 		long result = (CoreConstants.PAWN_ATTACKS_TABLE[side][kingIndex]
-				& enemyPawns)
-				| (CoreConstants.KNIGHT_TABLE[kingIndex]
-						& enemyKnights)
-				| (bishopAttacks(occupiedBoard, kingIndex, side)
-						& enemyBishopQueen)
-				| (rookAttacks(occupiedBoard, kingIndex, side)
-						& enemyRookQueen);
+				& enemyPawns) | (CoreConstants.KNIGHT_TABLE[kingIndex]
+						& enemyKnights) | (bishopAttacks(
+								occupiedBoard, kingIndex, side)
+								& enemyBishopQueen) | (rookAttacks(
+										occupiedBoard, kingIndex,
+										side) & enemyRookQueen);
 		return (BitBoard.bitScanForward(result) != -1);
 	}
 
@@ -480,8 +477,8 @@ public class BitBoard {
 	// Player has no available moves and is not in check then the game is
 	// stalemate
 	public boolean stalemate(int sideToMove) {
-		if (!check(sideToMove) && new MoveGen()
-				.generateMoves(this, true).size() == 0) {
+		if (!check(sideToMove) && new MoveGen().generateMoves(this,
+				true).size() == 0) {
 			return true;
 		} else {
 			return false;
@@ -500,12 +497,12 @@ public class BitBoard {
 		enemyRookQueen |= bitboards[7 - side];
 		enemyBishopQueen |= bitboards[9 - side];
 		long result = (CoreConstants.PAWN_ATTACKS_TABLE[side][index]
-				& enemyPawns)
-				| (CoreConstants.KNIGHT_TABLE[index] & enemyKnights)
-				| (bishopAttacks(occupiedBoard, index, side)
-						& enemyBishopQueen)
-				| (rookAttacks(occupiedBoard, index, side)
-						& enemyRookQueen);
+				& enemyPawns) | (CoreConstants.KNIGHT_TABLE[index]
+						& enemyKnights) | (bishopAttacks(
+								occupiedBoard, index, side)
+								& enemyBishopQueen) | (rookAttacks(
+										occupiedBoard, index, side)
+										& enemyRookQueen);
 		return (BitBoard.bitScanForward(result) != -1);
 	}
 
@@ -623,8 +620,8 @@ public class BitBoard {
 	public static void initialiseZobrist() {
 		for (int x = 0; x <= 63; x++) {
 			for (int y = 0; y <= 11; y++) {
-				zobristTable[x][y] = new Random()
-						.nextInt((int) Math.pow(2, 64) - 1);
+				zobristTable[x][y] = new Random().nextInt((int) Math
+						.pow(2, 64) - 1);
 			}
 		}
 	}
