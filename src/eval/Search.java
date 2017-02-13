@@ -9,32 +9,23 @@ import core.MoveGen;
 
 public class Search {
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
-	private Evaluation eval = new Evaluation();
-	private MoveGen moveGen;
-
+	
 	public Move rootNegamax(MoveGen moveGen, BitBoard board, int color) {
-		this.moveGen = moveGen;
 		double maxScore = Double.NEGATIVE_INFINITY;
 		double minScore = Double.POSITIVE_INFINITY;
-
 		Move optimal = null;
 		ArrayList<Move> moves = moveGen.generateMoves(board, true);
-		long overallStartTime = System.currentTimeMillis();
 		int noOfMoves = moves.size();
-		System.out.println("NO OF MOVES : " + noOfMoves);
-		System.out.println("THINKING TIME : " + EvalConstants.THINKING_TIME);
 		double timePerMove = EvalConstants.THINKING_TIME / noOfMoves;
 		for (Move move : moves) {
 			board.move(move);
 			long startTime = System.currentTimeMillis();
 			double firstGuess = 0;
 			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d += 2) {
-				firstGuess = mtdf(board, firstGuess, d, color);
+				firstGuess = mtdf(board, firstGuess, d, color, moveGen);
 				if (System.currentTimeMillis() - startTime >= timePerMove) {
-					System.out.println("FINAL DEPTH : " + d);
 					break;
 				}
-				// System.out.println("SCORE: " + firstGuess);
 			}
 			board.undo();
 			if (color == EvalConstants.WHITE) {
@@ -49,17 +40,16 @@ public class Search {
 				}
 			}
 		}
-		System.out.println("TOTAL TIME: " + (System.currentTimeMillis() - overallStartTime));
 		return optimal;
 	}
 
-	private double mtdf(BitBoard board, double f, int d, int color) {
+	private double mtdf(BitBoard board, double f, int d, int color, MoveGen moveGen) {
 		double g = f;
 		double upperBound = Double.POSITIVE_INFINITY;
 		double lowerBound = Double.NEGATIVE_INFINITY;
 		while (lowerBound < upperBound) {
 			double beta = Math.max(g, lowerBound + 1);
-			g = negamax(beta - 1, beta, board, d, color);
+			g = negamax(beta - 1, beta, board, d, color, moveGen);
 			if (g < beta) {
 				upperBound = g;
 			} else {
@@ -70,7 +60,7 @@ public class Search {
 	}
 
 	// Color Factor: 1 for white, -1 for black
-	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
+	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor, MoveGen moveGen) {
 		double alphaOrig = alpha;
 		TranspositionEntry tEntry = new TranspositionEntry();
 		tEntry = hashtable.get(board.hash());
@@ -86,13 +76,13 @@ public class Search {
 			}
 		}
 		if (depth == 0) {
-			return colorFactor * eval.evaluate(board, colorFactor);
+			return colorFactor * new Evaluation().evaluate(board, colorFactor);
 		}
 		double bestValue = Double.NEGATIVE_INFINITY;
 		ArrayList<Move> moves = moveGen.generateMoves(board, false);
 		for (Move move : moves) {
 			board.move(move);
-			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
+			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor, moveGen);
 			board.undo();
 			bestValue = (int) Math.max(bestValue, v);
 			alpha = Math.max(alpha, v);

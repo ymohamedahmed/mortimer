@@ -24,6 +24,7 @@ public class Evaluation extends EvalConstants {
 			long[] mobilitySquares = { 0, 0 };
 			long[] kingZone = { 0, 0 };
 			int[] scaleFactor = { 0 };
+			// Count the number of each type of piece by type and colour
 			int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
 			int blackPawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_PAWN]);
 			int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
@@ -34,14 +35,15 @@ public class Evaluation extends EvalConstants {
 			int blackRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_ROOK]);
 			int whiteQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_QUEEN]);
 			int blackQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_QUEEN]);
-
+			// Work out the endgame value, if the game has not reached the
+			// endgame the function will return no value
 			int endgameValue = Endgame.evaluate(board, scaleFactor, whitePawns, blackPawns,
 					whiteKnights, blackKnights, whiteBishops, blackBishops, whiteRooks, blackRooks,
 					whiteQueens, blackQueens);
 			if (endgameValue != NO_VALUE) {
-				System.out.println("ENDGAME");
 				return endgameValue;
 			}
+			// Calculate the material values for pawns and non pawns
 			pawnMat[0] = whitePawns * PIECE_VALUE_PHASE[PAWN];
 			pawnMat[1] = blackPawns * PIECE_VALUE_PHASE[PAWN];
 			nonPawnMat[0] = (whiteKnights * PIECE_VALUE_PHASE[KNIGHT])
@@ -55,18 +57,25 @@ public class Evaluation extends EvalConstants {
 					+ (blackQueens * PIECE_VALUE_PHASE[QUEEN])
 					+ ((blackBishops == 2) ? BISHOP_PAIR : 0);
 			int nonPawnMaterial = end(nonPawnMat[0] + nonPawnMat[1]);
+			// Calculate the game phase based on thresholds for the above
+			// calculations
 			int gamePhase = nonPawnMaterial >= MAT_MIDGAME_MAX ? PHASE_MIDGAME
 					: (nonPawnMaterial <= MAT_ENDGAME_MIN) ? PHASE_ENDGAME
 							: ((nonPawnMaterial - MAT_ENDGAME_MIN) * PHASE_MIDGAME)
 									/ (MAT_MIDGAME_MAX - MAT_ENDGAME_MIN);
+			// Work out square which can be moved to potentially
 			mobilitySquares[0] = ~board.bitboards[CoreConstants.WHITE];
 			mobilitySquares[1] = ~board.bitboards[CoreConstants.BLACK];
+			// Generate the information to be used later
 			EvalInfo ei = new EvalInfo();
 			ei.generate(board);
+			// Lookup the white and black pawn bitboards
 			long whitePawnsBoard = board.bitboards[CoreConstants.WHITE_PAWN];
 			long blackPawnsBoard = board.bitboards[CoreConstants.BLACK_PAWN];
 
+			// This means if the game is not in the endgame
 			if (gamePhase > 0) {
+				// Calculate the safe spaces for both players
 				long whiteSafe = WHITE_SPACE & ~ei.pawnAttacks[1]
 						& (~ei.attackedSquares[1] | ei.attackedSquares[0]);
 				long blackSafe = BLACK_SPACE & ~ei.pawnAttacks[0]
@@ -75,6 +84,7 @@ public class Evaluation extends EvalConstants {
 						| (whitePawnsBoard >>> 24));
 				long blackBehindPawn = ((blackPawnsBoard << 8) | (blackPawnsBoard << 16)
 						| (blackPawnsBoard << 24));
+				// Based on the number of safe spaces generate bonuses
 				spatial[0] = SPACE * (((BitBoard.hammingWeight(whiteSafe)
 						+ BitBoard.hammingWeight(whiteSafe & whiteBehindPawn))
 						* (whiteKnights + whiteBishops)) / 4);
@@ -82,9 +92,12 @@ public class Evaluation extends EvalConstants {
 						+ BitBoard.hammingWeight(blackSafe & blackBehindPawn))
 						* (blackKnights + blackBishops)) / 4);
 			} else {
+				// In the game the number of safe spaces is irrelevant since the
+				// board is so empty
 				spatial[0] = 0;
 				spatial[1] = 0;
 			}
+			// Evaluate the pawn attacks
 			pawnCanAttack[0] = ei.pawnAttacks[0];
 			pawnCanAttack[1] = ei.pawnAttacks[1];
 			for (int i = 0; i < 5; i++) {
@@ -102,10 +115,12 @@ public class Evaluation extends EvalConstants {
 				pawnCanAttack[1] |= ((blackPawnsBoard & ~CoreConstants.FILE_H) >>> 9)
 						| ((blackPawnsBoard & ~CoreConstants.FILE_A) >>> 7);
 			}
-
+			// Evaluate generally the attacks available to each player
 			attacks[0] = evalAttacks(board, ei, 0, board.bitboards[CoreConstants.BLACK]);
 			attacks[1] = evalAttacks(board, ei, 1, board.bitboards[CoreConstants.WHITE]);
 			try {
+				// Work out the king zone to be used later for additional
+				// evaluation
 				kingZone[0] = CoreConstants.KING_TABLE[ei.kingIndex[0]];
 				kingZone[0] |= (kingZone[0] << 8);
 				kingZone[1] = CoreConstants.KING_TABLE[ei.kingIndex[1]];
@@ -113,8 +128,10 @@ public class Evaluation extends EvalConstants {
 			} catch (Exception e) {
 
 			}
+			// All the piece on the board
 			long all = board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK];
 			long pieceAttacks, safeAttacks, kingAttacks;
+			// Pieces separated by type
 			long pawns = board.bitboards[CoreConstants.WHITE_PAWN]
 					| board.bitboards[CoreConstants.BLACK_PAWN];
 			long knights = board.bitboards[CoreConstants.WHITE_KNIGHT]
@@ -128,22 +145,32 @@ public class Evaluation extends EvalConstants {
 			long kings = board.bitboards[CoreConstants.WHITE_KING]
 					| board.bitboards[CoreConstants.BLACK_KING];
 			long square = 1;
+			// Now consider each square on the board individually
 			for (int index = 0; index < 64; index++) {
+				// Evaluation only occurs if the square is not empty
 				if ((square & all) != 0) {
 					boolean isWhite = ((board.bitboards[CoreConstants.WHITE] & square) != 0);
 					int col = isWhite ? 0 : 1;
 					int enemy = isWhite ? 1 : 0;
+					// Mines are all the pieces which are the player's own
 					long mines = isWhite ? board.bitboards[CoreConstants.WHITE]
 							: board.bitboards[CoreConstants.BLACK];
+					// Find the enemy pieces
 					long others = isWhite ? board.bitboards[CoreConstants.BLACK]
 							: board.bitboards[CoreConstants.WHITE];
+					// Flip the board for black pieces
 					int pieceIndex = isWhite ? index : 63 - index;
+					// Work out the row and column of the piece
 					int rank = (int) index / 8;
 					int file = index % 8;
 					int relativeRank = isWhite ? rank : 7 - rank;
+					// Consider all the attacks from that square
 					pieceAttacks = ei.attacksFromSquares[index];
+					// If the square contains a pawn
 					if ((square & pawns) != 0) {
+						// Consider the positional strength of the pawn
 						pieceSquare[col] += POS_PAWN[pieceIndex];
+						// Evaluate the structure of the pawns
 						long myPawns = pawns & mines;
 						long otherPawns = pawns & others;
 						long adjacentFiles = CoreConstants.ADJACENT_FILE[file];
@@ -156,6 +183,10 @@ public class Evaluation extends EvalConstants {
 						boolean doubled = (myPawns & routeToPromotion) != 0;
 						boolean opposed = (otherPawns & routeToPromotion) != 0;
 						boolean passed = !doubled && !opposed && otherPawnsAheadAdjacent == 0;
+						// Consider various penalties based on the structure of
+						// the pawns
+						// Consider if the pawn is not passed (i.e. they have no
+						// clear path to the final row)
 						if (!passed) {
 							long myPawnsAheadAdjacent = ranksForward & adjacentFiles & myPawns;
 							long myPawnsBesideAndBehindAdjacent = CoreConstants.ROW_BACKWARD_INCLUSIVE[col][rank]
@@ -196,6 +227,7 @@ public class Evaluation extends EvalConstants {
 									&& relativeRank == 1 && (pushSquare & mines & ~pawns) != 0) {
 								pawnStruct[col] -= PAWN_BLOCKADE;
 							}
+							// Consider opening game dependent structure
 							if (gamePhase > 0 && relativeRank > 2) {
 								long stormPawns = otherPawnsAheadAdjacent & ~CoreConstants.FILE_D
 										& ~CoreConstants.FILE_E;
@@ -211,7 +243,8 @@ public class Evaluation extends EvalConstants {
 							}
 
 						} else {
-
+							// Consider if pawn is indeed passed
+							// Judge whether or not the path is defended
 							long backFile = (getRookMoves(board, index, col)
 									& board.bitboards[enemy]) & pawnFile
 									& CoreConstants.ROW_BACKWARD[col][rank];
@@ -233,6 +266,7 @@ public class Evaluation extends EvalConstants {
 							boolean runner = mobile && (routeToPromotion & all) == 0
 									&& attackedNotDefendedRoute == 0;
 							passedPawns[col] += PAWN_PASSER[relativeRank];
+							// Add various benefits to encourage passed pawns
 							if (relativeRank >= 2) {
 								int pushIndex = isWhite ? index + 8 : index - 8;
 								passedPawns[col] += Board.distance(pushIndex, ei.kingIndex[enemy])
@@ -260,12 +294,16 @@ public class Evaluation extends EvalConstants {
 							pawnStruct[col] += (pawnFile & kings & mines) != 0
 									? PAWN_SHIELD_CENTER[relativeRank] : PAWN_SHIELD[relativeRank];
 						}
+						// Consider knights
 					} else if ((square & knights) != 0) {
+						// Evaluate position of the knight
 						pieceSquare[col] += POS_KNIGHT[pieceIndex];
 						safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy];
+						// Mobility (i.e. number of moves available)
 						mobility[col] += MOBILITY[KNIGHT][BitBoard
 								.hammingWeight(safeAttacks & mobilitySquares[col])];
 						kingAttacks = safeAttacks & kingZone[enemy];
+						// Consider if the knight can attack the enemy king
 						if (kingAttacks != 0) {
 							kingSafety[col] += PIECE_ATTACKS_KING[KNIGHT]
 									* BitBoard.hammingWeight(kingAttacks);
@@ -275,8 +313,11 @@ public class Evaluation extends EvalConstants {
 							positional[col] += KNIGHT_OUTPOST[(square * ei.pawnAttacks[col]) != 0
 									? 1 : 0];
 						}
+						// Consider bishops
 					} else if ((square & bishops) != 0) {
+						// Evaluate position of the bishops
 						pieceSquare[col] += POS_BISHOP[pieceIndex];
+						// Evaluate the attacks of the bishop
 						safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy];
 						mobility[col] += MOBILITY[BISHOP][BitBoard
 								.hammingWeight(safeAttacks & mobilitySquares[col])];
@@ -290,6 +331,7 @@ public class Evaluation extends EvalConstants {
 							positional[col] += BISHOP_OUTPOST[(square * ei.pawnAttacks[col] != 0 ? 1
 									: 0)];
 						}
+						// Penalise if the bishop is blocked by a pawn
 						positional[col] -= BISHOP_MY_PAWNS_IN_COLOR_PENALTY * BitBoard
 								.hammingWeight(pawns & mines & ((square & WHITE_SQUARES) != 0
 										? WHITE_SQUARES : BLACK_SQUARES));
@@ -297,14 +339,19 @@ public class Evaluation extends EvalConstants {
 							mobility[col] -= BISHOP_TRAPPED_PENALTY[(BISHOP_TRAPPING_GUARD[index]
 									& pawns & others) != 0 ? 1 : 0];
 						}
+						// Consider rooks
 					} else if ((square & rooks) != 0) {
+						// Evaluate the position of the rook
 						pieceSquare[col] += POS_ROOK[pieceIndex];
 						safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy]
 								& ~ei.knightAttacks[enemy] & ~ei.bishopAttacks[enemy];
+						// Benefits for having a large number of moves available
+						// (more probably one will be good)
 						int mobilityCount = BitBoard
 								.hammingWeight(safeAttacks & mobilitySquares[col]);
 						mobility[col] += MOBILITY[ROOK][mobilityCount];
 						kingAttacks = safeAttacks & kingZone[enemy];
+						// Consider if the rook can attack the enemy king
 						if (kingAttacks != 0) {
 							kingSafety[col] += PIECE_ATTACKS_KING[ROOK]
 									* BitBoard.hammingWeight(kingAttacks);
@@ -324,32 +371,42 @@ public class Evaluation extends EvalConstants {
 								positional[col] += ROOK_7 * BitBoard.hammingWeight(alignedPawns);
 							}
 						}
+						// Penalties for rooks that can't escape
 						if ((square & ROOK_TRAPPING[ei.kingIndex[col]]) != 0
 								&& mobilityCount < ROOK_TRAPPED_PENALTY.length) {
 							positional[col] -= ROOK_TRAPPED_PENALTY[mobilityCount];
 						}
+						// Consider queens
 					} else if ((square & queens) != 0) {
+						// Evaluate the position of the queen
 						pieceSquare[col] += POS_QUEEN[pieceIndex];
+						// Consider attacks available to the queen
 						safeAttacks = pieceAttacks & ~ei.pawnAttacks[enemy]
 								& ~ei.knightAttacks[enemy] & ~ei.bishopAttacks[enemy]
 								& ~ei.rookAttacks[enemy];
+						// Consider number of moves available
 						mobility[col] += MOBILITY[QUEEN][BitBoard
 								.hammingWeight(safeAttacks & mobilitySquares[col])];
 						kingAttacks = safeAttacks & kingZone[enemy];
+						// Consider if the queen can attack the king
 						if (kingAttacks != 0) {
 							kingSafety[col] += PIECE_ATTACKS_KING[QUEEN]
 									* BitBoard.hammingWeight(kingAttacks);
 							kingAttackedCount[col]++;
 						}
 					} else if ((square & kings) != 0) {
+						// King is judged on position, safety is considered
+						// later
 						pieceSquare[col] += POS_KING[pieceIndex];
 					}
 				}
 				square <<= 1;
 
 			}
+			// Check if it is white's turn
 			boolean white2Move = board.toMove == 0;
 
+			// Combine all the conditions evaluated
 			int openingAndEnding = (white2Move ? TEMPO : -TEMPO) + pawnMat[0] - pawnMat[1]
 					+ nonPawnMat[0] - nonPawnMat[1] + pieceSquare[0] - pieceSquare[1] + spatial[0]
 					- spatial[1] + positional[0] - positional[1] + attacks[0] - attacks[1]
@@ -358,29 +415,37 @@ public class Evaluation extends EvalConstants {
 					+ openingEndingWithShift(6,
 							KING_SAFETY_PONDER[kingAttackedCount[0]] * kingSafety[0]
 									- KING_SAFETY_PONDER[kingAttackedCount[1]] * kingSafety[1]);
+			// Consider the phase of the game
 			int value = (gamePhase * open(openingAndEnding) + (PHASE_MIDGAME - gamePhase)
 					* end(openingAndEnding) * scaleFactor[0] / SCALE_FACTOR_DEFAULT)
 					/ PHASE_MIDGAME;
 			assert Math.abs(value) < KNOWN_WIN : "Value is outside bounds";
+			// Multiply value by -1 if black is being evaluated, since
+			// evaluation is done from white's perspective
 			return color * value;
 		} catch (Exception e) {
 			return 0;
 		}
 	}
 
+	// Evaluate the attacks available to each piece
 	int evalAttacks(BitBoard board, EvalInfo ei, int color, long enemy) {
 		int attacks = 0;
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN]
 				| board.bitboards[CoreConstants.BLACK_PAWN];
+		// Find all the pawns that can attack
 		long attackedPawn = ei.pawnAttacks[color] & enemy & ~pawns;
 		while (attackedPawn != 0) {
 			long leastSigBit = lsb(attackedPawn);
+			// Benefit for pawns that have attacks available
 			attacks += PAWN_ATTACKS[PIECE_CORE_TO_EVAL[(int) board.board[BitBoard
 					.bitScanForward(leastSigBit)]]];
 			attackedPawn &= ~leastSigBit;
 		}
 		long otherWeak = ei.attackedSquares[color] & enemy & ~ei.pawnAttacks[1 - color];
 		if (otherWeak != 0) {
+			// Consider minor(knight and bishop) and major(rook and queen)
+			// pieces that have attacks available
 			long attackedByMinor = (ei.knightAttacks[color] | ei.bishopAttacks[color]) & otherWeak;
 			while (attackedByMinor != 0) {
 				long leastSigBit = lsb(attackedByMinor);
@@ -396,6 +461,7 @@ public class Evaluation extends EvalConstants {
 				attackedByMajor &= ~leastSigBit;
 			}
 		}
+		// Find bitboards containing rook and queens
 		long rooks = board.bitboards[CoreConstants.WHITE_BISHOP]
 				| board.bitboards[CoreConstants.BLACK_BISHOP];
 		long queens = board.bitboards[CoreConstants.WHITE_QUEEN]
@@ -414,10 +480,12 @@ public class Evaluation extends EvalConstants {
 		return attacks;
 	}
 
+	// Return least significant bit
 	long lsb(long squares) {
 		return squares & (-squares);
 	}
 
+	// Returning opening game value
 	public int open(int phase) {
 		return (phase + 0x8000) >> 16;
 	}
@@ -430,6 +498,7 @@ public class Evaluation extends EvalConstants {
 		return S(open(openEndingValue) >> shiftValue, end(openEndingValue) >> shiftValue);
 	}
 
+	// Get the moves availble to a rook
 	long getRookMoves(BitBoard board, int index, int side) {
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskRook[index];
