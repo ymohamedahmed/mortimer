@@ -215,7 +215,10 @@ public class MainController {
 	public void move(BitBoard board, Move move, boolean repaint) {
 		boolean capture = board.board[move.getFinalPos()] != CoreConstants.EMPTY;
 		board.move(move);
+		// Even piece id means white piece, odd mean black piece
 		int side = move.getPieceType() % 2;
+		// If the a pawn is moved onto the final row, then display the pawn
+		// promotion dialog getting player which piece to convert the pawn to
 		if (move.isPromotion() && side == playerColour) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, true);
 		} else if (move.isPromotion() && side == aiColor) {
@@ -226,33 +229,39 @@ public class MainController {
 			// Clear the canvas and then repaint it
 			clearCanvas();
 			paintChessBoard(board);
+			// Get the new moves
 			moveList = getMoves(board, true);
 
 		}
 		boolean aiLost = board.checkmate(aiColor);
 		boolean playerLost = board.checkmate(playerColour);
+		// If it is the AI's turn
 		if (side == playerColour && playingAI && !aiLost) {
 			moveAI(board);
 		}
+		// When the game is over, display the game over dialog
 		if (aiLost || playerLost || board.stalemate(board.toMove)) {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Game Over");
 			alert.setHeaderText(null);
 			alert.setContentText("The game has finished");
-
 			alert.showAndWait();
 		}
 
 	}
 
+	// Return all the moves available to the next player to move
 	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck) {
 		return moveGen.generateMoves(board, removeCheck);
 	}
 
+	// Displays a dialog giving the player the choice of which piece to convert
+	// their pawn to
 	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board,
 			boolean display) {
 		board.removePiece(pawnOldPos);
 		if (display) {
+			// Display choices
 			String choice = new String();
 			List<String> choices = new ArrayList<>();
 			choices.add("Queen");
@@ -269,9 +278,12 @@ public class MainController {
 			if (result.isPresent()) {
 				choice = result.get();
 			} else {
+				// If no valid answer, re-display the dialog
 				pawnPromotion(pawnOldPos, newPos, side, board, display);
 			}
 			switch (choice) {
+			// Based on choice add the appropriate piece
+			// Note: side == 0 is equivalent to is the side white
 			case "Queen":
 				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
 						newPos);
@@ -292,17 +304,21 @@ public class MainController {
 				break;
 			}
 		} else {
+			// If it is the AI, immediately select the queen option
 			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
 					newPos);
 		}
 	}
 
 	private void moveAI(BitBoard board) {
+		// Use the search class to select the best move
 		int colorFactor = (aiColor == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
 		Move move = search.rootNegamax(moveGen, board, colorFactor);
 		move(board, move, true);
 	}
 
+	// PGN is the notation used to represent the moves played so far in the
+	// chess game
 	private void updatePGNTextField(BitBoard board, Move move, boolean capture) {
 		String result = "";
 		if (board.getMoveNumber() % 2 == 0) {
@@ -311,15 +327,20 @@ public class MainController {
 		pgnTextField.setWrapText(true);
 		int side = move.getPieceType() % 2;
 		int enemy = (side == 0) ? 1 : 0;
+		// If white is moving start with the number of the move
 		if (side == 0) {
 			result += String.valueOf((board.getMoveNumber() / 2) + 1) + ". ";
 		}
+		// Add the letter of the piece being moved
 		result += CoreConstants.pieceToLetterCapital[move.getPieceType()];
+		// Capture moves get an 'x'
 		if (capture) {
 			result += "x";
 		}
+		// Convert square to algebraic notation e.g. 1 square is A1 etc.
 		result += CoreConstants.indexToAlgebraic[move.getFinalPos()];
 
+		// Castling has special notation
 		if (move.getCastlingFlag() != 0) {
 			if (move.getCastlingFlag() == CoreConstants.wQSide
 					|| move.getCastlingFlag() == CoreConstants.bQSide) {
@@ -333,17 +354,31 @@ public class MainController {
 		} else if (board.check(enemy)) {
 			result += "+";
 		}
+		// New line after every two moves
 		if (board.getMoveNumber() % 2 == 0 && board.getMoveNumber() != 0) {
 			result += "\n";
 		}
 		pgnTextField
 				.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
+		// Store history of the field so that undos work
 		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();
 	}
-	// File Format
-	// Current Bitboards in order
-	// History sorted by move number
 
+	// The next two methods are used for loading files and saving files
+	// They are called when specific buttons are pressed
+	// FILE FORMAT:
+	// Save who is next to move
+	// Save the number of moves made so far
+	// Then save the board array by index order
+	// Then save all the bitboards for each piece by piece id order
+	// Then save all the history arrays in order from the first move to the
+	// latest move
+	// Save the state of castling
+	// Save the current pgn
+	// Save the colour of the player
+	// Save the colour of the AI
+
+	// NOTE: loading is done in the same order
 	@FXML
 	private void handleLoadFileAction(ActionEvent event) {
 		System.out.println("LOADING GAME");
@@ -414,6 +449,8 @@ public class MainController {
 
 	}
 
+	// File format is outlined above, text file is build up and then written to
+	// a file
 	@FXML
 	private void handleSaveFileAction(ActionEvent event) {
 		String result = "";
@@ -477,12 +514,16 @@ public class MainController {
 		}
 	}
 
+	// Method is called when the user presses the restart game button
 	@FXML
 	private void restartGame(ActionEvent event) {
 		setupGame();
 		playGame();
 	}
 
+	// Simply undo the game twice to get back to the player's move
+	// Also undo the PGN notation
+	// Then re-generate the moves available
 	@FXML
 	private void undoAction(ActionEvent event) {
 		if (board.getMoveNumber() >= 2) {
@@ -495,6 +536,9 @@ public class MainController {
 		}
 	}
 
+	// Load FEN notation so that users can easily change the board
+	// Some users may wish to import boards from other programs
+	// This makes it easy
 	@FXML
 	private void loadFenMenuItem(ActionEvent event) {
 		TextInputDialog dialog = new TextInputDialog("");
@@ -504,18 +548,28 @@ public class MainController {
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()) {
 			try {
+				// Change the board
 				board.loadFen(result.get());
+				// Regenerate moves
 				moveList = moveGen.generateMoves(board, true);
 				pgnTextField.setText("");
 				clearCanvas();
 				paintChessBoard(board);
 			} catch (Exception e) {
+				// If there is an error, notify the user
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error Dialog");
+				alert.setContentText("Ooops, there was an error whilst loading the FEN notation. "
+						+ "Are you sure the notation is valid?");
+				alert.showAndWait();
 				e.printStackTrace();
 			}
 		}
 
 	}
 
+	// Export the FEN of the current board
+	// Executed when a user clicks a button in the menu bar
 	@FXML
 	private void exportFenMenuItem(ActionEvent event) {
 		String fen = board.exportFen();
@@ -526,8 +580,10 @@ public class MainController {
 		alert.showAndWait();
 	}
 
+	// Executed when the user chooses to change the theme of the board
 	@FXML
 	private void boardColourMenuItem(ActionEvent event) {
+		// The user chooses from three options
 		List<String> choices = new ArrayList<>();
 		choices.add("Classic");
 		choices.add("Moss Green");
@@ -537,8 +593,8 @@ public class MainController {
 		dialog.setHeaderText("Choose a Colour Theme");
 		dialog.setTitle("Choose Board Colour");
 
-		// Traditional way to get the response value.
 		Optional<String> result = dialog.showAndWait();
+		// Based on the response change the enum value
 		if (result.isPresent()) {
 			switch (result.get()) {
 			case "Classic":
@@ -556,6 +612,7 @@ public class MainController {
 		paintChessBoard(board);
 	}
 
+	// Used by the Start Menu Controller to change the settings of the game
 	public void setPlayingAI(boolean playingAI) {
 		this.playingAI = playingAI;
 	}
@@ -568,6 +625,9 @@ public class MainController {
 		aiColor = color;
 	}
 
+	// Enumeration for the board colour
+	// Stores the two colours used in theme
+	// Classic theme is default
 	private enum BoardColour {
 		CLASSIC, MOSS_GREEN, GREY;
 		public String getColourName() {
@@ -582,6 +642,7 @@ public class MainController {
 			}
 		}
 
+		// Colour for the half the squares
 		public Color getColourPrimary() {
 			if (this == BoardColour.CLASSIC) {
 				return Color.rgb(140, 82, 66);
@@ -594,6 +655,7 @@ public class MainController {
 			}
 		}
 
+		// Colour for the other half of the squares
 		public Color getColourSecondary() {
 			if (this == BoardColour.CLASSIC) {
 				return Color.rgb(255, 255, 206);
