@@ -26,19 +26,23 @@ public class Main extends Application {
 		try {
 			Main.primaryStage = primaryStage;
 			// Loads the font to be used within the UI
-			Font.loadFont(getClass().getResource("/fonts/cmunrm.ttf").toExternalForm(), 1.0);
+			Font.loadFont(getClass().getResource("/fonts/cmunrm.ttf")
+					.toExternalForm(), 1.0);
 			// Loads the FXML file for the UI
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/start.fxml"));
+			FXMLLoader loader = new FXMLLoader(
+					getClass().getResource("/fxml/start.fxml"));
 			Parent root = loader.load();
 			// Sets the title of the frame
 			primaryStage.setTitle("Mortimer");
 			Scene scene = new Scene(root);
 			// Applies the stylesheet to the window
-			scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+			scene.getStylesheets().add(
+					getClass().getResource("/css/style.css").toExternalForm());
 			primaryStage.setScene(scene);
 			primaryStage.setResizable(false);
 			// Adds the logo
-			primaryStage.getIcons().add(new Image(getClass().getResource("/images/logo.png").toExternalForm()));
+			primaryStage.getIcons().add(new Image(getClass()
+					.getResource("/images/logo.png").toExternalForm()));
 			primaryStage.show();
 		} catch (IOException e) {
 			e.printStackTrace();

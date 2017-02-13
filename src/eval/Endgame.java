@@ -11,10 +11,9 @@ public class Endgame extends EvalConstants {
 
 	// This method takes the board and decides based on the remaining pieces
 	// which method is bessed for evaluation
-	public static int evaluate(BitBoard board, int[] scaleFactor,
-			int wPawns, int bPawns, int wKnights, int bKnights,
-			int wBishops, int bBishops, int wRooks, int bRooks,
-			int wQueens, int bQueens) {
+	public static int evaluate(BitBoard board, int[] scaleFactor, int wPawns,
+			int bPawns, int wKnights, int bKnights, int wBishops, int bBishops,
+			int wRooks, int bRooks, int wQueens, int bQueens) {
 		scaleFactor[0] = SCALE_FACTOR_DEFAULT;
 		// The number of pieces remaining is used to decide which evaluation
 		// method is appropriate
@@ -24,13 +23,11 @@ public class Endgame extends EvalConstants {
 		int bMat = bNonPawnMat + bPawns;
 
 		if (wPawns == 0 && bPawns == 0) {
-			if ((bMat == 0 && wMat == 2 && wKnights == 1
-					&& wBishops == 1)
+			if ((bMat == 0 && wMat == 2 && wKnights == 1 && wBishops == 1)
 					|| (wMat == 0 && bMat == 2 && bKnights == 1
 							&& bBishops == 1)) {
 				// If there is a bishop and knight on one side
-				return Endgame.endgameKingBishopKnightKing(board,
-						wMat > bMat);
+				return Endgame.endgameKingBishopKnightKing(board, wMat > bMat);
 			}
 			// If both sides have the same number of pieces it is approximated
 			// to a draw
@@ -46,16 +43,14 @@ public class Endgame extends EvalConstants {
 				|| (wPawns == 0 && bPawns == 1)) {
 			if (wNonPawnMat == 0 && bNonPawnMat == 0) {
 				// If one player has a pawn and the other no pieces
-				return Endgame.endgameKingPawnKing(board,
-						wMat > bMat);
+				return Endgame.endgameKingPawnKing(board, wMat > bMat);
 			}
 			if ((wNonPawnMat == 1 && bNonPawnMat == 0)
 					|| (wNonPawnMat == 0 && bNonPawnMat == 1)) {
 				if ((wQueens == 1 && bPawns == 1)
 						|| (bQueens == 1 && wPawns == 1)) {
 					// If one player has a pawn and the other a queen
-					return endgameKingQueenKingPawn(board,
-							wQueens > bQueens);
+					return endgameKingQueenKingPawn(board, wQueens > bQueens);
 				}
 			}
 			if (wNonPawnMat == 1 && bNonPawnMat == 1) {
@@ -71,8 +66,7 @@ public class Endgame extends EvalConstants {
 							wPawns > bPawns);
 				}
 				if ((wBishops == 1 && wPawns == 1 && bKnights == 1)
-						|| (bBishops == 1 && bPawns == 1
-								&& wKnights == 1)) {
+						|| (bBishops == 1 && bPawns == 1 && wKnights == 1)) {
 					// One side has a bishop and pawn and the other one knights
 					return endgameKingBishopPawnKingKnight(board,
 							wPawns > bPawns);
@@ -80,19 +74,17 @@ public class Endgame extends EvalConstants {
 			}
 		}
 		if (bMat == 0 && (wBishops >= 2 || wRooks > 0 || wQueens > 0)
-				|| wMat == 0 && (bBishops >= 2 || bRooks > 0
-						|| bQueens > 9)) {
+				|| wMat == 0 && (bBishops >= 2 || bRooks > 0 || bQueens > 9)) {
 			// One side has no pieces (except king) and the other has a few
 			// significant pieces
 			// i.e. two or more bishops
 			// or a queen or rook
 			return Endgame.endgameKingWithNoPieces(board, wMat > bMat,
-					wKnights + bKnights, wBishops + bBishops,
-					wRooks + bRooks, wQueens + bQueens);
+					wKnights + bKnights, wBishops + bBishops, wRooks + bRooks,
+					wQueens + bQueens);
 		}
-		if (wRooks == 1 && bRooks == 1
-				&& ((wPawns == 2 && bPawns == 1)
-						|| (wPawns == 1 && bPawns == 2))) {
+		if (wRooks == 1 && bRooks == 1 && ((wPawns == 2 && bPawns == 1)
+				|| (wPawns == 1 && bPawns == 2))) {
 			scaleFactor[0] = scaleKingRookPawnPawnKingRookPawn(board,
 					wPawns > bPawns);
 		}
@@ -110,19 +102,17 @@ public class Endgame extends EvalConstants {
 	private static int endgameKingWithNoPieces(BitBoard board,
 			boolean wDominating, int knights, int bishops, int rooks,
 			int queens) {
-		int wKingIndex = BitBoard.bitScanForward(
-				board.bitboards[CoreConstants.WHITE_KING]);
-		int bKingIndex = BitBoard.bitScanForward(
-				board.bitboards[CoreConstants.BLACK_KING]);
+		int wKingIndex = BitBoard
+				.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
+		int bKingIndex = BitBoard
+				.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
 		// This is a very strong position hence return a value of known win with
 		// some added components based on specifically which pieces the player
 		// has
 		int value = KNOWN_WIN + (knights * PIECE_VALUE[KNIGHT])
-				+ (bishops * PIECE_VALUE[BISHOP])
-				+ (rooks * PIECE_VALUE[ROOK])
+				+ (bishops * PIECE_VALUE[BISHOP]) + (rooks * PIECE_VALUE[ROOK])
 				+ (queens * PIECE_VALUE[QUEEN])
-				+ CLOSER_SQUARES[Board.distance(wKingIndex,
-						bKingIndex)]
+				+ CLOSER_SQUARES[Board.distance(wKingIndex, bKingIndex)]
 				+ (wDominating ? TO_CORNERS[bKingIndex]
 						: TO_COLOR_CORNERS[wKingIndex]);
 		return (wDominating ? value : -value);
@@ -130,10 +120,10 @@ public class Endgame extends EvalConstants {
 
 	private static int endgameKingBishopKnightKing(BitBoard board,
 			boolean wDominating) {
-		int wKingIndex = BitBoard.bitScanForward(
-				board.bitboards[CoreConstants.WHITE_KING]);
-		int bKingIndex = BitBoard.bitScanForward(
-				board.bitboards[CoreConstants.BLACK_KING]);
+		int wKingIndex = BitBoard
+				.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
+		int bKingIndex = BitBoard
+				.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
 		long bishops = board.bitboards[CoreConstants.WHITE_BISHOP]
 				| board.bitboards[CoreConstants.BLACK_BISHOP];
 		// Flip index is used so that the internal board representation can
@@ -143,8 +133,7 @@ public class Endgame extends EvalConstants {
 			bKingIndex = Board.flipHorizontalIndex(bKingIndex);
 		}
 		int value = KNOWN_WIN
-				+ CLOSER_SQUARES[Board.distance(wKingIndex,
-						bKingIndex)]
+				+ CLOSER_SQUARES[Board.distance(wKingIndex, bKingIndex)]
 				+ (wDominating ? TO_CORNERS[bKingIndex]
 						: TO_CORNERS[wKingIndex]);
 		return (wDominating ? value : -value);
@@ -161,24 +150,19 @@ public class Endgame extends EvalConstants {
 		return wDominating
 				? KNOWN_WIN + PAWN
 						+ (int) BitBoard.bitScanForward(
-								board.bitboards[CoreConstants.WHITE_PAWN])
-								/ 8
+								board.bitboards[CoreConstants.WHITE_PAWN]) / 8
 				: -KNOWN_WIN - PIECE_VALUE[PAWN]
 						- (7 - (int) BitBoard.bitScanForward(
-								board.bitboards[CoreConstants.BLACK_PAWN])
-								/ 8);
+								board.bitboards[CoreConstants.BLACK_PAWN]) / 8);
 	}
 
 	private static int scaleKingRookPawnKingRook(BitBoard board,
 			boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int nonDomCol = domCol == 0 ? 1 : 0;
-		long otherRook = board.bitboards[CoreConstants.WHITE_ROOK
-				+ nonDomCol];
-		long domKing = board.bitboards[CoreConstants.WHITE_KING
-				+ domCol];
-		long otherKing = board.bitboards[CoreConstants.WHITE_KING
-				+ nonDomCol];
+		long otherRook = board.bitboards[CoreConstants.WHITE_ROOK + nonDomCol];
+		long domKing = board.bitboards[CoreConstants.WHITE_KING + domCol];
+		long otherKing = board.bitboards[CoreConstants.WHITE_KING + nonDomCol];
 		int domkingIndex = BitBoard.bitScanForward(domKing);
 		// Get various ranks (rows) relative to the piece moving
 		// I.e. the '8th' rank for black is rank 0 whereas for white it is rank
@@ -199,20 +183,19 @@ public class Endgame extends EvalConstants {
 		boolean white2Move = board.toMove == 0;
 		// Consider all the scenarios where a draw is probable
 		if ((CoreConstants.ROW_BACKWARD[domCol][rank6] & pawns) != 0
-				&& (CoreConstants.ROW_BACKWARD[domCol][rank6]
-						& domKing) != 0
-				&& (CoreConstants.ROW_FORWARD[domCol][rank6]
-						& fileAndAdjacent & otherKing) != 0
+				&& (CoreConstants.ROW_BACKWARD[domCol][rank6] & domKing) != 0
+				&& (CoreConstants.ROW_FORWARD[domCol][rank6] & fileAndAdjacent
+						& otherKing) != 0
 				&& (CoreConstants.ROW[rank6] & otherRook) != 0) {
 			return SCALE_FACTOR_DRAW;
 		}
 		if ((CoreConstants.ROW[rank6] & pawns) != 0
-				&& (CoreConstants.ROW_FORWARD[domCol][rank6]
-						& fileAndAdjacent & otherKing) != 0
+				&& (CoreConstants.ROW_FORWARD[domCol][rank6] & fileAndAdjacent
+						& otherKing) != 0
 				&& (CoreConstants.ROW_BACKWARD_INCLUSIVE[domCol][rank2]
 						& otherRook) != 0
-				|| ((white2Move != wDominating) && (Board
-						.distance(pIndex, domkingIndex) >= 3))) {
+				|| ((white2Move != wDominating)
+						&& (Board.distance(pIndex, domkingIndex) >= 3))) {
 			return SCALE_FACTOR_DRAW;
 		}
 		if ((CoreConstants.ROW[rank7] & pawns) != 0
@@ -224,11 +207,9 @@ public class Endgame extends EvalConstants {
 				|| (Board.distance(pIndex, domkingIndex) >= 2)) {
 			return SCALE_FACTOR_DRAW;
 		}
-		if (((CoreConstants.FILE_A | CoreConstants.FILE_B
-				| CoreConstants.FILE_G | CoreConstants.FILE_H)
-				& pawns) != 0
-				&& (CoreConstants.ROW[rank8] & fileAndAdjacent
-						& otherKing) != 0
+		if (((CoreConstants.FILE_A | CoreConstants.FILE_B | CoreConstants.FILE_G
+				| CoreConstants.FILE_H) & pawns) != 0
+				&& (CoreConstants.ROW[rank8] & fileAndAdjacent & otherKing) != 0
 				&& (CoreConstants.ROW[rank8] & otherRook) != 0) {
 			return SCALE_FACTOR_DRAW;
 		}
@@ -238,8 +219,7 @@ public class Endgame extends EvalConstants {
 	private static int endgameKingQueenKingPawn(BitBoard board,
 			boolean wDominating) {
 		// First two rows relative to the colour of player
-		long row1And2 = wDominating
-				? CoreConstants.ROW_1 | CoreConstants.ROW_2
+		long row1And2 = wDominating ? CoreConstants.ROW_1 | CoreConstants.ROW_2
 				: CoreConstants.ROW_7 | CoreConstants.ROW_8;
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN]
 				| board.bitboards[CoreConstants.BLACK_PAWN];
@@ -258,10 +238,8 @@ public class Endgame extends EvalConstants {
 		} else {
 			return NO_VALUE;
 		}
-		long domKing = board.bitboards[domCol
-				+ CoreConstants.WHITE_KING];
-		long enemyKing = board.bitboards[enemyCol
-				+ CoreConstants.WHITE_KING];
+		long domKing = board.bitboards[domCol + CoreConstants.WHITE_KING];
+		long enemyKing = board.bitboards[enemyCol + CoreConstants.WHITE_KING];
 		int domKingIndex = BitBoard.bitScanForward(domKing);
 		int pIndex = BitBoard.bitScanForward(pawns);
 		// If the king is in the pawn zone and is too close return a draw
@@ -278,8 +256,7 @@ public class Endgame extends EvalConstants {
 		int domCol = wDominating ? 0 : 1;
 		int enemyCol = domCol == 0 ? 1 : 0;
 		// Find the bishops of the dominating player
-		long domBishop = board.bitboards[domCol
-				+ CoreConstants.WHITE_BISHOP];
+		long domBishop = board.bitboards[domCol + CoreConstants.WHITE_BISHOP];
 		long domBishopSquares = ((domBishop & WHITE_SQUARES) != 0)
 				? WHITE_SQUARES : BLACK_SQUARES;
 		// Bitboard of all the pawns on the board
@@ -287,10 +264,9 @@ public class Endgame extends EvalConstants {
 				| board.bitboards[CoreConstants.BLACK_PAWN];
 		// Find the index of the pawn
 		int index = BitBoard.bitScanForward(pawns);
-		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index
-				/ 8] & CoreConstants.FILE[index % 8];
-		long otherKing = board.bitboards[CoreConstants.WHITE_KING
-				+ enemyCol];
+		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index / 8]
+				& CoreConstants.FILE[index % 8];
+		long otherKing = board.bitboards[CoreConstants.WHITE_KING + enemyCol];
 		// If the other king is blocking the pawn and the king is blocking the
 		// bishop then a draw is likely
 		if ((pawnRoute & otherKing) != 0
@@ -301,8 +277,7 @@ public class Endgame extends EvalConstants {
 	}
 
 	// Returns the moves available to the bishop (outlined in MoveGen.java)
-	private static long getBishopMoves(BitBoard board, int index,
-			int side) {
+	private static long getBishopMoves(BitBoard board, int index, int side) {
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK])
 				& CoreConstants.occupancyMaskBishop[index];
@@ -317,8 +292,7 @@ public class Endgame extends EvalConstants {
 			boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int enemyCol = domCol == 0 ? 1 : 0;
-		long domBishop = board.bitboards[domCol
-				+ CoreConstants.WHITE_BISHOP];
+		long domBishop = board.bitboards[domCol + CoreConstants.WHITE_BISHOP];
 		long otherBishop = board.bitboards[enemyCol
 				+ CoreConstants.WHITE_BISHOP];
 		long domBishopSquares = ((domBishop & WHITE_SQUARES) != 0)
@@ -326,10 +300,9 @@ public class Endgame extends EvalConstants {
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN]
 				| board.bitboards[CoreConstants.BLACK_PAWN];
 		int index = BitBoard.bitScanForward(pawns);
-		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index
-				/ 8] & CoreConstants.FILE[index % 8];
-		long otherKing = board.bitboards[CoreConstants.WHITE_KING
-				+ enemyCol];
+		long pawnRoute = CoreConstants.ROW_FORWARD[domCol][(int) index / 8]
+				& CoreConstants.FILE[index % 8];
+		long otherKing = board.bitboards[CoreConstants.WHITE_KING + enemyCol];
 		// If king is blocking pawn's route and the bishop, a draw is probable
 		if ((pawnRoute & otherKing) != 0
 				&& (domBishopSquares & otherKing) == 0) {
@@ -338,28 +311,25 @@ public class Endgame extends EvalConstants {
 		long otherBishopSquares = ((otherBishop & WHITE_SQUARES) != 0)
 				? WHITE_SQUARES : BLACK_SQUARES;
 		if (domBishopSquares != otherBishopSquares) {
-			int otherBishopIndex = BitBoard
-					.bitScanForward(otherBishop);
+			int otherBishopIndex = BitBoard.bitScanForward(otherBishop);
 			// The other player's bishop is blocking the pawn or it has a move
 			// which could potentially capture a pawn, then a draw is probable
 			if ((otherBishop & pawnRoute) != 0
-					|| (getBishopMoves(board, otherBishopIndex,
-							enemyCol) & board.bitboards[enemyCol]
-							& pawnRoute) != 0) {
+					|| (getBishopMoves(board, otherBishopIndex, enemyCol)
+							& board.bitboards[enemyCol] & pawnRoute) != 0) {
 				return DRAW;
 			}
 		}
 		return NO_VALUE;
 	}
 
-	private static int scaleKingRookPawnPawnKingRookPawn(
-			BitBoard board, boolean wDominating) {
+	private static int scaleKingRookPawnPawnKingRookPawn(BitBoard board,
+			boolean wDominating) {
 		int domCol = wDominating ? 0 : 1;
 		int enemyCol = domCol == 0 ? 1 : 0;
 		// Return the pawns of the dominating player (i.e. the player with the
 		// greater piece values)
-		long domPawns = board.bitboards[CoreConstants.WHITE_PAWN
-				+ domCol];
+		long domPawns = board.bitboards[CoreConstants.WHITE_PAWN + domCol];
 		int[] pawnIndices = { 0, 0 };
 		int i = 0;
 		while (domPawns != 0) {
@@ -370,22 +340,18 @@ public class Endgame extends EvalConstants {
 		long inFrontOfPawn1 = CoreConstants.ROW_FORWARD[domCol][(int) pawnIndices[0]
 				/ 8]
 				& (CoreConstants.FILE[pawnIndices[0] % 8]
-						| CoreConstants.ADJACENT_FILE[pawnIndices[0]
-								% 8]);
+						| CoreConstants.ADJACENT_FILE[pawnIndices[0] % 8]);
 		long inFrontOfPawn2 = CoreConstants.ROW_FORWARD[domCol][(int) pawnIndices[1]
 				/ 8]
 				& (CoreConstants.FILE[pawnIndices[1] % 8]
-						| CoreConstants.ADJACENT_FILE[pawnIndices[1]
-								% 8]);
+						| CoreConstants.ADJACENT_FILE[pawnIndices[1] % 8]);
 		// Bitboard of the other pawn
-		long otherPawn = board.bitboards[CoreConstants.WHITE_PAWN
-				+ enemyCol];
+		long otherPawn = board.bitboards[CoreConstants.WHITE_PAWN + enemyCol];
 		if ((inFrontOfPawn1 & otherPawn) == 0
 				|| (inFrontOfPawn2 & otherPawn) == 0) {
 			return SCALE_FACTOR_DEFAULT;
 		}
-		long otherKing = board.bitboards[CoreConstants.WHITE_KING
-				+ enemyCol];
+		long otherKing = board.bitboards[CoreConstants.WHITE_KING + enemyCol];
 		// If the king is directly in front of the pawn then a draw is probable
 		if ((inFrontOfPawn1 & otherKing) != 0
 				&& (inFrontOfPawn1 & otherKing) != 1) {

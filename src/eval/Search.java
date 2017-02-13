@@ -62,7 +62,8 @@ public class Search {
 
 	// Search algorithm used with negamax (minimax variant), supposed to be more
 	// efficient and produce the same result
-	private double mtdf(BitBoard board, double f, int d, int color, MoveGen moveGen) {
+	private double mtdf(BitBoard board, double f, int d, int color,
+			MoveGen moveGen) {
 		double g = f;
 		double upperBound = Double.POSITIVE_INFINITY;
 		double lowerBound = Double.NEGATIVE_INFINITY;
@@ -79,8 +80,8 @@ public class Search {
 	}
 
 	// Color Factor: 1 for white, -1 for black
-	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor,
-			MoveGen moveGen) {
+	private double negamax(double alpha, double beta, BitBoard board, int depth,
+			int colorFactor, MoveGen moveGen) {
 		double alphaOrig = alpha;
 		// Check if any of the values have already been computed, if so, return
 		// them from the hash table
@@ -107,7 +108,8 @@ public class Search {
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);
-			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor, moveGen);
+			double v = -negamax(-beta, -alpha, board, depth - 1,
+					-1 * colorFactor, moveGen);
 			board.undo();
 			bestValue = (int) Math.max(bestValue, v);
 			alpha = Math.max(alpha, v);

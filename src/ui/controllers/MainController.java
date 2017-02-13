@@ -54,20 +54,25 @@ public class MainController {
 	private boolean playingAI = true;
 	private BoardColour boardColour = BoardColour.CLASSIC;
 
+	// Called initially
 	public void initialize() {
 		// Intialise all the various lookup tables used by the AI
 		moveGen.initialiseKnightLookupTable();
 		// This allows the user to change how long it takes for the AI to select
 		// moves
-		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue,
-					Number newValue) {
-				double value = moveSpeedSlider.getValue();
-				EvalConstants.THINKING_TIME = EvalConstants.MAX_THINKING_TIME - (value / 100
-						* (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
-			}
-		});
+		moveSpeedSlider.valueProperty()
+				.addListener(new ChangeListener<Number>() {
+					@Override
+					public void changed(
+							ObservableValue<? extends Number> observable,
+							Number oldValue, Number newValue) {
+						double value = moveSpeedSlider.getValue();
+						EvalConstants.THINKING_TIME = EvalConstants.MAX_THINKING_TIME
+								- (value / 100
+										* (EvalConstants.MAX_THINKING_TIME
+												- EvalConstants.MIN_THINKING_TIME));
+					}
+				});
 		moveGen.initialiseKingLookupTable();
 		moveGen.initialisePawnLookupTable();
 		moveGen.initialiseBishopAndRookEvalLookupTable();
@@ -89,7 +94,8 @@ public class MainController {
 			int col = squareNo % 8;
 			int row = squareNo / 8;
 			// Selects the colour of the square based on the row and column
-			if ((col % 2 == 0 && row % 2 == 0) || (col % 2 == 1 && row % 2 == 1)) {
+			if ((col % 2 == 0 && row % 2 == 0)
+					|| (col % 2 == 1 && row % 2 == 1)) {
 				g.setFill(boardColour.getColourPrimary());
 			} else {
 				g.setFill(boardColour.getColourSecondary());
@@ -106,9 +112,11 @@ public class MainController {
 				// type of piece
 				if (piece != CoreConstants.EMPTY) {
 					Image image = new Image(MainController.class
-							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png")
+							.getResource("/images/"
+									+ CoreConstants.FILE_NAMES[piece] + ".png")
 							.toExternalForm());
-					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
+					g.drawImage(image, col * cellSize, (7 - row) * cellSize,
+							cellSize, cellSize);
 				}
 			}
 
@@ -130,7 +138,8 @@ public class MainController {
 		moveList = getMoves(board, false);
 		double cellSize = paintChessBoard(board);
 		// Make sure there is an active action listener
-		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
+		chessPane.setOnMouseClicked(
+				evt -> clickListenerChessPane(board, evt, cellSize));
 	}
 
 	private void clearCanvas() {
@@ -138,7 +147,8 @@ public class MainController {
 		g.clearRect(0, 0, chessPane.getWidth(), chessPane.getHeight());
 	}
 
-	private void clickListenerChessPane(BitBoard board, MouseEvent evt, double cellSize) {
+	private void clickListenerChessPane(BitBoard board, MouseEvent evt,
+			double cellSize) {
 		// Get the position clicked in terms of the board
 		double x = evt.getX();
 		double y = evt.getY();
@@ -151,7 +161,8 @@ public class MainController {
 			byte piece = board.board[index];
 			for (int square : blueSquares) {
 				if (square == index) {
-					move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
+					move(board, getMove(moveList, board.board[oldPos], oldPos,
+							index), true);
 					blueSquares.clear();
 					pieceMoved = true;
 					break;
@@ -171,16 +182,17 @@ public class MainController {
 				for (Move move : moves) {
 					int rowMove = Math.floorDiv(move.getFinalPos(), 8);
 					int colMove = move.getFinalPos() % 8;
-					if (board.board[move.getFinalPos()] == CoreConstants.EMPTY) {
+					if (board.board[move
+							.getFinalPos()] == CoreConstants.EMPTY) {
 						g.setFill(Color.BLUE);
-						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize,
-								cellSize);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize,
+								cellSize, cellSize);
 					} else {
 						// If the move is a capture move draw a red circle in
 						// the corner
 						g.setFill(Color.RED);
-						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5,
-								cellSize / 5);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize,
+								cellSize / 5, cellSize / 5);
 					}
 					blueSquares.add(move.getFinalPos());
 				}
@@ -191,7 +203,8 @@ public class MainController {
 
 	// Returns the move based on the piece, where it came from and where it's
 	// going
-	public Move getMove(ArrayList<Move> moves, int piece, int oldIndex, int finalIndex) {
+	public Move getMove(ArrayList<Move> moves, int piece, int oldIndex,
+			int finalIndex) {
 		for (Move move : moves) {
 			if (move.getPieceType() == piece && move.getOldPos() == oldIndex
 					&& move.getFinalPos() == finalIndex) {
@@ -202,7 +215,8 @@ public class MainController {
 	}
 
 	// Gets all the moves available to a particular piece
-	private ArrayList<Move> getMovesPiece(int oldPos, ArrayList<Move> moveList) {
+	private ArrayList<Move> getMovesPiece(int oldPos,
+			ArrayList<Move> moveList) {
 		ArrayList<Move> result = new ArrayList<>();
 		for (Move move : moveList) {
 			if (move.getOldPos() == oldPos) {
@@ -213,16 +227,19 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
-		boolean capture = board.board[move.getFinalPos()] != CoreConstants.EMPTY;
+		boolean capture = board.board[move
+				.getFinalPos()] != CoreConstants.EMPTY;
 		board.move(move);
 		// Even piece id means white piece, odd mean black piece
 		int side = move.getPieceType() % 2;
 		// If the a pawn is moved onto the final row, then display the pawn
 		// promotion dialog getting player which piece to convert the pawn to
 		if (move.isPromotion() && side == playerColour) {
-			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, true);
+			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board,
+					true);
 		} else if (move.isPromotion() && side == aiColor) {
-			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, false);
+			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board,
+					false);
 		}
 		updatePGNTextField(board, move, capture);
 		if (repaint) {
@@ -257,8 +274,8 @@ public class MainController {
 
 	// Displays a dialog giving the player the choice of which piece to convert
 	// their pawn to
-	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board,
-			boolean display) {
+	private void pawnPromotion(int pawnOldPos, int newPos, int side,
+			BitBoard board, boolean display) {
 		board.removePiece(pawnOldPos);
 		if (display) {
 			// Display choices
@@ -285,41 +302,41 @@ public class MainController {
 			// Based on choice add the appropriate piece
 			// Note: side == 0 is equivalent to is the side white
 			case "Queen":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN
+						: CoreConstants.BLACK_QUEEN, newPos);
 				break;
 			case "Rook":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK
+						: CoreConstants.BLACK_ROOK, newPos);
 				break;
 			case "Bishop":
-				board.addPiece(
-						(side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_BISHOP
+						: CoreConstants.BLACK_BISHOP, newPos);
 				break;
 			case "Knight":
-				board.addPiece(
-						(side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_KNIGHT
+						: CoreConstants.BLACK_KNIGHT, newPos);
 				break;
 			}
 		} else {
 			// If it is the AI, immediately select the queen option
-			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
-					newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN
+					: CoreConstants.BLACK_QUEEN, newPos);
 		}
 	}
 
 	private void moveAI(BitBoard board) {
 		// Use the search class to select the best move
-		int colorFactor = (aiColor == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
+		int colorFactor = (aiColor == 0) ? EvalConstants.WHITE
+				: EvalConstants.BLACK;
 		Move move = search.rootNegamax(moveGen, board, colorFactor);
 		move(board, move, true);
 	}
 
 	// PGN is the notation used to represent the moves played so far in the
 	// chess game
-	private void updatePGNTextField(BitBoard board, Move move, boolean capture) {
+	private void updatePGNTextField(BitBoard board, Move move,
+			boolean capture) {
 		String result = "";
 		if (board.getMoveNumber() % 2 == 0) {
 			result = " ";
@@ -344,9 +361,11 @@ public class MainController {
 		if (move.getCastlingFlag() != 0) {
 			if (move.getCastlingFlag() == CoreConstants.wQSide
 					|| move.getCastlingFlag() == CoreConstants.bQSide) {
-				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O";
+				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "."
+						+ " O-O";
 			} else {
-				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O-O";
+				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "."
+						+ " O-O-O";
 			}
 		}
 		if (board.checkmate(enemy)) {
@@ -358,8 +377,9 @@ public class MainController {
 		if (board.getMoveNumber() % 2 == 0 && board.getMoveNumber() != 0) {
 			result += "\n";
 		}
-		pgnTextField
-				.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
+		pgnTextField.setText(
+				(pgnTextField.getText() == null ? "" : pgnTextField.getText())
+						+ result);
 		// Store history of the field so that undos work
 		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();
 	}
@@ -394,7 +414,8 @@ public class MainController {
 				int noOfMoves = Integer.valueOf(reader.readLine());
 				board.setMoveNumber(noOfMoves);
 				for (int i = 0; i <= 63; i++) {
-					board.board[i] = (byte) ((int) Integer.valueOf(reader.readLine()));
+					board.board[i] = (byte) ((int) Integer
+							.valueOf(reader.readLine()));
 				}
 				for (int i = 0; i <= 13; i++) {
 					board.bitboards[i] = Long.valueOf(reader.readLine());
@@ -418,8 +439,10 @@ public class MainController {
 					board.kingHistory[1][i] = Long.valueOf(reader.readLine());
 					board.boardHistory[0][i] = Byte.valueOf(reader.readLine());
 					board.boardHistory[1][i] = Byte.valueOf(reader.readLine());
-					board.castlingHistory[0][i] = Long.valueOf(reader.readLine());
-					board.castlingHistory[1][i] = Long.valueOf(reader.readLine());
+					board.castlingHistory[0][i] = Long
+							.valueOf(reader.readLine());
+					board.castlingHistory[1][i] = Long
+							.valueOf(reader.readLine());
 					board.epHistory[0][i] = Long.valueOf(reader.readLine());
 					board.epHistory[1][i] = Long.valueOf(reader.readLine());
 				}
@@ -499,8 +522,8 @@ public class MainController {
 		BufferedWriter writer = null;
 		if (file != null) {
 			try {
-				writer = new BufferedWriter(
-						new FileWriter(file + (!file.getName().endsWith(".txt") ? ".txt" : "")));
+				writer = new BufferedWriter(new FileWriter(file
+						+ (!file.getName().endsWith(".txt") ? ".txt" : "")));
 				writer.write(result);
 			} catch (IOException ie) {
 				ie.printStackTrace();
@@ -559,8 +582,9 @@ public class MainController {
 				// If there is an error, notify the user
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("Error Dialog");
-				alert.setContentText("Ooops, there was an error whilst loading the FEN notation. "
-						+ "Are you sure the notation is valid?");
+				alert.setContentText(
+						"Ooops, there was an error whilst loading the FEN notation. "
+								+ "Are you sure the notation is valid?");
 				alert.showAndWait();
 				e.printStackTrace();
 			}
@@ -589,7 +613,8 @@ public class MainController {
 		choices.add("Moss Green");
 		choices.add("Grey");
 
-		ChoiceDialog<String> dialog = new ChoiceDialog<>(boardColour.getColourName(), choices);
+		ChoiceDialog<String> dialog = new ChoiceDialog<>(
+				boardColour.getColourName(), choices);
 		dialog.setHeaderText("Choose a Colour Theme");
 		dialog.setTitle("Choose Board Colour");
 

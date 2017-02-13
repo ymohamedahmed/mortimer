@@ -46,8 +46,8 @@ public class Move {
 	public boolean isEnPassant() {
 		return enPassant;
 	}
-	
-	//Setters for castling, promotion and en passant
+
+	// Setters for castling, promotion and en passant
 	public void setCastling(byte castling) {
 		this.castling = castling;
 	}
