@@ -27,14 +27,11 @@ public class EvalInfo {
 		this.board = board;
 		// Bit scan forward of the relevant bitboard returns the indices of the
 		// kings
-		kingIndex[0] = BitBoard
-				.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
-		kingIndex[1] = BitBoard
-				.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
+		kingIndex[0] = BitBoard.bitScanForward(board.bitboards[CoreConstants.WHITE_KING]);
+		kingIndex[1] = BitBoard.bitScanForward(board.bitboards[CoreConstants.BLACK_KING]);
 		long square = 1L;
 		// All the pieces on the board
-		long all = board.bitboards[CoreConstants.WHITE]
-				| board.bitboards[CoreConstants.BLACK];
+		long all = board.bitboards[CoreConstants.WHITE] | board.bitboards[CoreConstants.BLACK];
 		// Bitboards for each piece type
 		long pawns = board.bitboards[CoreConstants.WHITE_PAWN]
 				| board.bitboards[CoreConstants.BLACK_PAWN];
@@ -62,11 +59,9 @@ public class EvalInfo {
 
 		// Find the rooks attacking the king from each player
 		rookAttackKing[0] = getRookMoves(board, all, kingIndex[0], 0);
-		checkPinnerRook(kingIndex[0], rookAttackKing[0], all, whites,
-				(rooks | queens) & blacks, 0);
+		checkPinnerRook(kingIndex[0], rookAttackKing[0], all, whites, (rooks | queens) & blacks, 0);
 		rookAttackKing[1] = getRookMoves(board, all, kingIndex[1], 1);
-		checkPinnerRook(kingIndex[1], rookAttackKing[1], all, blacks,
-				(rooks | queens) & whites, 1);
+		checkPinnerRook(kingIndex[1], rookAttackKing[1], all, blacks, (rooks | queens) & whites, 1);
 
 		// Loop through all the squares on the board
 		for (int index = 0; index < 64; index++) {
@@ -78,10 +73,8 @@ public class EvalInfo {
 				int color = (board.bitboards[CoreConstants.WHITE] & square) != 0
 						? CoreConstants.WHITE : CoreConstants.BLACK;
 				// Isolate all the pinned pieces on the board
-				long pinnedSquares = (square & pinnedPieces) != 0
-						? pinnedMobility[index]
-						: EvalConstants.WHITE_SQUARES
-								| EvalConstants.BLACK_SQUARES;
+				long pinnedSquares = (square & pinnedPieces) != 0 ? pinnedMobility[index]
+						: EvalConstants.WHITE_SQUARES | EvalConstants.BLACK_SQUARES;
 				// Extract relevant information on the moves available based on
 				// which piece is in the square
 				if ((square & pawns) != 0) {
@@ -112,12 +105,10 @@ public class EvalInfo {
 			square <<= 1;
 		}
 		// Isolate all the attacked squares on the board
-		attackedSquares[0] = pawnAttacks[0] | knightAttacks[0]
-				| bishopAttacks[0] | rookAttacks[0] | queenAttacks[0]
-				| kingAttacks[0];
-		attackedSquares[1] = pawnAttacks[1] | knightAttacks[1]
-				| bishopAttacks[1] | rookAttacks[1] | queenAttacks[1]
-				| kingAttacks[1];
+		attackedSquares[0] = pawnAttacks[0] | knightAttacks[0] | bishopAttacks[0] | rookAttacks[0]
+				| queenAttacks[0] | kingAttacks[0];
+		attackedSquares[1] = pawnAttacks[1] | knightAttacks[1] | bishopAttacks[1] | rookAttacks[1]
+				| queenAttacks[1] | kingAttacks[1];
 	}
 
 	// Returns the moves available to a bishop
@@ -125,8 +116,7 @@ public class EvalInfo {
 	// available to the bishop
 	private long getBishopMoves(BitBoard board, long all, int index, int side) {
 		if (index != -1) {
-			long bishopBlockers = all
-					& CoreConstants.occupancyMaskBishop[index];
+			long bishopBlockers = all & CoreConstants.occupancyMaskBishop[index];
 			int lookupIndex = (int) ((bishopBlockers
 					* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
 			long moveSquares = CoreConstants.magicMovesBishop[index][lookupIndex]
@@ -160,56 +150,41 @@ public class EvalInfo {
 		}
 	}
 
-	private void checkPinnerBishop(int kingIndex, long bishopAttacks, long all,
-			long mines, long bishopsOrQueens, int side) {
+	private void checkPinnerBishop(int kingIndex, long bishopAttacks, long all, long mines,
+			long bishopsOrQueens, int side) {
 		if ((bishopAttacks & mines) == 0
-				|| (CoreConstants.BISHOP_TABLE[kingIndex]
-						& bishopsOrQueens) == 0) {
+				|| (CoreConstants.BISHOP_TABLE[kingIndex] & bishopsOrQueens) == 0) {
 			return;
 		}
-		long xray = getBishopMoves(board, all & ~(mines & bishopAttacks),
-				kingIndex, side);
+		long xray = getBishopMoves(board, all & ~(mines & bishopAttacks), kingIndex, side);
 		if ((xray & ~bishopAttacks & bishopsOrQueens) != 0) {
 			int rank = kingIndex / 8;
 			int file = kingIndex % 8;
-			checkPinnerRay(
-					xray & CoreConstants.ROW_UPWARD[rank]
-							& CoreConstants.LEFT_FILES[file],
+			checkPinnerRay(xray & CoreConstants.ROW_UPWARD[rank] & CoreConstants.LEFT_FILES[file],
 					mines, bishopsOrQueens);
-			checkPinnerRay(
-					xray & CoreConstants.ROW_UPWARD[rank]
-							& CoreConstants.RIGHT_FILES[file],
+			checkPinnerRay(xray & CoreConstants.ROW_UPWARD[rank] & CoreConstants.RIGHT_FILES[file],
 					mines, bishopsOrQueens);
-			checkPinnerRay(
-					xray & CoreConstants.ROW_DOWNARD[rank]
-							& CoreConstants.LEFT_FILES[file],
+			checkPinnerRay(xray & CoreConstants.ROW_DOWNARD[rank] & CoreConstants.LEFT_FILES[file],
 					mines, bishopsOrQueens);
-			checkPinnerRay(
-					xray & CoreConstants.ROW_DOWNARD[rank]
-							& CoreConstants.RIGHT_FILES[file],
+			checkPinnerRay(xray & CoreConstants.ROW_DOWNARD[rank] & CoreConstants.RIGHT_FILES[file],
 					mines, bishopsOrQueens);
 		}
 	}
 
-	private void checkPinnerRook(int kingIndex, long rookAttacks, long all,
-			long mines, long rooksOrQueens, int side) {
+	private void checkPinnerRook(int kingIndex, long rookAttacks, long all, long mines,
+			long rooksOrQueens, int side) {
 		if ((rookAttacks & mines) == 0
 				|| (CoreConstants.ROOK_TABLE[kingIndex] & rooksOrQueens) == 0) {
 			return;
 		}
-		long xray = getRookMoves(board, all & ~(mines & rookAttacks), kingIndex,
-				side);
+		long xray = getRookMoves(board, all & ~(mines & rookAttacks), kingIndex, side);
 		if ((xray & ~rookAttacks & rooksOrQueens) != 0) {
 			int rank = kingIndex / 8;
 			int file = kingIndex % 8;
-			checkPinnerRay(xray & CoreConstants.ROW_UPWARD[rank], mines,
-					rooksOrQueens);
-			checkPinnerRay(xray & CoreConstants.LEFT_FILES[file], mines,
-					rooksOrQueens);
-			checkPinnerRay(xray & CoreConstants.ROW_DOWNARD[rank], mines,
-					rooksOrQueens);
-			checkPinnerRay(xray & CoreConstants.RIGHT_FILES[file], mines,
-					rooksOrQueens);
+			checkPinnerRay(xray & CoreConstants.ROW_UPWARD[rank], mines, rooksOrQueens);
+			checkPinnerRay(xray & CoreConstants.LEFT_FILES[file], mines, rooksOrQueens);
+			checkPinnerRay(xray & CoreConstants.ROW_DOWNARD[rank], mines, rooksOrQueens);
+			checkPinnerRay(xray & CoreConstants.RIGHT_FILES[file], mines, rooksOrQueens);
 		}
 	}
 }

@@ -14,43 +14,37 @@ public class MoveGen {
 		long pawnBoard = board.bitboards[side + 2];
 		while (pawnBoard != 0) {
 			// Add moves for each pawn of one of the players
-			addPawnAttacks(board, moves, BitBoard.bitScanForward(pawnBoard),
-					side);
+			addPawnAttacks(board, moves, BitBoard.bitScanForward(pawnBoard), side);
 			pawnBoard &= pawnBoard - 1;
 		}
 		long knightBoard = board.bitboards[side + 4];
 		while (knightBoard != 0) {
 			// Add moves for each knight
-			addKnightMoves(board, moves, BitBoard.bitScanForward(knightBoard),
-					side);
+			addKnightMoves(board, moves, BitBoard.bitScanForward(knightBoard), side);
 			knightBoard &= knightBoard - 1;
 		}
 		long rookBoard = board.bitboards[side + 6];
 		while (rookBoard != 0) {
 			// Add moves for each rook
-			addRookMoves(board, moves, BitBoard.bitScanForward(rookBoard),
-					side);
+			addRookMoves(board, moves, BitBoard.bitScanForward(rookBoard), side);
 			rookBoard &= rookBoard - 1;
 		}
 		long bishopBoard = board.bitboards[side + 8];
 		while (bishopBoard != 0) {
 			// Add moves for each bishop
-			addBishopMoves(board, moves, BitBoard.bitScanForward(bishopBoard),
-					side);
+			addBishopMoves(board, moves, BitBoard.bitScanForward(bishopBoard), side);
 			bishopBoard &= bishopBoard - 1;
 		}
 		long queenBoard = board.bitboards[side + 10];
 		while (queenBoard != 0) {
 			// Add moves for each queen
-			addQueenMoves(board, moves, BitBoard.bitScanForward(queenBoard),
-					side);
+			addQueenMoves(board, moves, BitBoard.bitScanForward(queenBoard), side);
 			queenBoard &= queenBoard - 1;
 		}
 		long kingBoard = board.bitboards[side + 12];
 		while (kingBoard != 0) {
 			// Add moves for the king
-			addKingMoves(board, moves, BitBoard.bitScanForward(kingBoard),
-					side);
+			addKingMoves(board, moves, BitBoard.bitScanForward(kingBoard), side);
 			kingBoard &= kingBoard - 1;
 		}
 
@@ -64,8 +58,7 @@ public class MoveGen {
 		while (iter.hasNext()) {
 			Move move = iter.next();
 			if (board.board[move.getFinalPos()] == CoreConstants.WHITE_KING
-					|| board.board[move
-							.getFinalPos()] == CoreConstants.BLACK_KING) {
+					|| board.board[move.getFinalPos()] == CoreConstants.BLACK_KING) {
 				iter.remove();
 			}
 		}
@@ -81,8 +74,7 @@ public class MoveGen {
 	// I.e. if one king is inside the 3x3 square around the other king
 	private boolean kingInKingSquare(BitBoard board, int side) {
 		int myKingIndex = BitBoard.bitScanForward(board.bitboards[12 + side]);
-		int enemyKingIndex = BitBoard
-				.bitScanForward(board.bitboards[12 + ((side == 0) ? 1 : 0)]);
+		int enemyKingIndex = BitBoard.bitScanForward(board.bitboards[12 + ((side == 0) ? 1 : 0)]);
 		// + or - 1,8,7,9 represent the indices of the 8 squares surrounding the
 		// king
 		if (myKingIndex + 1 == enemyKingIndex) {
@@ -112,8 +104,7 @@ public class MoveGen {
 		return false;
 	}
 
-	private ArrayList<Move> removeCheckMoves(BitBoard board,
-			ArrayList<Move> moveList, int side) {
+	private ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
 
 		// Iterator has to be used to avoid concurrent modification exception
 		// i.e. so that we can remove from the arraylist as we loop through it
@@ -138,15 +129,13 @@ public class MoveGen {
 		return moveList;
 	}
 
-	private void addMoves(int pieceType, int index, long moves,
-			ArrayList<Move> moveList, boolean enPassant, boolean promotion,
-			byte castling) {
+	private void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList,
+			boolean enPassant, boolean promotion, byte castling) {
 		while (moves != 0) {
 			// Each set bit in the long moves represents a positon where the
 			// piece could move
 			// Each move is added to an arraylist containing all the moves
-			Move move = new Move(pieceType, index,
-					BitBoard.bitScanForward(moves));
+			Move move = new Move(pieceType, index, BitBoard.bitScanForward(moves));
 			move.setCastling(castling);
 			move.setPromotion(promotion);
 			move.setEnPassant(enPassant);
@@ -157,9 +146,8 @@ public class MoveGen {
 
 	// Used by the pawn move generation since black and white move in different
 	// directions an offset is used
-	private void addMovesWithOffset(int pieceType, long moves,
-			ArrayList<Move> moveList, boolean enPassant, boolean promotion,
-			byte castling, int offset) {
+	private void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList,
+			boolean enPassant, boolean promotion, byte castling, int offset) {
 		while (moves != 0) {
 			int to = BitBoard.bitScanForward(moves);
 			int from = (to - offset) % 64;
@@ -175,15 +163,12 @@ public class MoveGen {
 		}
 	}
 
-	private void addRookMoves(BitBoard board, ArrayList<Move> moveList,
-			int index, int side) {
-		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK
-				: CoreConstants.BLACK_ROOK;
+	private void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK;
 		// Blockers is all the positions which could stop the rook from moving
 		// further
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE]
-				| board.bitboards[CoreConstants.BLACK])
-				& CoreConstants.occupancyMaskRook[index];
+				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskRook[index];
 		// Using the blockers array and pre-computed values we can lookup the
 		// moves of the rook from an array generated when the program is
 		// executed
@@ -194,108 +179,89 @@ public class MoveGen {
 		// all those pieces are
 		long moveSquares = CoreConstants.magicMovesRook[index][lookupIndex]
 				& ~board.bitboards[side];
-		addMoves(pieceType, index, moveSquares, moveList, false, false,
-				CoreConstants.noCastle);
+		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	// Equivalent to the algorithm above
-	private void addBishopMoves(BitBoard board, ArrayList<Move> moveList,
-			int index, int side) {
-		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP
-				: CoreConstants.BLACK_BISHOP;
+	private void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE]
-				| board.bitboards[CoreConstants.BLACK])
-				& CoreConstants.occupancyMaskBishop[index];
+				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskBishop[index];
 		int lookupIndex = (int) ((bishopBlockers
 				* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
 		long moveSquares = CoreConstants.magicMovesBishop[index][lookupIndex]
 				& ~board.bitboards[side];
-		addMoves(pieceType, index, moveSquares, moveList, false, false,
-				CoreConstants.noCastle);
+		addMoves(pieceType, index, moveSquares, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	// The moves of the queen are just the moves of a rook as well as the moves
 	// of a bishop in that position
 	// Hence we calculate both of those and then OR the result
-	private void addQueenMoves(BitBoard board, ArrayList<Move> moveList,
-			int index, int side) {
-		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN
-				: CoreConstants.BLACK_QUEEN;
+	private void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN;
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE]
-				| board.bitboards[CoreConstants.BLACK])
-				& CoreConstants.occupancyMaskRook[index];
+				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskRook[index];
 		int lookupIndexRook = (int) ((rookBlockers
 				* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
 		long moveSquaresRook = CoreConstants.magicMovesRook[index][lookupIndexRook]
 				& ~board.bitboards[side];
 
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE]
-				| board.bitboards[CoreConstants.BLACK])
-				& CoreConstants.occupancyMaskBishop[index];
+				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskBishop[index];
 		int lookupIndexBishop = (int) ((bishopBlockers
 				* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
 		long moveSquaresBishop = CoreConstants.magicMovesBishop[index][lookupIndexBishop]
 				& ~board.bitboards[side];
 
 		long queenMoves = moveSquaresRook | moveSquaresBishop;
-		addMoves(pieceType, index, queenMoves, moveList, false, false,
-				CoreConstants.noCastle);
+		addMoves(pieceType, index, queenMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	// Simply lookup the moves of the knight since it is unaffected by the
 	// pieces around it so can be pre-computed easily
 	// Then remove the moves that would 'capture' a friendly piece
-	private void addKnightMoves(BitBoard board, ArrayList<Move> moveList,
-			int index, int side) {
-		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT
-				: CoreConstants.BLACK_KNIGHT;
-		long knightMoves = CoreConstants.KNIGHT_TABLE[index]
-				& ~board.bitboards[side];
-		addMoves(pieceType, index, knightMoves, moveList, false, false,
-				CoreConstants.noCastle);
+	private void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT;
+		long knightMoves = CoreConstants.KNIGHT_TABLE[index] & ~board.bitboards[side];
+		addMoves(pieceType, index, knightMoves, moveList, false, false, CoreConstants.noCastle);
 	}
 
 	// Similary to the knight, king moves can just be looked up
 	// However castling moves have to be calculateds
-	private void addKingMoves(BitBoard board, ArrayList<Move> moveList,
-			int index, int side) {
+	private void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
-		int pieceType = (side == 0) ? CoreConstants.WHITE_KING
-				: CoreConstants.BLACK_KING;
-		addMoves(pieceType, index, moves, moveList, false, false,
-				CoreConstants.noCastle);
+		int pieceType = (side == 0) ? CoreConstants.WHITE_KING : CoreConstants.BLACK_KING;
+		addMoves(pieceType, index, moves, moveList, false, false, CoreConstants.noCastle);
 		// Check for castling moves
 		// Check the castling flags (descirbed in the BitBoard class)
 		// If some have set bits in the correct position castling is legal, if
 		// so add moves accordingly
 		if (side == CoreConstants.WHITE) {
 			if ((board.castling[side] & 0b10000) == 16) {
-				addMoves(pieceType, index, CoreConstants.wqueenside, moveList,
-						false, false, CoreConstants.wQSide);
+				addMoves(pieceType, index, CoreConstants.wqueenside, moveList, false, false,
+						CoreConstants.wQSide);
 			}
 			if ((board.castling[side] & 0b01000) == 8) {
-				addMoves(pieceType, index, CoreConstants.wkingside, moveList,
-						false, false, CoreConstants.wKSide);
+				addMoves(pieceType, index, CoreConstants.wkingside, moveList, false, false,
+						CoreConstants.wKSide);
 			}
 		} else {
 			if ((board.castling[side] & 0b10000) == 16) {
-				addMoves(pieceType, index, CoreConstants.bqueenside, moveList,
-						false, false, CoreConstants.bQSide);
+				addMoves(pieceType, index, CoreConstants.bqueenside, moveList, false, false,
+						CoreConstants.bQSide);
 			}
 			if ((board.castling[side] & 0b01000) == 8) {
-				addMoves(pieceType, index, CoreConstants.bkingside, moveList,
-						false, false, CoreConstants.bKSide);
+				addMoves(pieceType, index, CoreConstants.bkingside, moveList, false, false,
+						CoreConstants.bKSide);
 			}
 		}
 	}
 
 	// Based on a tutorial in C++ by Peter Ellis Jones on
 	// https://github.com/peterellisjones/Checkmate
-	private void addPawnPushes(BitBoard board, ArrayList<Move> moveList,
-			int side) {
+	private void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
 		// If side is 0, then the piece is white
-		int pieceType = (side == 0) ? CoreConstants.WHITE_PAWN
-				: CoreConstants.BLACK_PAWN;
+		int pieceType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		// Offsets used to add correct moves for white and black
 		int[] offsets = { 8, 56 };
 		// Masks allow promotion moves to be separated
@@ -313,41 +279,35 @@ public class MoveGen {
 		// square
 		// If it is empty then the push is valid
 		long pushes = circularLeftShift(pawns, offset) & emptySquares;
-		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList,
-				false, false, CoreConstants.noCastle, offset);
+		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false,
+				CoreConstants.noCastle, offset);
 		// Isolate which moves are promotions
 		long promotions = pushes & promotions_mask[side];
-		addMovesWithOffset(pieceType, promotions, moveList, false, true,
-				CoreConstants.noCastle, offset);
+		addMovesWithOffset(pieceType, promotions, moveList, false, true, CoreConstants.noCastle,
+				offset);
 		// If the push led to row 3 if white or row 8 if black and the square
 		// ahead is empty then double push is possible
-		long doublePushes = circularLeftShift(pushes & startWithMask[side],
-				offset) & emptySquares;
-		addMovesWithOffset(pieceType, doublePushes, moveList, false, false,
-				CoreConstants.noCastle, offset + offset);
+		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
+		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, CoreConstants.noCastle,
+				offset + offset);
 	}
 
-	private void addPawnAttacks(BitBoard board, ArrayList<Move> moveList,
-			int index, int side) {
+	private void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int enemy = (side == 0) ? 1 : 0;
-		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN
-				: CoreConstants.BLACK_PAWN;
+		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
 		// Lookup pawn attacks from lookup table, only valid if it captures an
 		// enemy piece
-		long attacks = CoreConstants.PAWN_ATTACKS_TABLE[side][index]
-				& board.bitboards[enemy];
-		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList,
-				false, false, CoreConstants.noCastle);
+		long attacks = CoreConstants.PAWN_ATTACKS_TABLE[side][index] & board.bitboards[enemy];
+		addMoves(pawnType, index, attacks & ~promotions_mask[side], moveList, false, false,
+				CoreConstants.noCastle);
 		// Isolate the promotion moves
 		long promotions = attacks & promotions_mask[side];
-		addMoves(pawnType, index, promotions, moveList, false, true,
-				CoreConstants.noCastle);
+		addMoves(pawnType, index, promotions, moveList, false, true, CoreConstants.noCastle);
 		// Isolate the en passant moves
 		long enPassant = CoreConstants.PAWN_ATTACKS_TABLE[side][index]
 				& board.epTargetSquares[side];
-		addMoves(pawnType, index, enPassant, moveList, true, false,
-				CoreConstants.noCastle);
+		addMoves(pawnType, index, enPassant, moveList, true, false, CoreConstants.noCastle);
 	}
 
 	private long circularLeftShift(long target, int shift) {
@@ -397,29 +357,25 @@ public class MoveGen {
 							* CoreConstants.magicNumbersRook[index]) >>> CoreConstants.magicShiftRook[index]);
 					for (j = index + 8; j < 64; j += 8) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 8; j >= 0; j -= 8) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 1; j % 8 != 0; j++) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 1; j % 8 != 7 && j >= 0; j--) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
@@ -429,29 +385,25 @@ public class MoveGen {
 							* CoreConstants.magicNumbersBishop[index]) >>> CoreConstants.magicShiftBishop[index]);
 					for (j = index + 9; j % 8 != 0 && j < 64; j += 9) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 9; j % 8 != 7 && j >= 0; j -= 9) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index + 7; j % 8 != 7 && j < 64; j += 7) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
 					for (j = index - 7; j % 8 != 0 && j >= 0; j -= 7) {
 						validMoves |= (1L << j);
-						if ((CoreConstants.occupancyVariation[index][i]
-								& (1L << j)) != 0) {
+						if ((CoreConstants.occupancyVariation[index][i] & (1L << j)) != 0) {
 							break;
 						}
 					}
@@ -483,20 +435,15 @@ public class MoveGen {
 			// The AND operator is used to stop moves from wrapping around the
 			// board
 			long NNE = (target << 17) & ~CoreConstants.FILE_A;
-			long NEE = (target << 10) & ~CoreConstants.FILE_A
-					& ~CoreConstants.FILE_B;
-			long SEE = (target >>> 6) & ~CoreConstants.FILE_A
-					& ~CoreConstants.FILE_B;
+			long NEE = (target << 10) & ~CoreConstants.FILE_A & ~CoreConstants.FILE_B;
+			long SEE = (target >>> 6) & ~CoreConstants.FILE_A & ~CoreConstants.FILE_B;
 			long SSE = (target >>> 15) & ~CoreConstants.FILE_A;
 			long NNW = (target << 15) & ~CoreConstants.FILE_H;
-			long NWW = (target << 6) & ~CoreConstants.FILE_G
-					& ~CoreConstants.FILE_H;
-			long SWW = (target >>> 10) & ~CoreConstants.FILE_G
-					& ~CoreConstants.FILE_H;
+			long NWW = (target << 6) & ~CoreConstants.FILE_G & ~CoreConstants.FILE_H;
+			long SWW = (target >>> 10) & ~CoreConstants.FILE_G & ~CoreConstants.FILE_H;
 			long SSW = (target >>> 17) & ~CoreConstants.FILE_H;
 
-			CoreConstants.KNIGHT_TABLE[square] = NNE | NEE | SEE | SSE | NNW
-					| NWW | SWW | SSW;
+			CoreConstants.KNIGHT_TABLE[square] = NNE | NEE | SEE | SSE | NNW | NWW | SWW | SSW;
 		}
 	}
 
@@ -517,8 +464,7 @@ public class MoveGen {
 			long NW = (target << 7) & ~CoreConstants.FILE_H;
 			long SE = (target >>> 7) & ~CoreConstants.FILE_A;
 			long SW = (target >>> 9) & ~CoreConstants.FILE_H;
-			CoreConstants.KING_TABLE[square] = N | S | E | W | NE | NW | SE
-					| SW;
+			CoreConstants.KING_TABLE[square] = N | S | E | W | NE | NW | SE | SW;
 		}
 	}
 
@@ -531,8 +477,8 @@ public class MoveGen {
 				}
 				// OR of east and west moves is all the attacks available to a
 				// pawn at a particular index
-				CoreConstants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(
-						board, side) | getPawnWestAttacks(board, side);
+				CoreConstants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(board, side)
+						| getPawnWestAttacks(board, side);
 			}
 		}
 
@@ -568,19 +514,15 @@ public class MoveGen {
 		long square = 1;
 		int index = 0;
 		while (square != 0) {
-			CoreConstants.ROOK_TABLE[index] = squareAttackedSlider(square, 8,
-					CoreConstants.ROW_8)
+			CoreConstants.ROOK_TABLE[index] = squareAttackedSlider(square, 8, CoreConstants.ROW_8)
 					| squareAttackedSlider(square, -8, CoreConstants.ROW_1)
 					| squareAttackedSlider(square, -1, CoreConstants.FILE_A)
 					| squareAttackedSlider(square, 1, CoreConstants.FILE_H);
 			CoreConstants.BISHOP_TABLE[index] = squareAttackedSlider(square, 9,
 					CoreConstants.ROW_8 | CoreConstants.FILE_H)
-					| squareAttackedSlider(square, 7,
-							CoreConstants.ROW_8 | CoreConstants.FILE_A)
-					| squareAttackedSlider(square, -7,
-							CoreConstants.ROW_1 | CoreConstants.FILE_H)
-					| squareAttackedSlider(square, -9,
-							CoreConstants.ROW_1 | CoreConstants.FILE_A);
+					| squareAttackedSlider(square, 7, CoreConstants.ROW_8 | CoreConstants.FILE_A)
+					| squareAttackedSlider(square, -7, CoreConstants.ROW_1 | CoreConstants.FILE_H)
+					| squareAttackedSlider(square, -9, CoreConstants.ROW_1 | CoreConstants.FILE_A);
 
 			square <<= 1;
 			index++;

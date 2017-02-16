@@ -22,18 +22,11 @@ public class StartMenuController {
 	// Loads the main chess game interface
 	private void setupController() {
 		try {
-			FXMLLoader loader = new FXMLLoader(
-					getClass().getResource(
-							"/fxml/root.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/root.fxml"));
 			Parent root = loader.load();
-			controller = loader
-					.<MainController>getController();
+			controller = loader.<MainController>getController();
 			Scene scene = new Scene(root);
-			scene.getStylesheets()
-					.add(getClass()
-							.getResource(
-									"/css/style.css")
-							.toExternalForm());
+			scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
 			Main.primaryStage.setScene(scene);
 			Main.primaryStage.setResizable(false);
 		} catch (IOException e) {
@@ -58,13 +51,10 @@ public class StartMenuController {
 		choices.add("Black");
 		choices.add("Random");
 
-		ChoiceDialog<String> dialog = new ChoiceDialog<>(
-				"White", choices);
+		ChoiceDialog<String> dialog = new ChoiceDialog<>("White", choices);
 		dialog.setTitle("Colour Choice");
-		dialog.setContentText(
-				"Choose colour you wish to play with");
-		Optional<String> result = dialog
-				.showAndWait();
+		dialog.setContentText("Choose colour you wish to play with");
+		Optional<String> result = dialog.showAndWait();
 
 		if (result.isPresent()) {
 			choice = result.get();
@@ -73,16 +63,12 @@ public class StartMenuController {
 		}
 		switch (choice) {
 		case "White":
-			controller.setPlayerColour(
-					CoreConstants.WHITE);
-			controller.setAIColour(
-					CoreConstants.BLACK);
+			controller.setPlayerColour(CoreConstants.WHITE);
+			controller.setAIColour(CoreConstants.BLACK);
 			break;
 		case "Black":
-			controller.setPlayerColour(
-					CoreConstants.BLACK);
-			controller.setAIColour(
-					CoreConstants.WHITE);
+			controller.setPlayerColour(CoreConstants.BLACK);
+			controller.setAIColour(CoreConstants.WHITE);
 			break;
 		case "Random":
 			// Generates random number out of 0 and 1

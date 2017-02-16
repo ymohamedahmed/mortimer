@@ -25,8 +25,7 @@ public class EvalTest {
 		System.out.println(eval.evaluate(board, 1));
 		board.loadFen("3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/5K2/2R5");
 		System.out.println(eval.evaluate(board, 1));
-		board.loadFen(
-				"2q1rr1k/3bbnnp/p2p1pp1/2pPp3/PpP1P1P1/1P2BNNP/2BQ1PRK/7R");
+		board.loadFen("2q1rr1k/3bbnnp/p2p1pp1/2pPp3/PpP1P1P1/1P2BNNP/2BQ1PRK/7R");
 		System.out.println(eval.evaluate(board, 1));
 		board.loadFen("rnbqkb1r/p3pppp/1p6/2ppP3/3N4/2P5/PPP1QPPP/R1B1KB1R");
 		System.out.println(eval.evaluate(board, 1));
@@ -34,8 +33,7 @@ public class EvalTest {
 		System.out.println(eval.evaluate(board, 1));
 		board.loadFen("2r3k1/pppR1pp1/4p3/4P1P1/5P2/1P4K1/P1P5/8");
 		System.out.println(eval.evaluate(board, 1));
-		board.loadFen(
-				"1nk1r1r1/pp2n1pp/4p3/q2pPp1N/b1pP1P2/B1P2R2/2P1B1PP/R2Q2K1");
+		board.loadFen("1nk1r1r1/pp2n1pp/4p3/q2pPp1N/b1pP1P2/B1P2R2/2P1B1PP/R2Q2K1");
 		System.out.println(eval.evaluate(board, 1));
 		board.loadFen("4b3/p3kp2/6p1/3pP2p/2pP1P2/4K1P1/P3N2P/8");
 		System.out.println(eval.evaluate(board, 1));

@@ -22,8 +22,7 @@ public class MoveGenTest {
 		moveGen.generateMoveDatabase(true);
 		moveGen.generateMoveDatabase(false);
 		endTime = System.currentTimeMillis();
-		System.out.println(
-				"lookup table init time: " + (endTime - startTime) + "ms");
+		System.out.println("lookup table init time: " + (endTime - startTime) + "ms");
 
 		startTime = System.currentTimeMillis();
 		long perft1 = perft(moveGen, 1);

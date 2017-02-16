@@ -86,8 +86,7 @@ public class Board {
 
 	// Returns the distance between two pieces
 	public static int distance(int a, int b) {
-		return Math.max(Math.abs((a & 7) - (b & 7)),
-				Math.abs((a >> 3) - (b >> 3)));
+		return Math.max(Math.abs((a & 7) - (b & 7)), Math.abs((a >> 3) - (b >> 3)));
 	}
 
 	public static int flipHorizontalIndex(int index) {
