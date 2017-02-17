@@ -424,7 +424,7 @@ public class Evaluation extends EvalConstants {
 			// evaluation is done from white's perspective
 			return color * value;
 		} catch (Exception e) {
-			return 0;
+			return NO_VALUE;
 		}
 	}
 

@@ -278,7 +278,7 @@ public class MoveGen {
 		// Circular left shift is equivalent to moving each pawn forward one
 		// square
 		// If it is empty then the push is valid
-		long pushes = circularLeftShift(pawns, offset) & emptySquares;
+		long pushes = (side == 0 ? (pawns<<8) : (pawns >>> 8)) & emptySquares;
 		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false,
 				CoreConstants.noCastle, offset);
 		// Isolate which moves are promotions
@@ -287,7 +287,8 @@ public class MoveGen {
 				offset);
 		// If the push led to row 3 if white or row 8 if black and the square
 		// ahead is empty then double push is possible
-		long doublePushes = circularLeftShift(pushes & startWithMask[side], offset) & emptySquares;
+		pushes &= startWithMask[side];
+		long doublePushes = (side == 0 ? (pushes<<8) : (pushes >>> 8)) & emptySquares;
 		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, CoreConstants.noCastle,
 				offset + offset);
 	}
@@ -308,10 +309,6 @@ public class MoveGen {
 		long enPassant = CoreConstants.PAWN_ATTACKS_TABLE[side][index]
 				& board.epTargetSquares[side];
 		addMoves(pawnType, index, enPassant, moveList, true, false, CoreConstants.noCastle);
-	}
-
-	private long circularLeftShift(long target, int shift) {
-		return target << shift | target >>> (64 - shift);
 	}
 
 	// Modified algorithm based on tutorial from
