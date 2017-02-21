@@ -53,7 +53,6 @@ public class MainController {
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
 	private boolean playingAI = true;
 	private BoardColour boardColour = BoardColour.CLASSIC;
-
 	// Called initially
 	public void initialize() {
 		// Intialise all the various lookup tables used by the AI

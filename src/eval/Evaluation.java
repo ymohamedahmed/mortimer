@@ -5,7 +5,7 @@ import core.CoreConstants;
 
 public class Evaluation extends EvalConstants {
 	// Based on the CompleteEvaluator class in the open source chess engine
-	// Carballo
+	// Carballo https://github.com/albertoruibal/carballo
 	public int evaluate(BitBoard board, int color) {
 		try {
 			// Instantiating evaluation criteria
