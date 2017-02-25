@@ -21,6 +21,7 @@ public class EvalTest {
 
 		board.resetToInitialSetup();
 		System.out.println(eval.evaluate(board, 1));
+		System.out.println(eval.evaluate(board, -1));
 		board.loadFen("1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5");
 		System.out.println(eval.evaluate(board, 1));
 		board.loadFen("3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/5K2/2R5");

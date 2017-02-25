@@ -31,14 +31,13 @@ public class Search {
 			double firstGuess = 0;
 			// If there is more time, keep increasing the depth of the search
 			// (i.e. the number of moves looked ahead)
-			for (int d = 1; d <= EvalConstants.MAX_DEPTH; d += 2) {
+			for (int d = 0; d <= EvalConstants.MAX_DEPTH; d += 2) {
 				// Use the mtdf algorithm to generate an value for the board at
 				// a particular depth
 				firstGuess = mtdf(board, firstGuess, d, color, moveGen);
 				// If too much time has been spent evaluating break from the
 				// loop
-				if (System.currentTimeMillis() - startTime >= timePerMove) {
-					System.out.println("FINAL DEPTH: " + d);
+				if (System.currentTimeMillis() - startTime >= timePerMove && d >= EvalConstants.MIN_DEPTH) {
 					break;
 				}
 			}
