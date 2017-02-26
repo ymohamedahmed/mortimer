@@ -424,10 +424,7 @@ public class MoveGen {
 	// Generate a lookup table for knight moves
 	public void initialiseKnightLookupTable() {
 		for (int square = 0; square < 64; square++) {
-			long target = (long) Math.pow(2, square);
-			if (square == 63) {
-				target = 0x8000_0000_0000_0000L;
-			}
+			long target = 1L << square;
 			// Each direction of the knight moves considered
 			// The AND operator is used to stop moves from wrapping around the
 			// board
@@ -446,10 +443,8 @@ public class MoveGen {
 
 	public void initialiseKingLookupTable() {
 		for (int square = 0; square < 64; square++) {
-			long target = (long) Math.pow(2, square);
-			if (square == 63) {
-				target = 0x8000_0000_0000_0000L;
-			}
+			long target = 1L << square;
+			
 			// Each directions is considered.
 			// Similarly to the knight lookup method, the AND operator stops the
 			// moves from wrapping around the board
@@ -468,10 +463,7 @@ public class MoveGen {
 	public void initialisePawnLookupTable() {
 		for (int side = 0; side <= 1; side++) {
 			for (int index = 0; index < 64; index++) {
-				long board = (long) Math.pow(2, index);
-				if (index == 63) {
-					board = 0x8000_0000_0000_0000L;
-				}
+				long board = 1L << index;
 				// OR of east and west moves is all the attacks available to a
 				// pawn at a particular index
 				CoreConstants.PAWN_ATTACKS_TABLE[side][index] = getPawnEastAttacks(board, side)

@@ -144,10 +144,8 @@ public class BitBoard {
 	public void addPiece(byte piece, int square) {
 		// Add the piece to the board array
 		board[square] = piece;
-		long bitboard = (long) Math.pow(2, square);
-		if (square == 63) {
-			bitboard = 0x8000_0000_0000_0000L;
-		}
+		long bitboard = 1L << square;
+		
 		// Add the board to the bitboard for its piece and colour
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
@@ -495,7 +493,7 @@ public class BitBoard {
 		// bitboard
 		byte piece = board[square];
 		board[square] = CoreConstants.EMPTY;
-		long bitboard = ~((square == 63) ? 0x8000_0000_0000_0000L : (long) Math.pow(2, square));
+		long bitboard = ~(1L << square);
 		bitboards[piece & 1] &= bitboard;
 		bitboards[piece] &= bitboard;
 	}

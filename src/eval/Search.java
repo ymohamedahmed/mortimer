@@ -38,6 +38,7 @@ public class Search {
 				// If too much time has been spent evaluating break from the
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove && d >= EvalConstants.MIN_DEPTH) {
+					System.out.println("FINAL DEPTH: " + d);
 					break;
 				}
 			}
