@@ -57,6 +57,13 @@ public class MainController {
 	public void initialize() {
 		// Intialise all the various lookup tables used by the AI
 		moveGen.initialiseKnightLookupTable();
+		moveGen.initialiseKingLookupTable();
+		moveGen.initialisePawnLookupTable();
+		// Lookup tables for rooks (true) and bishops (false)
+		moveGen.generateMoveDatabase(true);
+		moveGen.generateMoveDatabase(false);
+		// Initialise the hash function
+		BitBoard.initialiseZobrist();
 		// This allows the user to change how long it takes for the AI to select
 		// moves
 		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -68,14 +75,7 @@ public class MainController {
 						* (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
 			}
 		});
-		moveGen.initialiseKingLookupTable();
-		moveGen.initialisePawnLookupTable();
-		moveGen.initialiseBishopAndRookEvalLookupTable();
-		// Lookup tables for rooks (true) and bishops (false)
-		moveGen.generateMoveDatabase(true);
-		moveGen.generateMoveDatabase(false);
-		// Initialise the hash function
-		BitBoard.initialiseZobrist();
+		
 	}
 
 	private double paintChessBoard(BitBoard board) {

@@ -498,37 +498,5 @@ public class MoveGen {
 		return result;
 	}
 
-	// LOOKUP TABLES FOR BISHOP AND ROOK ARE USED DURING EVALUATION ONLY
-	public void initialiseBishopAndRookEvalLookupTable() {
-		long square = 1;
-		int index = 0;
-		while (square != 0) {
-			CoreConstants.ROOK_TABLE[index] = squareAttackedSlider(square, 8, CoreConstants.ROW_8)
-					| squareAttackedSlider(square, -8, CoreConstants.ROW_1)
-					| squareAttackedSlider(square, -1, CoreConstants.FILE_A)
-					| squareAttackedSlider(square, 1, CoreConstants.FILE_H);
-			CoreConstants.BISHOP_TABLE[index] = squareAttackedSlider(square, 9,
-					CoreConstants.ROW_8 | CoreConstants.FILE_H)
-					| squareAttackedSlider(square, 7, CoreConstants.ROW_8 | CoreConstants.FILE_A)
-					| squareAttackedSlider(square, -7, CoreConstants.ROW_1 | CoreConstants.FILE_H)
-					| squareAttackedSlider(square, -9, CoreConstants.ROW_1 | CoreConstants.FILE_A);
-
-			square <<= 1;
-			index++;
-		}
-	}
-
-	long squareAttackedSlider(long square, int shift, long border) {
-		long ret = 0;
-		while ((square & border) == 0) {
-			if (shift > 0) {
-				square <<= shift;
-			} else {
-				square >>>= -shift;
-			}
-			ret |= square;
-		}
-		return ret;
-	}
 
 }

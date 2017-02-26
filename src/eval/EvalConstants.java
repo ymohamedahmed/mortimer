@@ -11,10 +11,6 @@ public class EvalConstants {
 	public static final double MAX_DEPTH = 15;
 	public static final double MIN_DEPTH = 4;
 
-	// Evaluation constants from
-	// https://github.com/albertoruibal/carballo/blob/master/core
-	/// src/main/java/com/alonsoruibal/chess/evaluation/CompleteEvaluator.java
-
 	// New identifiers used for colours and piece types
 	public static final int WHITE = 1;
 	public static final int BLACK = -1;
@@ -24,6 +20,9 @@ public class EvalConstants {
 	public static final int ROOK = 4;
 	public static final int QUEEN = 5;
 	public static final int KING = 6;
+	
+	//Piece Square tables from the Chess Programming wikispace
+	//https://chessprogramming.wikispaces.com/Simplified+evaluation+function
 	public int[] pawnTable = { 0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 10, -20, -20, 10, 10, 5, 5, -5, -10,
 			0, 0, -10, -5, 5, 0, 0, 0, 20, 20, 0, 0, 0, 5, 5, 10, 25, 25, 10, 5, 5, 10, 10, 20, 30,
 			30, 20, 10, 10, 50, 50, 50, 50, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0, 0, 0 };

@@ -60,9 +60,7 @@ public class CoreConstants {
 	// Lookup tables
 	public static long KNIGHT_TABLE[] = new long[64];
 	public static long KING_TABLE[] = new long[64];
-	public static long PAWN_ATTACKS_TABLE[][] = new long[2][64];
-	public static long BISHOP_TABLE[] = new long[64];
-	public static long ROOK_TABLE[] = new long[64];
+	public static long PAWN_ATTACKS_TABLE[][] = new long[2][64];;
 
 	// Occupancy Mask
 	// Manipulated from http://www.rivalchess.com/magic-bitboards/ to match my

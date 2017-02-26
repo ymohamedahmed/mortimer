@@ -57,7 +57,8 @@ public class MoveGenTest {
 		System.out.println("perft 5: " + perft5);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 5 time: " + (endTime - startTime) + "ms");
-
+		board.resetToInitialSetup();
+		System.out.println("perft 6: " + perft(moveGen,6));
 		assertEquals(3, BitBoard.hammingWeight(0b010101));
 		assertEquals(1, BitBoard.hammingWeight(0b010));
 		assertEquals(5, BitBoard.hammingWeight(0b01010111));
