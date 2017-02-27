@@ -43,7 +43,7 @@ public class MainController {
 	public Slider moveSpeedSlider;
 
 	private int playerColour = CoreConstants.WHITE;
-	private int aiColor = CoreConstants.BLACK;
+	private int aiColour = CoreConstants.BLACK;
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
@@ -118,7 +118,7 @@ public class MainController {
 
 	public void playGame() {
 		// If the ai is the first to move
-		if (aiColor == CoreConstants.WHITE) {
+		if (aiColour == CoreConstants.WHITE) {
 			moveAI(board);
 		}
 	}
@@ -221,7 +221,7 @@ public class MainController {
 		// promotion dialog getting player which piece to convert the pawn to
 		if (move.isPromotion() && side == playerColour) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, true);
-		} else if (move.isPromotion() && side == aiColor) {
+		} else if (move.isPromotion() && side == aiColour) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, false);
 		}
 		updatePGNTextField(board, move, capture);
@@ -233,7 +233,7 @@ public class MainController {
 			moveList = getMoves(board, true);
 
 		}
-		boolean aiLost = board.checkmate(aiColor);
+		boolean aiLost = board.checkmate(aiColour);
 		boolean playerLost = board.checkmate(playerColour);
 		boolean stalemate = board.stalemate(board.toMove);
 		// If it is the AI's turn
@@ -322,7 +322,7 @@ public class MainController {
 
 	private void moveAI(BitBoard board) {
 		// Use the search class to select the best move
-		int colorFactor = (aiColor == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
+		int colorFactor = (aiColour == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
 		Move move = search.rootNegamax(moveGen, board, colorFactor);
 		move(board, move, true);
 	}
@@ -437,7 +437,7 @@ public class MainController {
 				board.castling[1] = Integer.valueOf(reader.readLine());
 				pgnTextField.setText(reader.readLine());
 				playerColour = Integer.valueOf(reader.readLine());
-				aiColor = Integer.valueOf(reader.readLine());
+				aiColour = Integer.valueOf(reader.readLine());
 				clearCanvas();
 				paintChessBoard(board);
 				moveList = moveGen.generateMoves(board, true);
@@ -500,7 +500,7 @@ public class MainController {
 		result += board.castling[1] + "\n";
 		result += pgnTextField.getText() + "\n";
 		result += String.valueOf(playerColour) + "\n";
-		result += String.valueOf(aiColor);
+		result += String.valueOf(aiColour);
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
 		Stage stage = Main.primaryStage;
@@ -632,7 +632,7 @@ public class MainController {
 	}
 
 	public void setAIColour(int color) {
-		aiColor = color;
+		aiColour = color;
 	}
 
 	// Enumeration for the board colour
