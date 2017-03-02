@@ -342,7 +342,7 @@ public class MainController {
 			result += String.valueOf((board.getMoveNumber() / 2) + 1) + ". ";
 		}
 		// Add the letter of the piece being moved
-		result += CoreConstants.pieceToLetterCapital[move.getPieceType()];
+		result += CoreConstants.pieceToLetterCapital[move.getPieceType()/2];
 		// Capture moves get an 'x'
 		if (capture) {
 			result += "x";

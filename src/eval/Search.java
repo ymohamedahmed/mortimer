@@ -31,14 +31,17 @@ public class Search {
 			double firstGuess = 0;
 			// If there is more time, keep increasing the depth of the search
 			// (i.e. the number of moves looked ahead)
-			for (int d = 0; d <= EvalConstants.MAX_DEPTH; d += 2) {
+			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth += 2) {
 				// Use the mtdf algorithm to generate an value for the board at
 				// a particular depth
-				firstGuess = mtdf(board, firstGuess, d, color, moveGen);
+				// firstGuess = mtdf(board, firstGuess, d, color, moveGen);
+				firstGuess = pvs(board, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, depth,
+						color, moveGen);
 				// If too much time has been spent evaluating break from the
 				// loop
-				if (System.currentTimeMillis() - startTime >= timePerMove && d >= EvalConstants.MIN_DEPTH) {
-					System.out.println("FINAL DEPTH: " + d);
+				if (System.currentTimeMillis() - startTime >= timePerMove
+						&& depth >= EvalConstants.MIN_DEPTH) {
+					System.out.println("FINAL DEPTH: " + depth);
 					break;
 				}
 			}
@@ -77,6 +80,32 @@ public class Search {
 			}
 		}
 		return g;
+	}
+
+	private double pvs(BitBoard board, double alpha, double beta, int depth, int color,
+			MoveGen moveGen) {
+		if (depth == 0) {
+			return color * new Evaluation().evaluate(board, color);
+		}
+		ArrayList<Move> moves = moveGen.generateMoves(board, false);
+		for (Move move : moves) {
+			double score = 0;
+			board.move(move);
+			if (moves.indexOf(move) != 0) {
+				score = -pvs(board, -alpha - 1, -alpha, depth - 1, -color, moveGen);
+				if (alpha < score && score < beta) {
+					score = -pvs(board, -beta, -score, depth - 1, -color, moveGen);
+				}
+			} else {
+				score = -pvs(board, -beta, -alpha, depth - 1, -color, moveGen);
+			}
+			alpha = Math.max(alpha, score);
+			board.undo();
+			if (alpha >= beta) {
+				break;
+			}
+		}
+		return alpha;
 	}
 
 	// Color Factor: 1 for white, -1 for black

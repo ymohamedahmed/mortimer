@@ -112,32 +112,29 @@ public class BitBoard {
 		String result = "";
 		// Loop through the board in the order used in FEN notation
 		for (int row = 56; row >= 0; row -= 8) {
-			int emptyCount = 0;
 			for (int col = 0; col <= 7; col++) {
 				int index = row + col;
 				if (board[index] == CoreConstants.EMPTY) {
-					// If empty increment the number of empty squares
-					emptyCount++;
+					result += ' ';
 				} else {
-					if (emptyCount != 0) {
-						// Include empty count when you reach a non-empty square
-						result += String.valueOf(emptyCount);
-						emptyCount = 0;
-					}
 					// Convert piece type to the FEN letter e.g. King to K etc.
 					result += CoreConstants.pieceToLetterFen[board[index]];
 				}
 			}
-			if (emptyCount != 0) {
-				// If you reach end of line and there were empty squares append
-				// to string
-				result += String.valueOf(emptyCount);
-			}
 			if (row != 0) {
-				// Add / to indicate end of row
+				// Add / to indicate end of row as long as it isn't the final
+				// row
 				result += "/";
 			}
 		}
+		result = result.replace("        ", "8");
+		result = result.replace("       ", "7");
+		result = result.replace("      ", "6");
+		result = result.replace("     ", "5");
+		result = result.replace("    ", "4");
+		result = result.replace("   ", "3");
+		result = result.replace("  ", "2");
+		result = result.replace(" ", "1");
 		return result;
 	}
 
@@ -145,7 +142,7 @@ public class BitBoard {
 		// Add the piece to the board array
 		board[square] = piece;
 		long bitboard = 1L << square;
-		
+
 		// Add the board to the bitboard for its piece and colour
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
