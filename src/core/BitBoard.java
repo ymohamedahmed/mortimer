@@ -2,9 +2,6 @@ package core;
 
 import java.util.Random;
 
-/**
- * Created by yousuf on 11/22/16.
- */
 public class BitBoard {
 	public long[] bitboards = new long[14];
 	public byte[] board = new byte[64];
@@ -22,6 +19,8 @@ public class BitBoard {
 	int moveNumber = 0;
 
 	// History arrays
+	// History arrays are based on Carballo
+	// https://github.com/albertoruibal/carballo/blob/master/core/src/main/java/com/alonsoruibal/chess/Board.java
 	public long[] moveHistory;
 	public long[] whiteHistory;
 	public long[] blackHistory;
@@ -38,6 +37,8 @@ public class BitBoard {
 
 	public BitBoard() {
 		// Instantiate the history arrays
+		// Based on Carballo
+		// https://github.com/albertoruibal/carballo/blob/master/core/src/main/java/com/alonsoruibal/chess/Board.java
 		moveHistory = new long[CoreConstants.MAX_MOVES];
 		whiteHistory = new long[CoreConstants.MAX_MOVES];
 		blackHistory = new long[CoreConstants.MAX_MOVES];
@@ -138,6 +139,10 @@ public class BitBoard {
 		return result;
 	}
 
+	// addPiece, removePiece and reset are based on a tutorial from Peter Ellis
+	// Jones on his blog
+	// http://peterellisjones.com/post/41238723473/chess-engine-part-ii-move-encoding-and-move
+	// Corresponding github repo: https://github.com/peterellisjones/Checkmate
 	public void addPiece(byte piece, int square) {
 		// Add the piece to the board array
 		board[square] = piece;
@@ -146,6 +151,28 @@ public class BitBoard {
 		// Add the board to the bitboard for its piece and colour
 		bitboards[piece & 1] |= bitboard;
 		bitboards[piece] |= bitboard;
+	}
+
+	public void removePiece(int square) {
+		// Remove piece from the board array, the colour bitboard and piece type
+		// bitboard
+		byte piece = board[square];
+		board[square] = CoreConstants.EMPTY;
+		long bitboard = ~(1L << square);
+		bitboards[piece & 1] &= bitboard;
+		bitboards[piece] &= bitboard;
+	}
+
+	void reset() {
+		// Set all bitbooards to zero and board to empty
+		for (int i = 0; i < 64; i++) {
+			board[i] = CoreConstants.EMPTY;
+		}
+		for (int i = 0; i < 14; i++) {
+			bitboards[i] = 0;
+		}
+
+		toMove = CoreConstants.WHITE;
 	}
 
 	public void move(Move move) {
@@ -485,28 +512,6 @@ public class BitBoard {
 		return moveSquares;
 	}
 
-	public void removePiece(int square) {
-		// Remove piece from the board array, the colour bitboard and piece type
-		// bitboard
-		byte piece = board[square];
-		board[square] = CoreConstants.EMPTY;
-		long bitboard = ~(1L << square);
-		bitboards[piece & 1] &= bitboard;
-		bitboards[piece] &= bitboard;
-	}
-
-	void reset() {
-		// Set all bitbooards to zero and board to empty
-		for (int i = 0; i < 64; i++) {
-			board[i] = CoreConstants.EMPTY;
-		}
-		for (int i = 0; i < 14; i++) {
-			bitboards[i] = 0;
-		}
-
-		toMove = CoreConstants.WHITE;
-	}
-
 	// The board setup before starting a vanilla chess match
 	public void resetToInitialSetup() {
 		// Begin by setting all indexes to empty
@@ -599,6 +604,7 @@ public class BitBoard {
 	}
 
 	// Returns the number of set bits in a binary number
+	// Based on algorithm at https://en.wikipedia.org/wiki/Hamming_weight
 	public static int hammingWeight(long x) {
 		x -= (x >> 1) & CoreConstants.m1;
 		x = (x & CoreConstants.m2) + ((x >> 2) & CoreConstants.m2);

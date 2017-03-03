@@ -9,7 +9,8 @@ import core.MoveGen;
 
 public class Search {
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
-
+	private int arcsTraversed = 0;
+	int noOfCutoffs = 0;
 	// This is the method that is accessed from the main controller class, and
 	// returns what the program deems to be the best available move to a
 	// particular colour.
@@ -59,18 +60,21 @@ public class Search {
 				}
 			}
 		}
+		System.out.println("Number of arcs traversed: " + arcsTraversed);
+		System.out.println("Transposition table: " + hashtable.size());
+		System.out.println("Number of Cutoffs: " + noOfCutoffs);
 		return optimal;
 	}
 
 	// Search algorithm used with negamax (minimax variant), supposed to be more
 	// efficient and produce the same result
-	private double mtdf(BitBoard board, double f, int d, int color, MoveGen moveGen) {
-		double g = f;
+	private double mtdf(BitBoard board, double firstGuess, int depth, int color, MoveGen moveGen) {
+		double g = firstGuess;
 		double upperBound = Double.POSITIVE_INFINITY;
 		double lowerBound = Double.NEGATIVE_INFINITY;
 		while (lowerBound < upperBound) {
 			double beta = Math.max(g, lowerBound + 1);
-			g = negamax(beta - 1, beta, board, d, color, moveGen);
+			g = negamax(beta - 1, beta, board, depth, color, moveGen);
 			if (g < beta) {
 				upperBound = g;
 			} else {
@@ -109,11 +113,13 @@ public class Search {
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);
+			arcsTraversed++;
 			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor, moveGen);
 			board.undo();
 			bestValue = (int) Math.max(bestValue, v);
 			alpha = Math.max(alpha, v);
 			if (alpha >= beta) {
+				noOfCutoffs++;
 				break;
 			}
 		}
