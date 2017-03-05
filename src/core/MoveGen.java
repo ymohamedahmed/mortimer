@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 public class MoveGen {
 
-	public ArrayList<Move> generateMoves(BitBoard board, boolean legal) {
+	public static ArrayList<Move> generateMoves(BitBoard board, boolean legal) {
 		ArrayList<Move> moves = new ArrayList<>();
 		// Generate moves only for the next side to move
 		int side = board.toMove;
@@ -72,7 +72,7 @@ public class MoveGen {
 
 	// Method to check if a king is inside another king's set of moves
 	// I.e. if one king is inside the 3x3 square around the other king
-	private boolean kingInKingSquare(BitBoard board, int side) {
+	private static boolean kingInKingSquare(BitBoard board, int side) {
 		int myKingIndex = BitBoard.bitScanForward(board.bitboards[12 + side]);
 		int enemyKingIndex = BitBoard.bitScanForward(board.bitboards[12 + ((side == 0) ? 1 : 0)]);
 		// + or - 1,8,7,9 represent the indices of the 8 squares surrounding the
@@ -104,7 +104,7 @@ public class MoveGen {
 		return false;
 	}
 
-	private ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
+	private static ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
 
 		// Iterator has to be used to avoid concurrent modification exception
 		// i.e. so that we can remove from the arraylist as we loop through it
@@ -129,7 +129,7 @@ public class MoveGen {
 		return moveList;
 	}
 
-	private void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList,
+	private static void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList,
 			boolean enPassant, boolean promotion, byte castling) {
 		while (moves != 0) {
 			// Each set bit in the long moves represents a positon where the
@@ -146,7 +146,7 @@ public class MoveGen {
 
 	// Used by the pawn move generation since black and white move in different
 	// directions an offset is used
-	private void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList,
+	private static void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList,
 			boolean enPassant, boolean promotion, byte castling, int offset) {
 		while (moves != 0) {
 			int to = BitBoard.bitScanForward(moves);
@@ -163,7 +163,7 @@ public class MoveGen {
 		}
 	}
 
-	private void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK;
 		// Blockers is all the positions which could stop the rook from moving
 		// further
@@ -183,7 +183,7 @@ public class MoveGen {
 	}
 
 	// Equivalent to the algorithm above
-	private void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskBishop[index];
@@ -197,7 +197,7 @@ public class MoveGen {
 	// The moves of the queen are just the moves of a rook as well as the moves
 	// of a bishop in that position
 	// Hence we calculate both of those and then OR the result
-	private void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN;
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskRook[index];
@@ -220,7 +220,7 @@ public class MoveGen {
 	// Simply lookup the moves of the knight since it is unaffected by the
 	// pieces around it so can be pre-computed easily
 	// Then remove the moves that would 'capture' a friendly piece
-	private void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT;
 		long knightMoves = CoreConstants.KNIGHT_TABLE[index] & ~board.bitboards[side];
 		addMoves(pieceType, index, knightMoves, moveList, false, false, CoreConstants.noCastle);
@@ -228,7 +228,7 @@ public class MoveGen {
 
 	// Similary to the knight, king moves can just be looked up
 	// However castling moves have to be calculateds
-	private void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KING : CoreConstants.BLACK_KING;
 		addMoves(pieceType, index, moves, moveList, false, false, CoreConstants.noCastle);
@@ -259,7 +259,7 @@ public class MoveGen {
 
 	// Based on a tutorial in C++ by Peter Ellis Jones on
 	// https://github.com/peterellisjones/Checkmate
-	private void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
+	private static void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
 		// If side is 0, then the piece is white
 		int pieceType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		// Offsets used to add correct moves for white and black
@@ -293,7 +293,7 @@ public class MoveGen {
 				offset + offset);
 	}
 
-	private void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
 		int enemy = (side == 0) ? 1 : 0;
 		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
@@ -315,7 +315,7 @@ public class MoveGen {
 	// http://www.rivalchess.com/magic-bitboards/
 	// Used to fill a lookup table for rook and bishop moves
 	// This is crucial as it allows for fast move generation
-	public void generateMoveDatabase(boolean rook) {
+	public static void generateMoveDatabase(boolean rook) {
 		long validMoves = 0;
 		int variations;
 		int varCount;
@@ -412,7 +412,7 @@ public class MoveGen {
 	}
 
 	// Updates each index in the setbits array where the board has a set bit
-	void getIndexSetBits(int[] setBits, long board) {
+	static void getIndexSetBits(int[] setBits, long board) {
 		int onBits = 0;
 		while (board != 0) {
 			setBits[onBits] = Long.numberOfTrailingZeros(board);
@@ -422,7 +422,7 @@ public class MoveGen {
 	}
 
 	// Generate a lookup table for knight moves
-	public void initialiseKnightLookupTable() {
+	public static void initialiseKnightLookupTable() {
 		for (int square = 0; square < 64; square++) {
 			long target = 1L << square;
 			// Each direction of the knight moves considered
@@ -441,7 +441,7 @@ public class MoveGen {
 		}
 	}
 
-	public void initialiseKingLookupTable() {
+	public static void initialiseKingLookupTable() {
 		for (int square = 0; square < 64; square++) {
 			long target = 1L << square;
 			
@@ -460,7 +460,7 @@ public class MoveGen {
 		}
 	}
 
-	public void initialisePawnLookupTable() {
+	public static void initialisePawnLookupTable() {
 		for (int side = 0; side <= 1; side++) {
 			for (int index = 0; index < 64; index++) {
 				long board = 1L << index;
@@ -475,7 +475,7 @@ public class MoveGen {
 
 	// Returns the attacks to the east of the piece, also stops the move from
 	// wrapping around the board
-	private long getPawnEastAttacks(long board, int side) {
+	private static long getPawnEastAttacks(long board, int side) {
 		long result;
 		if (side == 0) {
 			result = ((board << 9) & ~CoreConstants.FILE_A);
@@ -488,7 +488,7 @@ public class MoveGen {
 
 	// Returns the attacks to the west of the piece, also stops the move from
 	// wrapping around the board
-	private long getPawnWestAttacks(long board, int side) {
+	private static long getPawnWestAttacks(long board, int side) {
 		long result;
 		if (side == 0) {
 			result = ((board << 7) & ~CoreConstants.FILE_H);

@@ -9,18 +9,16 @@ import core.MoveGen;
 
 public class Search {
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
-	private int arcsTraversed = 0;
-	int noOfCutoffs = 0;
 	// This is the method that is accessed from the main controller class, and
 	// returns what the program deems to be the best available move to a
 	// particular colour.
 
-	public Move rootNegamax(MoveGen moveGen, BitBoard board, int color) {
+	public Move rootNegamax(BitBoard board, int color) {
 		double maxScore = Double.NEGATIVE_INFINITY;
 		double minScore = Double.POSITIVE_INFINITY;
 		Move optimal = null;
 		// Find all the possible moves
-		ArrayList<Move> moves = moveGen.generateMoves(board, true);
+		ArrayList<Move> moves = MoveGen.generateMoves(board, true);
 		int noOfMoves = moves.size();
 		// Calculates a rough estimate of how much time to spend evaluating each
 		// move
@@ -35,12 +33,11 @@ public class Search {
 			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth += 2) {
 				// Use the mtdf algorithm to generate an value for the board at
 				// a particular depth
-				firstGuess = mtdf(board, firstGuess, depth, color, moveGen);
+				firstGuess = mtdf(board, firstGuess, depth, color);
 				// If too much time has been spent evaluating break from the
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove
 						&& depth >= EvalConstants.MIN_DEPTH) {
-					System.out.println("FINAL DEPTH: " + depth);
 					break;
 				}
 			}
@@ -60,21 +57,18 @@ public class Search {
 				}
 			}
 		}
-		System.out.println("Number of arcs traversed: " + arcsTraversed);
-		System.out.println("Transposition table: " + hashtable.size());
-		System.out.println("Number of Cutoffs: " + noOfCutoffs);
 		return optimal;
 	}
 
 	// Search algorithm used with negamax (minimax variant), supposed to be more
 	// efficient and produce the same result
-	private double mtdf(BitBoard board, double firstGuess, int depth, int color, MoveGen moveGen) {
+	private double mtdf(BitBoard board, double firstGuess, int depth, int color) {
 		double g = firstGuess;
 		double upperBound = Double.POSITIVE_INFINITY;
 		double lowerBound = Double.NEGATIVE_INFINITY;
 		while (lowerBound < upperBound) {
 			double beta = Math.max(g, lowerBound + 1);
-			g = negamax(beta - 1, beta, board, depth, color, moveGen);
+			g = negamax(beta - 1, beta, board, depth, color);
 			if (g < beta) {
 				upperBound = g;
 			} else {
@@ -85,8 +79,7 @@ public class Search {
 	}
 
 	// Color Factor: 1 for white, -1 for black
-	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor,
-			MoveGen moveGen) {
+	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
 		double alphaOrig = alpha;
 		// Check if any of the values have already been computed, if so, return
 		// them from the hash table
@@ -109,17 +102,15 @@ public class Search {
 		}
 		double bestValue = Double.NEGATIVE_INFINITY;
 		// Pseudo-legal moves are generated to speed up the algorithm
-		ArrayList<Move> moves = moveGen.generateMoves(board, false);
+		ArrayList<Move> moves = MoveGen.generateMoves(board, false);
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);
-			arcsTraversed++;
-			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor, moveGen);
+			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
 			board.undo();
 			bestValue = (int) Math.max(bestValue, v);
 			alpha = Math.max(alpha, v);
 			if (alpha >= beta) {
-				noOfCutoffs++;
 				break;
 			}
 		}

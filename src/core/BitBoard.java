@@ -460,7 +460,7 @@ public class BitBoard {
 	// If there are no available moves and the player is in check, then it is
 	// checkmate
 	public boolean checkmate(int side) {
-		if (check(side) && new MoveGen().generateMoves(this, true).size() == 0) {
+		if (check(side) && MoveGen.generateMoves(this, true).size() == 0) {
 			return true;
 		} else {
 			return false;
@@ -470,7 +470,7 @@ public class BitBoard {
 	// Player has no available moves and is not in check then the game is
 	// stalemate
 	public boolean stalemate(int sideToMove) {
-		if (!check(sideToMove) && new MoveGen().generateMoves(this, true).size() == 0) {
+		if (!check(sideToMove) && MoveGen.generateMoves(this, true).size() == 0) {
 			return true;
 		} else {
 			return false;
@@ -621,7 +621,7 @@ public class BitBoard {
 		moveNumber = n;
 	}
 
-	public byte[] getBoardArray(){
+	public byte[] getBoardArray() {
 		return board;
 	}
 }

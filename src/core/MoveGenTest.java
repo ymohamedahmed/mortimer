@@ -14,51 +14,49 @@ public class MoveGenTest {
 		long startTime = 0;
 		long endTime = 0;
 		board.resetToInitialSetup();
-		MoveGen moveGen = new MoveGen();
 		startTime = System.currentTimeMillis();
-		moveGen.initialiseKnightLookupTable();
-		moveGen.initialiseKingLookupTable();
-		moveGen.initialisePawnLookupTable();
-		moveGen.generateMoveDatabase(true);
-		moveGen.generateMoveDatabase(false);
+		MoveGen.initialiseKnightLookupTable();
+		MoveGen.initialiseKingLookupTable();
+		MoveGen.initialisePawnLookupTable();
+		MoveGen.generateMoveDatabase(true);
+		MoveGen.generateMoveDatabase(false);
 		endTime = System.currentTimeMillis();
 		System.out.println("lookup table init time: " + (endTime - startTime) + "ms");
 
 		startTime = System.currentTimeMillis();
-		long perft1 = perft(moveGen, 1);
+		long perft1 = perft(1);
 		System.out.println("perft 1: " + perft1);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 1 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft2 = perft(moveGen, 2);
+		long perft2 = perft(2);
 		System.out.println("perft 2: " + perft2);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 2 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft3 = perft(moveGen, 3);
+		long perft3 = perft(3);
 		System.out.println("perft 3: " + perft3);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 3 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft4 = perft(moveGen, 4);
+		long perft4 = perft(4);
 		System.out.println("perft 4: " + perft4);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 4 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft5 = perft(moveGen, 5);
+		long perft5 = perft(5);
 		System.out.println("perft 5: " + perft5);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 5 time: " + (endTime - startTime) + "ms");
-		board.resetToInitialSetup();
-		System.out.println("perft 6: " + perft(moveGen,6));
+
 		assertEquals(3, BitBoard.hammingWeight(0b010101));
 		assertEquals(1, BitBoard.hammingWeight(0b010));
 		assertEquals(5, BitBoard.hammingWeight(0b01010111));
@@ -72,9 +70,9 @@ public class MoveGenTest {
 		assertEquals(true, board.stalemate(1));
 	}
 
-	public long perft(MoveGen moveGen, int depth) {
+	public long perft(int depth) {
 		long nodes = 0;
-		ArrayList<Move> moveList = moveGen.generateMoves(board, true);
+		ArrayList<Move> moveList = MoveGen.generateMoves(board, true);
 		int nMoves = moveList.size();
 		if (depth == 1) {
 			return nMoves;
@@ -82,7 +80,7 @@ public class MoveGenTest {
 
 		for (int i = 0; i < nMoves; i++) {
 			board.move(moveList.get(i));
-			nodes += perft(moveGen, depth - 1);
+			nodes += perft(depth - 1);
 			board.undo();
 		}
 		return nodes;

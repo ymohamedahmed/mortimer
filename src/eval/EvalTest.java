@@ -10,12 +10,11 @@ public class EvalTest {
 	@Test
 	public void test() {
 		BitBoard board = new BitBoard();
-		MoveGen moveGen = new MoveGen();
-		moveGen.initialiseKnightLookupTable();
-		moveGen.initialiseKingLookupTable();
-		moveGen.initialisePawnLookupTable();
-		moveGen.generateMoveDatabase(true);
-		moveGen.generateMoveDatabase(false);
+		MoveGen.initialiseKnightLookupTable();
+		MoveGen.initialiseKingLookupTable();
+		MoveGen.initialisePawnLookupTable();
+		MoveGen.generateMoveDatabase(true);
+		MoveGen.generateMoveDatabase(false);
 
 		Evaluation eval = new Evaluation();
 

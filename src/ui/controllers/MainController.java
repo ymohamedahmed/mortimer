@@ -42,24 +42,21 @@ public class MainController {
 	public TextArea pgnTextField;
 	public Slider moveSpeedSlider;
 
-
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
-	private ArrayList<Move> moveList = new ArrayList<>();
 	private Search search = new Search();
 	private BitBoard board;
-	private MoveGen moveGen = new MoveGen();
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
-
+	private ArrayList<Move> moveList = new ArrayList<>();
 	// Called initially
 	public void initialize() {
 		// Intialise all the various lookup tables used by the AI
-		moveGen.initialiseKnightLookupTable();
-		moveGen.initialiseKingLookupTable();
-		moveGen.initialisePawnLookupTable();
+		MoveGen.initialiseKnightLookupTable();
+		MoveGen.initialiseKingLookupTable();
+		MoveGen.initialisePawnLookupTable();
 		// Lookup tables for rooks (true) and bishops (false)
-		moveGen.generateMoveDatabase(true);
-		moveGen.generateMoveDatabase(false);
+		MoveGen.generateMoveDatabase(true);
+		MoveGen.generateMoveDatabase(false);
 		// Initialise the hash function
 		BitBoard.initialiseZobrist();
 		// This allows the user to change how long it takes for the AI to select
@@ -73,7 +70,7 @@ public class MainController {
 						* (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
 			}
 		});
-		
+
 	}
 
 	private double paintChessBoard(BitBoard board) {
@@ -125,7 +122,7 @@ public class MainController {
 		board = new BitBoard();
 		board.resetToInitialSetup();
 		pgnTextField.setText("");
-		moveList = getMoves(board, false);
+		moveList = MoveGen.generateMoves(board, false);
 		double cellSize = paintChessBoard(board);
 		// Make sure there is an active action listener
 		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
@@ -136,7 +133,8 @@ public class MainController {
 		g.clearRect(0, 0, chessPane.getWidth(), chessPane.getHeight());
 	}
 
-	private void clickListenerChessPane(BitBoard board, MouseEvent evt, double cellSize) {
+	private void clickListenerChessPane(BitBoard board, MouseEvent evt,
+			double cellSize) {
 		// Get the position clicked in terms of the board
 		double x = evt.getX();
 		double y = evt.getY();
@@ -149,7 +147,8 @@ public class MainController {
 			byte piece = board.board[index];
 			for (int square : blueSquares) {
 				if (square == index) {
-					move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
+					move(board, getMove(moveList, board.board[oldPos], oldPos, index),
+							true);
 					blueSquares.clear();
 					pieceMoved = true;
 					break;
@@ -228,7 +227,7 @@ public class MainController {
 			clearCanvas();
 			paintChessBoard(board);
 			// Get the new moves
-			moveList = getMoves(board, true);
+			moveList = MoveGen.generateMoves(board, true);
 
 		}
 		boolean aiLost = board.checkmate(UIConstants.AI_COLOUR);
@@ -258,10 +257,6 @@ public class MainController {
 
 	}
 
-	// Return all the moves available to the next player to move
-	private ArrayList<Move> getMoves(BitBoard board, boolean removeCheck) {
-		return moveGen.generateMoves(board, removeCheck);
-	}
 
 	// Displays a dialog giving the player the choice of which piece to convert
 	// their pawn to
@@ -321,7 +316,7 @@ public class MainController {
 	private void moveAI(BitBoard board) {
 		// Use the search class to select the best move
 		int colorFactor = (UIConstants.AI_COLOUR == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
-		Move move = search.rootNegamax(moveGen, board, colorFactor);
+		Move move = search.rootNegamax(board, colorFactor);
 		move(board, move, true);
 	}
 
@@ -340,7 +335,7 @@ public class MainController {
 			result += String.valueOf((board.getMoveNumber() / 2) + 1) + ". ";
 		}
 		// Add the letter of the piece being moved
-		result += CoreConstants.pieceToLetterCapital[move.getPieceType()/2];
+		result += CoreConstants.pieceToLetterCapital[move.getPieceType() / 2];
 		// Capture moves get an 'x'
 		if (capture) {
 			result += "x";
@@ -438,7 +433,7 @@ public class MainController {
 				UIConstants.AI_COLOUR = Integer.valueOf(reader.readLine());
 				clearCanvas();
 				paintChessBoard(board);
-				moveList = moveGen.generateMoves(board, true);
+				moveList = MoveGen.generateMoves(board, true);
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("Error Dialog");
@@ -540,7 +535,7 @@ public class MainController {
 			pgnTextField.setText(pgnHistory[board.getMoveNumber()]);
 			clearCanvas();
 			paintChessBoard(board);
-			moveList = moveGen.generateMoves(board, true);
+			moveList = MoveGen.generateMoves(board, true);
 		}
 	}
 
@@ -559,7 +554,7 @@ public class MainController {
 				// Change the board
 				board.loadFen(result.get());
 				// Regenerate moves
-				moveList = moveGen.generateMoves(board, true);
+				moveList = MoveGen.generateMoves(board, true);
 				pgnTextField.setText("");
 				clearCanvas();
 				paintChessBoard(board);
@@ -597,7 +592,8 @@ public class MainController {
 		choices.add("Moss Green");
 		choices.add("Grey");
 
-		ChoiceDialog<String> dialog = new ChoiceDialog<>(UIConstants.BOARD_COLOUR.getColourName(), choices);
+		ChoiceDialog<String> dialog = new ChoiceDialog<>(UIConstants.BOARD_COLOUR.getColourName(),
+				choices);
 		dialog.setHeaderText("Choose a Colour Theme");
 		dialog.setTitle("Choose Board Colour");
 
@@ -619,6 +615,5 @@ public class MainController {
 		clearCanvas();
 		paintChessBoard(board);
 	}
-
 
 }
