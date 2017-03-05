@@ -6,7 +6,6 @@ public class BitBoard {
 	public long[] bitboards = new long[14];
 	public byte[] board = new byte[64];
 	public long[] epTargetSquares = new long[2];
-	private static int[][] zobristTable = new int[64][12];
 	// Castling flag
 	// WHITE
 	// wQueensideLegal | wKingsideLegal | wKingMoved | wRookQueensideMoved |
@@ -582,7 +581,7 @@ public class BitBoard {
 	public static void initialiseZobrist() {
 		for (int x = 0; x <= 63; x++) {
 			for (int y = 0; y <= 11; y++) {
-				zobristTable[x][y] = new Random().nextInt((int) Math.pow(2, 64) - 1);
+				CoreConstants.zobristTable[x][y] = new Random().nextInt((int) Math.pow(2, 64) - 1);
 			}
 		}
 	}
@@ -597,7 +596,7 @@ public class BitBoard {
 		for (int index = 0; index < 64; index++) {
 			if (board[index] != CoreConstants.EMPTY) {
 				int j = board[index] - 2;
-				hash = hash ^ zobristTable[index][j];
+				hash = hash ^ CoreConstants.zobristTable[index][j];
 			}
 		}
 		return hash;
@@ -620,5 +619,9 @@ public class BitBoard {
 	// Change the number of moves played
 	public void setMoveNumber(int n) {
 		moveNumber = n;
+	}
+
+	public byte[] getBoardArray(){
+		return board;
 	}
 }

@@ -139,7 +139,7 @@ public class Search {
 		return bestValue;
 	}
 
-	// Indicates the nature of the value stored
+	// Indicates the nature of the value stored in the hash table
 	private enum TranspositionFlag {
 		EXACT, LOWERBOUND, UPPERBOUND
 	}

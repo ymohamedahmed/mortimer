@@ -1,5 +1,6 @@
 package core;
 
+
 public class CoreConstants {
 	// Uses the index based on the piece type to return the file name for the
 	// image of the piece
@@ -165,4 +166,6 @@ public class CoreConstants {
 	public static String[] pieceToLetterCapital = { "", "", "N", "R", "B", "Q", "K" };
 	public static String[] pieceToLetterFen = { "", "", "P", "p", "N", "n", "R", "r", "B", "b", "Q",
 			"q", "K", "k" };
+
+	public static int[][] zobristTable = new int[64][12];
 }

@@ -42,8 +42,7 @@ public class MainController {
 	public TextArea pgnTextField;
 	public Slider moveSpeedSlider;
 
-	private int playerColour = CoreConstants.WHITE;
-	private int aiColour = CoreConstants.BLACK;
+
 	private ArrayList<Integer> blueSquares = new ArrayList<>();
 	private int oldPos;
 	private ArrayList<Move> moveList = new ArrayList<>();
@@ -51,8 +50,7 @@ public class MainController {
 	private BitBoard board;
 	private MoveGen moveGen = new MoveGen();
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
-	private boolean playingAI = true;
-	private BoardColour boardColour = BoardColour.CLASSIC;
+
 	// Called initially
 	public void initialize() {
 		// Intialise all the various lookup tables used by the AI
@@ -90,9 +88,9 @@ public class MainController {
 			int row = squareNo / 8;
 			// Selects the colour of the square based on the row and column
 			if ((col % 2 == 0 && row % 2 == 0) || (col % 2 == 1 && row % 2 == 1)) {
-				g.setFill(boardColour.getColourPrimary());
+				g.setFill(UIConstants.BOARD_COLOUR.getColourPrimary());
 			} else {
-				g.setFill(boardColour.getColourSecondary());
+				g.setFill(UIConstants.BOARD_COLOUR.getColourSecondary());
 			}
 			// Paints the square
 			g.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
@@ -118,7 +116,7 @@ public class MainController {
 
 	public void playGame() {
 		// If the ai is the first to move
-		if (aiColour == CoreConstants.WHITE) {
+		if (UIConstants.AI_COLOUR == CoreConstants.WHITE) {
 			moveAI(board);
 		}
 	}
@@ -219,9 +217,9 @@ public class MainController {
 		int side = move.getPieceType() % 2;
 		// If the a pawn is moved onto the final row, then display the pawn
 		// promotion dialog getting player which piece to convert the pawn to
-		if (move.isPromotion() && side == playerColour) {
+		if (move.isPromotion() && side == UIConstants.PLAYER_COLOUR) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, true);
-		} else if (move.isPromotion() && side == aiColour) {
+		} else if (move.isPromotion() && side == UIConstants.AI_COLOUR) {
 			pawnPromotion(move.getOldPos(), move.getFinalPos(), side, board, false);
 		}
 		updatePGNTextField(board, move, capture);
@@ -233,17 +231,17 @@ public class MainController {
 			moveList = getMoves(board, true);
 
 		}
-		boolean aiLost = board.checkmate(aiColour);
-		boolean playerLost = board.checkmate(playerColour);
+		boolean aiLost = board.checkmate(UIConstants.AI_COLOUR);
+		boolean playerLost = board.checkmate(UIConstants.PLAYER_COLOUR);
 		boolean stalemate = board.stalemate(board.toMove);
 		// If it is the AI's turn
-		if (side == playerColour && playingAI && !aiLost) {
+		if (side == UIConstants.PLAYER_COLOUR && UIConstants.PLAYING_AI && !aiLost) {
 			moveAI(board);
 		}
 		// When the game is over, display the game over dialog
 		if (aiLost || playerLost || stalemate) {
 			String result = "";
-			String sPlayerColour = (playerColour == 0) ? "WHITE" : "BLACK";
+			String sPlayerColour = (UIConstants.PLAYER_COLOUR == 0) ? "WHITE" : "BLACK";
 			if (aiLost) {
 				result = "Congratulations you, playing with " + sPlayerColour + ", have won!";
 			} else if (playerLost) {
@@ -322,7 +320,7 @@ public class MainController {
 
 	private void moveAI(BitBoard board) {
 		// Use the search class to select the best move
-		int colorFactor = (aiColour == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
+		int colorFactor = (UIConstants.AI_COLOUR == 0) ? EvalConstants.WHITE : EvalConstants.BLACK;
 		Move move = search.rootNegamax(moveGen, board, colorFactor);
 		move(board, move, true);
 	}
@@ -436,8 +434,8 @@ public class MainController {
 				board.castling[0] = Integer.valueOf(reader.readLine());
 				board.castling[1] = Integer.valueOf(reader.readLine());
 				pgnTextField.setText(reader.readLine());
-				playerColour = Integer.valueOf(reader.readLine());
-				aiColour = Integer.valueOf(reader.readLine());
+				UIConstants.PLAYER_COLOUR = Integer.valueOf(reader.readLine());
+				UIConstants.AI_COLOUR = Integer.valueOf(reader.readLine());
 				clearCanvas();
 				paintChessBoard(board);
 				moveList = moveGen.generateMoves(board, true);
@@ -499,8 +497,8 @@ public class MainController {
 		result += board.castling[0] + "\n";
 		result += board.castling[1] + "\n";
 		result += pgnTextField.getText() + "\n";
-		result += String.valueOf(playerColour) + "\n";
-		result += String.valueOf(aiColour);
+		result += String.valueOf(UIConstants.PLAYER_COLOUR) + "\n";
+		result += String.valueOf(UIConstants.AI_COLOUR);
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
 		Stage stage = Main.primaryStage;
@@ -599,7 +597,7 @@ public class MainController {
 		choices.add("Moss Green");
 		choices.add("Grey");
 
-		ChoiceDialog<String> dialog = new ChoiceDialog<>(boardColour.getColourName(), choices);
+		ChoiceDialog<String> dialog = new ChoiceDialog<>(UIConstants.BOARD_COLOUR.getColourName(), choices);
 		dialog.setHeaderText("Choose a Colour Theme");
 		dialog.setTitle("Choose Board Colour");
 
@@ -608,13 +606,13 @@ public class MainController {
 		if (result.isPresent()) {
 			switch (result.get()) {
 			case "Classic":
-				boardColour = BoardColour.CLASSIC;
+				UIConstants.BOARD_COLOUR = BoardColour.CLASSIC;
 				break;
 			case "Moss Green":
-				boardColour = BoardColour.MOSS_GREEN;
+				UIConstants.BOARD_COLOUR = BoardColour.MOSS_GREEN;
 				break;
 			case "Grey":
-				boardColour = BoardColour.GREY;
+				UIConstants.BOARD_COLOUR = BoardColour.GREY;
 				break;
 			}
 		}
@@ -622,62 +620,5 @@ public class MainController {
 		paintChessBoard(board);
 	}
 
-	// Used by the Start Menu Controller to change the settings of the game
-	public void setPlayingAI(boolean playingAI) {
-		this.playingAI = playingAI;
-	}
-
-	public void setPlayerColour(int color) {
-		playerColour = color;
-	}
-
-	public void setAIColour(int color) {
-		aiColour = color;
-	}
-
-	// Enumeration for the board colour
-	// Stores the two colours used in theme
-	// Classic theme is default
-	private enum BoardColour {
-		CLASSIC, MOSS_GREEN, GREY;
-		public String getColourName() {
-			if (this == BoardColour.CLASSIC) {
-				return "Classic";
-			} else if (this == BoardColour.MOSS_GREEN) {
-				return "Moss Green";
-			} else if (this == BoardColour.GREY) {
-				return "Grey";
-			} else {
-				return "";
-			}
-		}
-
-		// Colour for the half the squares
-		public Color getColourPrimary() {
-			if (this == BoardColour.CLASSIC) {
-				return Color.rgb(140, 82, 66);
-			} else if (this == BoardColour.MOSS_GREEN) {
-				return Color.rgb(175, 212, 144);
-			} else if (this == BoardColour.GREY) {
-				return Color.rgb(167, 171, 164);
-			} else {
-				return BoardColour.CLASSIC.getColourPrimary();
-			}
-		}
-
-		// Colour for the other half of the squares
-		public Color getColourSecondary() {
-			if (this == BoardColour.CLASSIC) {
-				return Color.rgb(255, 255, 206);
-			} else if (this == BoardColour.MOSS_GREEN) {
-				return Color.rgb(255, 255, 255);
-			} else if (this == BoardColour.GREY) {
-				return Color.rgb(255, 255, 255);
-			} else {
-				return BoardColour.CLASSIC.getColourSecondary();
-			}
-		}
-
-	}
 
 }

@@ -63,20 +63,20 @@ public class StartMenuController {
 		}
 		switch (choice) {
 		case "White":
-			controller.setPlayerColour(CoreConstants.WHITE);
-			controller.setAIColour(CoreConstants.BLACK);
+			UIConstants.PLAYER_COLOUR = CoreConstants.WHITE;
+			UIConstants.AI_COLOUR = CoreConstants.BLACK;
 			break;
 		case "Black":
-			controller.setPlayerColour(CoreConstants.BLACK);
-			controller.setAIColour(CoreConstants.WHITE);
+			UIConstants.PLAYER_COLOUR = CoreConstants.BLACK;
+			UIConstants.AI_COLOUR = CoreConstants.WHITE;
 			break;
 		case "Random":
 			// Generates random number out of 0 and 1
 			// Result is the player's colour
 			Random random = new Random();
 			int side = random.nextInt(2);
-			controller.setPlayerColour(side);
-			controller.setAIColour(side == 0 ? 1 : 0);
+			UIConstants.PLAYER_COLOUR = side;
+			UIConstants.AI_COLOUR = (side == 0) ? 1 : 0;
 			break;
 		}
 	}
@@ -85,7 +85,7 @@ public class StartMenuController {
 	public void playHuman() {
 		setupController();
 		controller.setupGame();
-		controller.setPlayingAI(false);
+		UIConstants.PLAYING_AI = false;
 		controller.playGame();
 	}
 
