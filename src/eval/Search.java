@@ -27,7 +27,7 @@ public class Search {
 			// Make the move then judge the resulting board
 			board.move(move);
 			long startTime = System.currentTimeMillis();
-			double firstGuess = 0;
+			double firstGuess = 0; 
 			// If there is more time, keep increasing the depth of the search
 			// (i.e. the number of moves looked ahead)
 			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth += 2) {
@@ -38,6 +38,7 @@ public class Search {
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove
 						&& depth >= EvalConstants.MIN_DEPTH) {
+					System.out.println("DEPTH: " + depth);
 					break;
 				}
 			}

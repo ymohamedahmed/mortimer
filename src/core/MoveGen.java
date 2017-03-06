@@ -305,7 +305,7 @@ public class MoveGen {
 		// Isolate the promotion moves
 		long promotions = attacks & promotions_mask[side];
 		addMoves(pawnType, index, promotions, moveList, false, true, CoreConstants.noCastle);
-		// Isolate the en passant moves
+		// Isolate the en passant moves $\label{code:enpassant}$
 		long enPassant = CoreConstants.PAWN_ATTACKS_TABLE[side][index]
 				& board.epTargetSquares[side];
 		addMoves(pawnType, index, enPassant, moveList, true, false, CoreConstants.noCastle);

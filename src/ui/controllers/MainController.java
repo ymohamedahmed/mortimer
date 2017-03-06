@@ -60,7 +60,7 @@ public class MainController {
 		// Initialise the hash function
 		BitBoard.initialiseZobrist();
 		// This allows the user to change how long it takes for the AI to select
-		// moves
+		// moves $\label{code:movespeed}$
 		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue,
@@ -125,15 +125,15 @@ public class MainController {
 		moveList = MoveGen.generateMoves(board, false);
 		double cellSize = paintChessBoard(board);
 		// Make sure there is an active action listener
-		chessPane.setOnMouseClicked(evt -> clickListenerChessPane(board, evt, cellSize));
+		chessPane.setOnMouseClicked(evt -> clickListener(board, evt, cellSize));
 	}
 
 	private void clearCanvas() {
 		GraphicsContext g = chessPane.getGraphicsContext2D();
 		g.clearRect(0, 0, chessPane.getWidth(), chessPane.getHeight());
 	}
-
-	private void clickListenerChessPane(BitBoard board, MouseEvent evt,
+	
+	private void clickListener(BitBoard board, MouseEvent evt,
 			double cellSize) {
 		// Get the position clicked in terms of the board
 		double x = evt.getX();
@@ -154,7 +154,7 @@ public class MainController {
 					break;
 				}
 			}
-			// Clicks square with piece in it
+			// Clicks square with piece in it $\label{code:dispmoves}$
 			if (piece != CoreConstants.EMPTY && !pieceMoved) {
 				// Get its available moves
 				ArrayList<Move> moves = getMovesPiece(index, moveList);
@@ -176,7 +176,7 @@ public class MainController {
 						// If the move is a capture move draw a red circle in
 						// the corner
 						g.setFill(Color.RED);
-						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5,
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize 	/ 5,
 								cellSize / 5);
 					}
 					blueSquares.add(move.getFinalPos());
@@ -231,12 +231,19 @@ public class MainController {
 
 		}
 		boolean aiLost = board.checkmate(UIConstants.AI_COLOUR);
-		boolean playerLost = board.checkmate(UIConstants.PLAYER_COLOUR);
-		boolean stalemate = board.stalemate(board.toMove);
+		displayEndGameMessage(board);
 		// If it is the AI's turn
 		if (side == UIConstants.PLAYER_COLOUR && UIConstants.PLAYING_AI && !aiLost) {
 			moveAI(board);
 		}
+	
+
+	}
+	//Displays the appropriate message when a player has lost or drawn $\label{code:dispend}$
+	private void displayEndGameMessage(BitBoard board){
+		boolean aiLost = board.checkmate(UIConstants.AI_COLOUR);
+		boolean playerLost = board.checkmate(UIConstants.PLAYER_COLOUR);
+		boolean stalemate = board.stalemate(board.toMove);
 		// When the game is over, display the game over dialog
 		if (aiLost || playerLost || stalemate) {
 			String result = "";
@@ -254,12 +261,9 @@ public class MainController {
 			alert.setContentText(result);
 			alert.showAndWait();
 		}
-
 	}
-
-
 	// Displays a dialog giving the player the choice of which piece to convert
-	// their pawn to
+	// their pawn to $\label{code:pawnPromotion}$
 	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board,
 			boolean display) {
 		board.removePiece(pawnOldPos);
@@ -381,7 +385,7 @@ public class MainController {
 	// Save the colour of the player
 	// Save the colour of the AI
 
-	// NOTE: loading is done in the same order
+	// NOTE: loading is done in the same order $\label{code:loadfile}$
 	@FXML
 	private void handleLoadFileAction(ActionEvent event) {
 		System.out.println("LOADING GAME");
@@ -453,7 +457,7 @@ public class MainController {
 	}
 
 	// File format is outlined above, text file is build up and then written to
-	// a file
+	// a file $\label{code:savefile}$
 	@FXML
 	private void handleSaveFileAction(ActionEvent event) {
 		String result = "";

@@ -17,8 +17,7 @@ public class BitBoard {
 	public int toMove = CoreConstants.WHITE;
 	int moveNumber = 0;
 
-	// History arrays
-	// History arrays are based on Carballo
+	// History arrays are based on tutorial by Alberto Ruibal
 	// https://github.com/albertoruibal/carballo/blob/master/core/src/main/java/com/alonsoruibal/chess/Board.java
 	public long[] moveHistory;
 	public long[] whiteHistory;
@@ -36,8 +35,6 @@ public class BitBoard {
 
 	public BitBoard() {
 		// Instantiate the history arrays
-		// Based on Carballo
-		// https://github.com/albertoruibal/carballo/blob/master/core/src/main/java/com/alonsoruibal/chess/Board.java
 		moveHistory = new long[CoreConstants.MAX_MOVES];
 		whiteHistory = new long[CoreConstants.MAX_MOVES];
 		blackHistory = new long[CoreConstants.MAX_MOVES];
@@ -230,7 +227,7 @@ public class BitBoard {
 		updateCastlingFlags(enemy);
 
 		// If a pawn makes a double push, store the square behind as being
-		// attackable using en passant
+		// attackable using en passant $\label{code:addtoeparray}$
 		epTargetSquares[enemy] = 0;
 		if (piece == CoreConstants.WHITE_PAWN) {
 			if (finalIndex - oldIndex == 16) {
@@ -329,6 +326,7 @@ public class BitBoard {
 
 	}
 
+	//Function takes the side as input and calculates if castling is legal $\label{code:castling}$
 	void updateCastlingFlags(int side) {
 		if (side == 0) {
 			// Consider queenside white
@@ -438,7 +436,7 @@ public class BitBoard {
 
 	// Based on
 	// https://chessprogramming.wikispaces.com/Checks+and+Pinned+Pieces+(Bitboards)
-	// Effectively works backwards from the king position to see if
+	// Effectively works backwards from the king position to see if $\label{code:check}$
 	public boolean check(int side) {
 		int kingIndex = (side == CoreConstants.WHITE)
 				? bitScanForward(bitboards[CoreConstants.WHITE_KING])
@@ -458,7 +456,7 @@ public class BitBoard {
 	}
 
 	// If there are no available moves and the player is in check, then it is
-	// checkmate
+	// checkmate $\label{code:checkmate}$
 	public boolean checkmate(int side) {
 		if (check(side) && MoveGen.generateMoves(this, true).size() == 0) {
 			return true;
@@ -468,7 +466,7 @@ public class BitBoard {
 	}
 
 	// Player has no available moves and is not in check then the game is
-	// stalemate
+	// stalemate $\label{code:stalemate}$
 	public boolean stalemate(int sideToMove) {
 		if (!check(sideToMove) && MoveGen.generateMoves(this, true).size() == 0) {
 			return true;
