@@ -16,9 +16,6 @@ import javafx.scene.control.ChoiceDialog;
 public class StartMenuController {
 	private MainController controller;
 
-	public void initialize() {
-	}
-
 	// Loads the main chess game interface
 	private void setupController() {
 		try {
@@ -81,7 +78,7 @@ public class StartMenuController {
 		}
 	}
 
-	// Executed if the user chooses to play against another human
+	// Executed if the user chooses to play against another human $\label{code:playHuman}$
 	public void playHuman() {
 		setupController();
 		controller.setupGame();

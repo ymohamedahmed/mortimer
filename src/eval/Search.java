@@ -2,18 +2,22 @@ package eval;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 import core.BitBoard;
 import core.Move;
 import core.MoveGen;
 
 public class Search {
+	// Transposition table $\label{code:hashtable}$
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
 	// This is the method that is accessed from the main controller class, and
 	// returns what the program deems to be the best available move to a
 	// particular colour.
 
 	public Move rootNegamax(BitBoard board, int color) {
+		long overallStartTime = System.currentTimeMillis();
 		double maxScore = Double.NEGATIVE_INFINITY;
 		double minScore = Double.POSITIVE_INFINITY;
 		Move optimal = null;
@@ -27,7 +31,7 @@ public class Search {
 			// Make the move then judge the resulting board
 			board.move(move);
 			long startTime = System.currentTimeMillis();
-			double firstGuess = 0; 
+			double firstGuess = 0;
 			// If there is more time, keep increasing the depth of the search
 			// (i.e. the number of moves looked ahead)
 			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth += 2) {
@@ -58,6 +62,7 @@ public class Search {
 				}
 			}
 		}
+		System.out.println("TIME TO MAKE MOVE: " + (System.currentTimeMillis() - overallStartTime));
 		return optimal;
 	}
 
@@ -79,7 +84,7 @@ public class Search {
 		return g;
 	}
 
-	// Color Factor: 1 for white, -1 for black
+	// Color Factor: 1 for white, -1 for black $\label{code:negamax}$
 	private double negamax(double alpha, double beta, BitBoard board, int depth, int colorFactor) {
 		double alphaOrig = alpha;
 		// Check if any of the values have already been computed, if so, return
@@ -99,11 +104,12 @@ public class Search {
 		}
 		// Return the value of the leaf node
 		if (depth == 0) {
-			return colorFactor * new Evaluation().evaluate(board, colorFactor);
+			return colorFactor * Evaluation.evaluate(board, colorFactor);
 		}
 		double bestValue = Double.NEGATIVE_INFINITY;
 		// Pseudo-legal moves are generated to speed up the algorithm
-		ArrayList<Move> moves = MoveGen.generateMoves(board, false);
+		List<Move> moves = mergeSort(board, MoveGen.generateMoves(board, false), colorFactor);
+
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);
@@ -129,6 +135,99 @@ public class Search {
 		hashtable.put(board.hash(), tEntryFinal);
 
 		return bestValue;
+	}
+
+	// Merge sort algorithm
+	public List<Move> mergeSort(BitBoard board, List<Move> moves, int colorFactor) {
+		int size = moves.size();
+		if (size <= 1) {
+			return moves;
+		}
+		int middleIndex = size / 2;
+		List<Move> leftList = moves.subList(0, middleIndex);
+		List<Move> rightList = moves.subList(middleIndex, size);
+		rightList = mergeSort(board, rightList, colorFactor);
+		leftList = mergeSort(board, leftList, colorFactor);
+		List<Move> result = merge(board, leftList, rightList, colorFactor);
+		return result;
+	}
+
+	public List<Move> merge(BitBoard board, List<Move> left, List<Move> right, int colorFactor) {
+		List<Move> result = new ArrayList<>();
+		Iterator<Move> leftIter = left.iterator();
+		Iterator<Move> rightIter = right.iterator();
+		Move leftMove = leftIter.next();
+		board.move(leftMove);
+		double x = Evaluation.fastEval(board);
+		board.undo();
+		Move rightMove = rightIter.next();
+		board.move(rightMove);
+		double y = Evaluation.fastEval(board);
+		board.undo();
+		while (true) {
+			if (colorFactor == 1) {
+				if (x <= y) {
+					result.add(leftMove);
+					if (leftIter.hasNext()) {
+						leftMove = leftIter.next();
+						board.move(leftMove);
+						x = Evaluation.fastEval(board);
+						board.undo();
+					} else {
+						result.add(rightMove);
+						while (rightIter.hasNext()) {
+							result.add(rightIter.next());
+						}
+						break;
+					}
+				} else {
+					result.add(rightMove);
+					if (rightIter.hasNext()) {
+						rightMove = rightIter.next();
+						board.move(rightMove);
+						y = Evaluation.fastEval(board);
+						board.undo();
+					} else {
+						result.add(leftMove);
+						while (leftIter.hasNext()) {
+							result.add(leftIter.next());
+						}
+						break;
+					}
+				}
+			}else{
+				if (x >= y) {
+					result.add(leftMove);
+					if (leftIter.hasNext()) {
+						leftMove = leftIter.next();
+						board.move(leftMove);
+						x = Evaluation.fastEval(board);
+						board.undo();
+					} else {
+						result.add(rightMove);
+						while (rightIter.hasNext()) {
+							result.add(rightIter.next());
+						}
+						break;
+					}
+				} else {
+					result.add(rightMove);
+					if (rightIter.hasNext()) {
+						rightMove = rightIter.next();
+						board.move(rightMove);
+						y = Evaluation.fastEval(board);
+						board.undo();
+					} else {
+						result.add(leftMove);
+						while (leftIter.hasNext()) {
+							result.add(leftIter.next());
+						}
+						break;
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	// Indicates the nature of the value stored in the hash table

@@ -171,7 +171,7 @@ public class BitBoard {
 	}
 
 	public void move(Move move) {
-		// Store the current board
+		// Store the current board $\label{code:bitboardmove}$
 		storeHistory();
 		moveNumber++;
 		// Switch the moving player
@@ -575,7 +575,7 @@ public class BitBoard {
 		return pos == 64 ? -1 : 63 - pos;
 	}
 
-	// Zobrist hashing is the hash function used in the evaluation system
+	// Zobrist hashing is the hash function used in the evaluation system $\label{code:initZob}$
 	public static void initialiseZobrist() {
 		for (int x = 0; x <= 63; x++) {
 			for (int y = 0; y <= 11; y++) {
@@ -588,7 +588,7 @@ public class BitBoard {
 	// Function uses XOR with a randomly initialised 2-D array to produce a hash
 	// for the board
 	// Used with a hash table in the evaluation system to store previously
-	// computed values
+	// computed values $\label{code:hash}$
 	public int hash() {
 		int hash = 0;
 		for (int index = 0; index < 64; index++) {

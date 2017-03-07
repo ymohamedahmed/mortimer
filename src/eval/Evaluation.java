@@ -5,7 +5,7 @@ import core.CoreConstants;
 
 public class Evaluation extends EvalConstants {
 
-	public double evaluate(BitBoard board, int color) {
+	public static double evaluate(BitBoard board, int color) {
 		// Calculate the number of each type of piece per side
 		int whiteKing = board.checkmate(CoreConstants.WHITE) ? 0 : 1;
 		int blackKing = board.checkmate(CoreConstants.BLACK) ? 0 : 1;
@@ -99,5 +99,28 @@ public class Evaluation extends EvalConstants {
 			}
 		}
 		return color * (materialScore + posScore);
+	}
+	public static double fastEval(BitBoard board){
+		int whiteQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_QUEEN]);
+		int blackQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_QUEEN]);
+		int whiteRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_ROOK]);
+		int blackRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_ROOK]);
+		int whiteBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_BISHOP]);
+		int blackBishops = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_BISHOP]);
+		int whiteKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_KNIGHT]);
+		int blackKnights = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_KNIGHT]);
+		int whitePawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_PAWN]);
+		int blackPawns = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_PAWN]);
+		// Workout the difference between how many pieces each side has per type
+		int qDiff = whiteQueens - blackQueens;
+		int rDiff = whiteRooks - blackRooks;
+		int bDiff = whiteBishops - blackBishops;
+		int nDiff = whiteKnights - blackKnights;
+		int pDiff = whitePawns - blackPawns;
+
+		// Work out the difference between the material score of white and black
+		int materialScore = (900 * qDiff) + (500 * rDiff) + (330 * bDiff)
+				+ (320 * nDiff) + (100 * pDiff);
+		return materialScore;
 	}
 }
