@@ -49,9 +49,8 @@ public class BitBoard {
 		epHistory = new long[2][CoreConstants.MAX_MOVES];
 		castlingHistory = new long[2][CoreConstants.MAX_MOVES];
 	}
-
 	public void loadFen(String board) {
-		// Start by resetting the board
+		// Start by resetting the board $\label{code:loadFen}$
 		reset();
 		// "/" represent end of row on the board
 		board = board.replace("/", "");
@@ -107,7 +106,7 @@ public class BitBoard {
 
 	public String exportFen() {
 		String result = "";
-		// Loop through the board in the order used in FEN notation
+		// Loop through the board in the order used in FEN notation $\label{code:exportFen}$
 		for (int row = 56; row >= 0; row -= 8) {
 			for (int col = 0; col <= 7; col++) {
 				int index = row + col;
@@ -301,7 +300,7 @@ public class BitBoard {
 	}
 
 	public void undo() {
-		// Update the current bitboards from the history arrays
+		// Update the current bitboards from the history arrays $\label{code:undo}$
 		moveNumber--;
 		bitboards[0] = whiteHistory[moveNumber];
 		bitboards[1] = blackHistory[moveNumber];
@@ -322,6 +321,7 @@ public class BitBoard {
 		epTargetSquares[1] = epHistory[1][moveNumber];
 		castling[0] = castlingHistory[0][moveNumber];
 		castling[1] = castlingHistory[1][moveNumber];
+		// Change who's next to move
 		toMove = (toMove == 0) ? 1 : 0;
 
 	}

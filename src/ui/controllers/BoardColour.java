@@ -4,7 +4,7 @@ import javafx.scene.paint.Color;
 
 // Enumeration for the board colour
 // Stores the two colours used in theme
-// Classic theme is default
+// Classic theme is default $\label{code:BoardColour}$
 public enum BoardColour {
 	CLASSIC, MOSS_GREEN, GREY;
 	public String getColourName() {

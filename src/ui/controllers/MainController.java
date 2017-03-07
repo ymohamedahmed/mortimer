@@ -48,6 +48,7 @@ public class MainController {
 	private BitBoard board;
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
 	private ArrayList<Move> moveList = new ArrayList<>();
+
 	// Called initially
 	public void initialize() {
 		// Intialise all the various lookup tables used by the AI
@@ -63,11 +64,10 @@ public class MainController {
 		// moves $\label{code:movespeed}$
 		moveSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue,
-					Number newValue) {
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 				double value = moveSpeedSlider.getValue();
-				EvalConstants.THINKING_TIME = EvalConstants.MAX_THINKING_TIME - (value / 100
-						* (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
+				EvalConstants.THINKING_TIME = EvalConstants.MAX_THINKING_TIME
+						- (value / 100 * (EvalConstants.MAX_THINKING_TIME - EvalConstants.MIN_THINKING_TIME));
 			}
 		});
 
@@ -101,8 +101,7 @@ public class MainController {
 				// type of piece
 				if (piece != CoreConstants.EMPTY) {
 					Image image = new Image(MainController.class
-							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png")
-							.toExternalForm());
+							.getResource("/images/" + CoreConstants.FILE_NAMES[piece] + ".png").toExternalForm());
 					g.drawImage(image, col * cellSize, (7 - row) * cellSize, cellSize, cellSize);
 				}
 			}
@@ -112,13 +111,14 @@ public class MainController {
 	}
 
 	public void playGame() {
-		// If the ai is the first to move
+		// If the ai is the first to move $\label{code:playgame}$
 		if (UIConstants.AI_COLOUR == CoreConstants.WHITE) {
 			moveAI(board);
 		}
 	}
 
 	public void setupGame() {
+		// New board which is then reset $\label{code:setupgame}$
 		board = new BitBoard();
 		board.resetToInitialSetup();
 		pgnTextField.setText("");
@@ -132,9 +132,8 @@ public class MainController {
 		GraphicsContext g = chessPane.getGraphicsContext2D();
 		g.clearRect(0, 0, chessPane.getWidth(), chessPane.getHeight());
 	}
-	
-	private void clickListener(BitBoard board, MouseEvent evt,
-			double cellSize) {
+
+	private void clickListener(BitBoard board, MouseEvent evt, double cellSize) {
 		// Get the position clicked in terms of the board
 		double x = evt.getX();
 		double y = evt.getY();
@@ -147,8 +146,7 @@ public class MainController {
 			byte piece = board.board[index];
 			for (int square : blueSquares) {
 				if (square == index) {
-					move(board, getMove(moveList, board.board[oldPos], oldPos, index),
-							true);
+					move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
 					blueSquares.clear();
 					pieceMoved = true;
 					break;
@@ -170,14 +168,12 @@ public class MainController {
 					int colMove = move.getFinalPos() % 8;
 					if (board.board[move.getFinalPos()] == CoreConstants.EMPTY) {
 						g.setFill(Color.BLUE);
-						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize,
-								cellSize);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize, cellSize);
 					} else {
 						// If the move is a capture move draw a red circle in
 						// the corner
 						g.setFill(Color.RED);
-						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize 	/ 5,
-								cellSize / 5);
+						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize / 5, cellSize / 5);
 					}
 					blueSquares.add(move.getFinalPos());
 				}
@@ -190,8 +186,7 @@ public class MainController {
 	// going
 	public Move getMove(ArrayList<Move> moves, int piece, int oldIndex, int finalIndex) {
 		for (Move move : moves) {
-			if (move.getPieceType() == piece && move.getOldPos() == oldIndex
-					&& move.getFinalPos() == finalIndex) {
+			if (move.getPieceType() == piece && move.getOldPos() == oldIndex && move.getFinalPos() == finalIndex) {
 				return move;
 			}
 		}
@@ -236,11 +231,12 @@ public class MainController {
 		if (side == UIConstants.PLAYER_COLOUR && UIConstants.PLAYING_AI && !aiLost) {
 			moveAI(board);
 		}
-	
 
 	}
-	//Displays the appropriate message when a player has lost or drawn $\label{code:dispend}$
-	private void displayEndGameMessage(BitBoard board){
+
+	// Displays the appropriate message when a player has lost or drawn
+	// $\label{code:dispend}$
+	private void displayEndGameMessage(BitBoard board) {
 		boolean aiLost = board.checkmate(UIConstants.AI_COLOUR);
 		boolean playerLost = board.checkmate(UIConstants.PLAYER_COLOUR);
 		boolean stalemate = board.stalemate(board.toMove);
@@ -262,10 +258,10 @@ public class MainController {
 			alert.showAndWait();
 		}
 	}
+
 	// Displays a dialog giving the player the choice of which piece to convert
 	// their pawn to $\label{code:pawnPromotion}$
-	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board,
-			boolean display) {
+	private void pawnPromotion(int pawnOldPos, int newPos, int side, BitBoard board, boolean display) {
 		board.removePiece(pawnOldPos);
 		if (display) {
 			// Display choices
@@ -292,28 +288,21 @@ public class MainController {
 			// Based on choice add the appropriate piece
 			// Note: side == 0 is equivalent to is the side white
 			case "Queen":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
 				break;
 			case "Rook":
-				board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK, newPos);
 				break;
 			case "Bishop":
-				board.addPiece(
-						(side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP, newPos);
 				break;
 			case "Knight":
-				board.addPiece(
-						(side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT,
-						newPos);
+				board.addPiece((side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT, newPos);
 				break;
 			}
 		} else {
 			// If it is the AI, immediately select the queen option
-			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN,
-					newPos);
+			board.addPiece((side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN, newPos);
 		}
 	}
 
@@ -325,7 +314,7 @@ public class MainController {
 	}
 
 	// PGN is the notation used to represent the moves played so far in the
-	// chess game
+	// chess game $\label{code:updatePGN}$
 	private void updatePGNTextField(BitBoard board, Move move, boolean capture) {
 		String result = "";
 		if (board.getMoveNumber() % 2 == 0) {
@@ -349,8 +338,7 @@ public class MainController {
 
 		// Castling has special notation
 		if (move.getCastlingFlag() != 0) {
-			if (move.getCastlingFlag() == CoreConstants.wQSide
-					|| move.getCastlingFlag() == CoreConstants.bQSide) {
+			if (move.getCastlingFlag() == CoreConstants.wQSide || move.getCastlingFlag() == CoreConstants.bQSide) {
 				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O";
 			} else {
 				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O-O";
@@ -365,8 +353,7 @@ public class MainController {
 		if (board.getMoveNumber() % 2 == 0 && board.getMoveNumber() != 0) {
 			result += "\n";
 		}
-		pgnTextField
-				.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
+		pgnTextField.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
 		// Store history of the field so that undos work
 		pgnHistory[board.getMoveNumber()] = pgnTextField.getText();
 	}
@@ -441,8 +428,7 @@ public class MainController {
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("Error Dialog");
-				alert.setContentText(
-						"Ooops, there was an error whilst loading the save game file!");
+				alert.setContentText("Ooops, there was an error whilst loading the save game file!");
 				alert.showAndWait();
 				e.printStackTrace();
 			} finally {
@@ -506,8 +492,7 @@ public class MainController {
 		BufferedWriter writer = null;
 		if (file != null) {
 			try {
-				writer = new BufferedWriter(
-						new FileWriter(file + (!file.getName().endsWith(".txt") ? ".txt" : "")));
+				writer = new BufferedWriter(new FileWriter(file + (!file.getName().endsWith(".txt") ? ".txt" : "")));
 				writer.write(result);
 			} catch (IOException ie) {
 				ie.printStackTrace();
@@ -522,6 +507,7 @@ public class MainController {
 	}
 
 	// Method is called when the user presses the restart game button
+	// $\label{code:restart}$
 	@FXML
 	private void restartGame(ActionEvent event) {
 		setupGame();
@@ -530,11 +516,17 @@ public class MainController {
 
 	// Simply undo the game twice to get back to the player's move
 	// Also undo the PGN notation
-	// Then re-generate the moves available
+	// Then re-generate the moves available $\label{code:undoAction}$
 	@FXML
 	private void undoAction(ActionEvent event) {
-		if (board.getMoveNumber() >= 2) {
+		if (board.getMoveNumber() >= 2 && UIConstants.PLAYING_AI) {
 			board.undo();
+			board.undo();
+			pgnTextField.setText(pgnHistory[board.getMoveNumber()]);
+			clearCanvas();
+			paintChessBoard(board);
+			moveList = MoveGen.generateMoves(board, true);
+		} else if (board.getMoveNumber() >= 1 && !UIConstants.PLAYING_AI) {
 			board.undo();
 			pgnTextField.setText(pgnHistory[board.getMoveNumber()]);
 			clearCanvas();
@@ -545,7 +537,7 @@ public class MainController {
 
 	// Load FEN notation so that users can easily change the board
 	// Some users may wish to import boards from other programs
-	// This makes it easy
+	// This makes it easy $\label{code:loadFenMenuItem}$
 	@FXML
 	private void loadFenMenuItem(ActionEvent event) {
 		TextInputDialog dialog = new TextInputDialog("");
@@ -576,7 +568,7 @@ public class MainController {
 	}
 
 	// Export the FEN of the current board
-	// Executed when a user clicks a button in the menu bar
+	// Executed when a user clicks a button in the menu bar $\label{code:exportFenMenuItem}$
 	@FXML
 	private void exportFenMenuItem(ActionEvent event) {
 		String fen = board.exportFen();
@@ -587,7 +579,7 @@ public class MainController {
 		alert.showAndWait();
 	}
 
-	// Executed when the user chooses to change the theme of the board
+	// Executed when the user chooses to change the theme of the board $\label{code:boardColourMenuItem}$
 	@FXML
 	private void boardColourMenuItem(ActionEvent event) {
 		// The user chooses from three options
@@ -596,8 +588,7 @@ public class MainController {
 		choices.add("Moss Green");
 		choices.add("Grey");
 
-		ChoiceDialog<String> dialog = new ChoiceDialog<>(UIConstants.BOARD_COLOUR.getColourName(),
-				choices);
+		ChoiceDialog<String> dialog = new ChoiceDialog<>(UIConstants.BOARD_COLOUR.getColourName(), choices);
 		dialog.setHeaderText("Choose a Colour Theme");
 		dialog.setTitle("Choose Board Colour");
 
