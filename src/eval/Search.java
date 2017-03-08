@@ -165,6 +165,7 @@ public class Search {
 		double y = Evaluation.fastEval(board);
 		board.undo();
 		while (true) {
+			//Maximiser white is in ascending order
 			if (colorFactor == 1) {
 				if (x <= y) {
 					result.add(leftMove);
