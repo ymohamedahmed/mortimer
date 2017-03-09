@@ -40,8 +40,7 @@ public class Search {
 				firstGuess = mtdf(board, firstGuess, depth, color);
 				// If too much time has been spent evaluating break from the
 				// loop
-				if (System.currentTimeMillis() - startTime >= timePerMove
-						&& depth >= EvalConstants.MIN_DEPTH) {
+				if (System.currentTimeMillis() - startTime >= timePerMove && depth >= EvalConstants.MIN_DEPTH) {
 					System.out.println("DEPTH: " + depth);
 					break;
 				}
@@ -108,6 +107,7 @@ public class Search {
 		}
 		double bestValue = Double.NEGATIVE_INFINITY;
 		// Pseudo-legal moves are generated to speed up the algorithm
+		// By sorting them by evaluation value, cutoffs are more likely to occur
 		List<Move> moves = mergeSort(board, MoveGen.generateMoves(board, false), colorFactor);
 
 		// Analyses each move
@@ -137,44 +137,59 @@ public class Search {
 		return bestValue;
 	}
 
-	// Merge sort algorithm
+	// Merge sort algorithm to order the moves available by the evaluation value
+	// of the resulting board $\label{code:mergesort}$
 	public List<Move> mergeSort(BitBoard board, List<Move> moves, int colorFactor) {
 		int size = moves.size();
 		if (size <= 1) {
 			return moves;
 		}
+		// Find the middle of the list
 		int middleIndex = size / 2;
+		// Split the list into left and right $\label{code:listoperations}$
 		List<Move> leftList = moves.subList(0, middleIndex);
 		List<Move> rightList = moves.subList(middleIndex, size);
+		// Recursively apply the sort to left and right list
 		rightList = mergeSort(board, rightList, colorFactor);
 		leftList = mergeSort(board, leftList, colorFactor);
+		// Merge the two lists
 		List<Move> result = merge(board, leftList, rightList, colorFactor);
 		return result;
 	}
 
+	// Algorithm to merge two lists together into a single list
 	public List<Move> merge(BitBoard board, List<Move> left, List<Move> right, int colorFactor) {
 		List<Move> result = new ArrayList<>();
+		// Generate iterators for each half of the list
 		Iterator<Move> leftIter = left.iterator();
 		Iterator<Move> rightIter = right.iterator();
+		// Work out eval values for the first item in each list
+		// Note: move must be undone to return the board to its original state
 		Move leftMove = leftIter.next();
 		board.move(leftMove);
-		double x = Evaluation.fastEval(board);
+		double leftEval = Evaluation.fastEval(board);
 		board.undo();
 		Move rightMove = rightIter.next();
 		board.move(rightMove);
-		double y = Evaluation.fastEval(board);
+		double rightEval = Evaluation.fastEval(board);
 		board.undo();
+		// The while loops is broken as and when is appropriate
 		while (true) {
-			//Maximiser white is in ascending order
+			// White player is maximiser, so board values should be sorted in
+			// ascending order
 			if (colorFactor == 1) {
-				if (x <= y) {
+				if (leftEval <= rightEval) {
+					// Add the move to the resulting list, sort
 					result.add(leftMove);
 					if (leftIter.hasNext()) {
+						// Update evaluation values
 						leftMove = leftIter.next();
 						board.move(leftMove);
-						x = Evaluation.fastEval(board);
+						leftEval = Evaluation.fastEval(board);
 						board.undo();
 					} else {
+						// If the left list is empty, add the rest of the right
+						// list
 						result.add(rightMove);
 						while (rightIter.hasNext()) {
 							result.add(rightIter.next());
@@ -182,11 +197,12 @@ public class Search {
 						break;
 					}
 				} else {
+					// Add the smaller of the two to the list
 					result.add(rightMove);
 					if (rightIter.hasNext()) {
 						rightMove = rightIter.next();
 						board.move(rightMove);
-						y = Evaluation.fastEval(board);
+						rightEval = Evaluation.fastEval(board);
 						board.undo();
 					} else {
 						result.add(leftMove);
@@ -196,13 +212,17 @@ public class Search {
 						break;
 					}
 				}
-			}else{
-				if (x >= y) {
+			} else {
+				// Black player is minimiser, so board values should be sorted
+				// in descending order to maximise cutoffs
+				// Equivalent to the code above, the initial condition is merely
+				// reversed
+				if (leftEval >= rightEval) {
 					result.add(leftMove);
 					if (leftIter.hasNext()) {
 						leftMove = leftIter.next();
 						board.move(leftMove);
-						x = Evaluation.fastEval(board);
+						leftEval = Evaluation.fastEval(board);
 						board.undo();
 					} else {
 						result.add(rightMove);
@@ -216,7 +236,7 @@ public class Search {
 					if (rightIter.hasNext()) {
 						rightMove = rightIter.next();
 						board.move(rightMove);
-						y = Evaluation.fastEval(board);
+						rightEval = Evaluation.fastEval(board);
 						board.undo();
 					} else {
 						result.add(leftMove);
