@@ -1,6 +1,6 @@
 package eval;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +22,7 @@ public class Search {
 		double minScore = Double.POSITIVE_INFINITY;
 		Move optimal = null;
 		// Find all the possible moves
-		ArrayList<Move> moves = MoveGen.generateMoves(board, true);
+		LinkedList<Move> moves = MoveGen.generateMoves(board, true);
 		int noOfMoves = moves.size();
 		// Calculates a rough estimate of how much time to spend evaluating each
 		// move
@@ -159,7 +159,7 @@ public class Search {
 
 	// Algorithm to merge two lists together into a single list
 	public List<Move> merge(BitBoard board, List<Move> left, List<Move> right, int colorFactor) {
-		List<Move> result = new ArrayList<>();
+		List<Move> result = new LinkedList<>();
 		// Generate iterators for each half of the list
 		Iterator<Move> leftIter = left.iterator();
 		Iterator<Move> rightIter = right.iterator();

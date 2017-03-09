@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,12 +42,12 @@ public class MainController {
 	public TextArea pgnTextField;
 	public Slider moveSpeedSlider;
 
-	private ArrayList<Integer> blueSquares = new ArrayList<>();
+	private LinkedList<Integer> blueSquares = new LinkedList<>();
 	private int oldPos;
 	private Search search = new Search();
 	private BitBoard board;
 	private String[] pgnHistory = new String[CoreConstants.MAX_MOVES];
-	private ArrayList<Move> moveList = new ArrayList<>();
+	private LinkedList<Move> moveList = new LinkedList<>();
 
 	// Called initially
 	public void initialize() {
@@ -155,7 +155,7 @@ public class MainController {
 			// Clicks square with piece in it $\label{code:dispmoves}$
 			if (piece != CoreConstants.EMPTY && !pieceMoved) {
 				// Get its available moves
-				ArrayList<Move> moves = getMovesPiece(index, moveList);
+				LinkedList<Move> moves = getMovesPiece(index, moveList);
 				oldPos = index;
 				// Clear the canvas and then repaint it
 				clearCanvas();
@@ -184,7 +184,7 @@ public class MainController {
 
 	// Returns the move based on the piece, where it came from and where it's
 	// going
-	public Move getMove(ArrayList<Move> moves, int piece, int oldIndex, int finalIndex) {
+	public Move getMove(LinkedList<Move> moves, int piece, int oldIndex, int finalIndex) {
 		for (Move move : moves) {
 			if (move.getPieceType() == piece && move.getOldPos() == oldIndex && move.getFinalPos() == finalIndex) {
 				return move;
@@ -194,8 +194,8 @@ public class MainController {
 	}
 
 	// Gets all the moves available to a particular piece
-	private ArrayList<Move> getMovesPiece(int oldPos, ArrayList<Move> moveList) {
-		ArrayList<Move> result = new ArrayList<>();
+	private LinkedList<Move> getMovesPiece(int oldPos, LinkedList<Move> moveList) {
+		LinkedList<Move> result = new LinkedList<>();
 		for (Move move : moveList) {
 			if (move.getOldPos() == oldPos) {
 				result.add(move);
@@ -266,7 +266,7 @@ public class MainController {
 		if (display) {
 			// Display choices
 			String choice = new String();
-			List<String> choices = new ArrayList<>();
+			List<String> choices = new LinkedList<>();
 			choices.add("Queen");
 			choices.add("Rook");
 			choices.add("Bishop");
@@ -583,7 +583,7 @@ public class MainController {
 	@FXML
 	private void boardColourMenuItem(ActionEvent event) {
 		// The user chooses from three options
-		List<String> choices = new ArrayList<>();
+		List<String> choices = new LinkedList<>();
 		choices.add("Classic");
 		choices.add("Moss Green");
 		choices.add("Grey");

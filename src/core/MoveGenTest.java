@@ -2,7 +2,7 @@ package core;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.junit.Test;
 
@@ -72,7 +72,7 @@ public class MoveGenTest {
 
 	public long perft(int depth) {
 		long nodes = 0;
-		ArrayList<Move> moveList = MoveGen.generateMoves(board, true);
+		LinkedList<Move> moveList = MoveGen.generateMoves(board, true);
 		int nMoves = moveList.size();
 		if (depth == 1) {
 			return nMoves;

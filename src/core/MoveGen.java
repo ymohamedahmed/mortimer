@@ -1,12 +1,12 @@
 package core;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 public class MoveGen {
 
-	public static ArrayList<Move> generateMoves(BitBoard board, boolean legal) {
-		ArrayList<Move> moves = new ArrayList<>();
+	public static LinkedList<Move> generateMoves(BitBoard board, boolean legal) {
+		LinkedList<Move> moves = new LinkedList<>();
 		// Generate moves only for the next side to move
 		int side = board.toMove;
 		// Start by adding forward pawn moves, known as pushes
@@ -50,10 +50,10 @@ public class MoveGen {
 
 		Iterator<Move> iter = moves.iterator();
 		// No move can go directly to the position of a king, so remove these
-		// moves from the arraylist
+		// moves from the LinkedList
 		// NOTE: iterator is used to avoid concurrent modification exception
 		// i.e.
-		// you can't loop through an arraylist and remove elements at the same
+		// you can't loop through an LinkedList and remove elements at the same
 		// time
 		while (iter.hasNext()) {
 			Move move = iter.next();
@@ -104,10 +104,10 @@ public class MoveGen {
 		return false;
 	}
 
-	private static ArrayList<Move> removeCheckMoves(BitBoard board, ArrayList<Move> moveList, int side) {
+	private static LinkedList<Move> removeCheckMoves(BitBoard board, LinkedList<Move> moveList, int side) {
 
 		// Iterator has to be used to avoid concurrent modification exception
-		// i.e. so that we can remove from the arraylist as we loop through it
+		// i.e. so that we can remove from the LinkedList as we loop through it
 		Iterator<Move> iter = moveList.iterator();
 		while (iter.hasNext()) {
 			Move move = iter.next();
@@ -129,12 +129,12 @@ public class MoveGen {
 		return moveList;
 	}
 
-	private static void addMoves(int pieceType, int index, long moves, ArrayList<Move> moveList,
+	private static void addMoves(int pieceType, int index, long moves, LinkedList<Move> moveList,
 			boolean enPassant, boolean promotion, byte castling) {
 		while (moves != 0) {
 			// Each set bit in the long moves represents a positon where the
 			// piece could move
-			// Each move is added to an arraylist containing all the moves
+			// Each move is added to an LinkedList containing all the moves
 			Move move = new Move(pieceType, index, BitBoard.bitScanForward(moves));
 			move.setCastling(castling);
 			move.setPromotion(promotion);
@@ -146,7 +146,7 @@ public class MoveGen {
 
 	// Used by the pawn move generation since black and white move in different
 	// directions an offset is used
-	private static void addMovesWithOffset(int pieceType, long moves, ArrayList<Move> moveList,
+	private static void addMovesWithOffset(int pieceType, long moves, LinkedList<Move> moveList,
 			boolean enPassant, boolean promotion, byte castling, int offset) {
 		while (moves != 0) {
 			int to = BitBoard.bitScanForward(moves);
@@ -163,7 +163,7 @@ public class MoveGen {
 		}
 	}
 
-	private static void addRookMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addRookMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK;
 		// Blockers is all the positions which could stop the rook from moving
 		// further
@@ -183,7 +183,7 @@ public class MoveGen {
 	}
 
 	// Equivalent to the algorithm above
-	private static void addBishopMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addBishopMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskBishop[index];
@@ -197,7 +197,7 @@ public class MoveGen {
 	// The moves of the queen are just the moves of a rook as well as the moves
 	// of a bishop in that position
 	// Hence we calculate both of those and then OR the result
-	private static void addQueenMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addQueenMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN;
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskRook[index];
@@ -220,7 +220,7 @@ public class MoveGen {
 	// Simply lookup the moves of the knight since it is unaffected by the
 	// pieces around it so can be pre-computed easily
 	// Then remove the moves that would 'capture' a friendly piece
-	private static void addKnightMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addKnightMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT;
 		long knightMoves = CoreConstants.KNIGHT_TABLE[index] & ~board.bitboards[side];
 		addMoves(pieceType, index, knightMoves, moveList, false, false, CoreConstants.noCastle);
@@ -228,7 +228,7 @@ public class MoveGen {
 
 	// Similary to the knight, king moves can just be looked up
 	// However castling moves have to be calculateds
-	private static void addKingMoves(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addKingMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
 		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KING : CoreConstants.BLACK_KING;
 		addMoves(pieceType, index, moves, moveList, false, false, CoreConstants.noCastle);
@@ -259,7 +259,7 @@ public class MoveGen {
 
 	// Based on a tutorial in C++ by Peter Ellis Jones on
 	// https://github.com/peterellisjones/Checkmate
-	private static void addPawnPushes(BitBoard board, ArrayList<Move> moveList, int side) {
+	private static void addPawnPushes(BitBoard board, LinkedList<Move> moveList, int side) {
 		// If side is 0, then the piece is white
 		int pieceType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		// Offsets used to add correct moves for white and black
@@ -293,7 +293,7 @@ public class MoveGen {
 				offset + offset);
 	}
 
-	private static void addPawnAttacks(BitBoard board, ArrayList<Move> moveList, int index, int side) {
+	private static void addPawnAttacks(BitBoard board, LinkedList<Move> moveList, int index, int side) {
 		int enemy = (side == 0) ? 1 : 0;
 		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
