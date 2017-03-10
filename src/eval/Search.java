@@ -1,8 +1,8 @@
 package eval;
 
-import java.util.LinkedList;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import core.BitBoard;
@@ -22,7 +22,7 @@ public class Search {
 		double minScore = Double.POSITIVE_INFINITY;
 		Move optimal = null;
 		// Find all the possible moves
-		LinkedList<Move> moves = MoveGen.generateMoves(board, true);
+		List<Move> moves = MoveGen.generateMoves(board, true);
 		int noOfMoves = moves.size();
 		// Calculates a rough estimate of how much time to spend evaluating each
 		// move
@@ -66,7 +66,7 @@ public class Search {
 	}
 
 	// Search algorithm used with negamax (minimax variant), supposed to be more
-	// efficient and produce the same result
+	// efficient and produce the same result $\label{code:mtdf}$
 	private double mtdf(BitBoard board, double firstGuess, int depth, int color) {
 		double g = firstGuess;
 		double upperBound = Double.POSITIVE_INFINITY;
@@ -146,10 +146,10 @@ public class Search {
 		}
 		// Find the middle of the list
 		int middleIndex = size / 2;
-		// Split the list into left and right $\label{code:listoperations}$
+		// Split the list into left and right $\label{code:sublist}$
 		List<Move> leftList = moves.subList(0, middleIndex);
 		List<Move> rightList = moves.subList(middleIndex, size);
-		// Recursively apply the sort to left and right list
+		// Recursively apply the sort to left and right list 
 		rightList = mergeSort(board, rightList, colorFactor);
 		leftList = mergeSort(board, leftList, colorFactor);
 		// Merge the two lists

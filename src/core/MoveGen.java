@@ -104,10 +104,12 @@ public class MoveGen {
 		return false;
 	}
 
-	private static LinkedList<Move> removeCheckMoves(BitBoard board, LinkedList<Move> moveList, int side) {
+	private static LinkedList<Move> removeCheckMoves(BitBoard board, LinkedList<Move> moveList,
+			int side) {
 
 		// Iterator has to be used to avoid concurrent modification exception
 		// i.e. so that we can remove from the LinkedList as we loop through it
+		// $\label{code:listRemove}$
 		Iterator<Move> iter = moveList.iterator();
 		while (iter.hasNext()) {
 			Move move = iter.next();
@@ -133,7 +135,7 @@ public class MoveGen {
 			boolean enPassant, boolean promotion, byte castling) {
 		while (moves != 0) {
 			// Each set bit in the long moves represents a positon where the
-			// piece could move
+			// piece could move $\label{code:listAdd)$
 			// Each move is added to an LinkedList containing all the moves
 			Move move = new Move(pieceType, index, BitBoard.bitScanForward(moves));
 			move.setCastling(castling);
@@ -163,7 +165,8 @@ public class MoveGen {
 		}
 	}
 
-	private static void addRookMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
+	private static void addRookMoves(BitBoard board, LinkedList<Move> moveList, int index,
+			int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_ROOK : CoreConstants.BLACK_ROOK;
 		// Blockers is all the positions which could stop the rook from moving
 		// further
@@ -183,7 +186,8 @@ public class MoveGen {
 	}
 
 	// Equivalent to the algorithm above
-	private static void addBishopMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
+	private static void addBishopMoves(BitBoard board, LinkedList<Move> moveList, int index,
+			int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_BISHOP : CoreConstants.BLACK_BISHOP;
 		long bishopBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskBishop[index];
@@ -197,7 +201,8 @@ public class MoveGen {
 	// The moves of the queen are just the moves of a rook as well as the moves
 	// of a bishop in that position
 	// Hence we calculate both of those and then OR the result
-	private static void addQueenMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
+	private static void addQueenMoves(BitBoard board, LinkedList<Move> moveList, int index,
+			int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_QUEEN : CoreConstants.BLACK_QUEEN;
 		long rookBlockers = (board.bitboards[CoreConstants.WHITE]
 				| board.bitboards[CoreConstants.BLACK]) & CoreConstants.occupancyMaskRook[index];
@@ -220,7 +225,8 @@ public class MoveGen {
 	// Simply lookup the moves of the knight since it is unaffected by the
 	// pieces around it so can be pre-computed easily
 	// Then remove the moves that would 'capture' a friendly piece
-	private static void addKnightMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
+	private static void addKnightMoves(BitBoard board, LinkedList<Move> moveList, int index,
+			int side) {
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KNIGHT : CoreConstants.BLACK_KNIGHT;
 		long knightMoves = CoreConstants.KNIGHT_TABLE[index] & ~board.bitboards[side];
 		addMoves(pieceType, index, knightMoves, moveList, false, false, CoreConstants.noCastle);
@@ -228,7 +234,8 @@ public class MoveGen {
 
 	// Similary to the knight, king moves can just be looked up
 	// However castling moves have to be calculateds
-	private static void addKingMoves(BitBoard board, LinkedList<Move> moveList, int index, int side) {
+	private static void addKingMoves(BitBoard board, LinkedList<Move> moveList, int index,
+			int side) {
 		long moves = CoreConstants.KING_TABLE[index] & ~board.bitboards[side];
 		int pieceType = (side == 0) ? CoreConstants.WHITE_KING : CoreConstants.BLACK_KING;
 		addMoves(pieceType, index, moves, moveList, false, false, CoreConstants.noCastle);
@@ -278,7 +285,7 @@ public class MoveGen {
 		// Circular left shift is equivalent to moving each pawn forward one
 		// square
 		// If it is empty then the push is valid
-		long pushes = (side == 0 ? (pawns<<8) : (pawns >>> 8)) & emptySquares;
+		long pushes = (side == 0 ? (pawns << 8) : (pawns >>> 8)) & emptySquares;
 		addMovesWithOffset(pieceType, pushes & ~promotions_mask[side], moveList, false, false,
 				CoreConstants.noCastle, offset);
 		// Isolate which moves are promotions
@@ -288,12 +295,13 @@ public class MoveGen {
 		// If the push led to row 3 if white or row 8 if black and the square
 		// ahead is empty then double push is possible
 		pushes &= startWithMask[side];
-		long doublePushes = (side == 0 ? (pushes<<8) : (pushes >>> 8)) & emptySquares;
+		long doublePushes = (side == 0 ? (pushes << 8) : (pushes >>> 8)) & emptySquares;
 		addMovesWithOffset(pieceType, doublePushes, moveList, false, false, CoreConstants.noCastle,
 				offset + offset);
 	}
 
-	private static void addPawnAttacks(BitBoard board, LinkedList<Move> moveList, int index, int side) {
+	private static void addPawnAttacks(BitBoard board, LinkedList<Move> moveList, int index,
+			int side) {
 		int enemy = (side == 0) ? 1 : 0;
 		int pawnType = (side == 0) ? CoreConstants.WHITE_PAWN : CoreConstants.BLACK_PAWN;
 		long[] promotions_mask = { CoreConstants.ROW_8, CoreConstants.ROW_1 };
@@ -305,7 +313,7 @@ public class MoveGen {
 		// Isolate the promotion moves
 		long promotions = attacks & promotions_mask[side];
 		addMoves(pawnType, index, promotions, moveList, false, true, CoreConstants.noCastle);
-		// Isolate the en passant moves $\label{code:enpassant}$
+		// Isolate the en passant moves $\label{code:epMoveGen}$
 		long enPassant = CoreConstants.PAWN_ATTACKS_TABLE[side][index]
 				& board.epTargetSquares[side];
 		addMoves(pawnType, index, enPassant, moveList, true, false, CoreConstants.noCastle);
@@ -444,7 +452,7 @@ public class MoveGen {
 	public static void initialiseKingLookupTable() {
 		for (int square = 0; square < 64; square++) {
 			long target = 1L << square;
-			
+
 			// Each directions is considered.
 			// Similarly to the knight lookup method, the AND operator stops the
 			// moves from wrapping around the board
@@ -497,6 +505,5 @@ public class MoveGen {
 		}
 		return result;
 	}
-
 
 }

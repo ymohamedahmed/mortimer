@@ -24,35 +24,35 @@ public class MoveGenTest {
 		System.out.println("lookup table init time: " + (endTime - startTime) + "ms");
 
 		startTime = System.currentTimeMillis();
-		long perft1 = perft(board, 1);
+		long perft1 = perft(board,1);
 		System.out.println("perft 1: " + perft1);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 1 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft2 = perft(board, 2);
+		long perft2 = perft(board,2);
 		System.out.println("perft 2: " + perft2);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 2 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft3 = perft(board, 3);
+		long perft3 = perft(board,3);
 		System.out.println("perft 3: " + perft3);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 3 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft4 = perft(board, 4);
+		long perft4 = perft(board,4);
 		System.out.println("perft 4: " + perft4);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 4 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft5 = perft(board, 5);
+		long perft5 = perft(board,5);
 		System.out.println("perft 5: " + perft5);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 5 time: " + (endTime - startTime) + "ms");
