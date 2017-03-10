@@ -7,12 +7,12 @@ import java.util.LinkedList;
 import org.junit.Test;
 
 public class MoveGenTest {
-	BitBoard board = new BitBoard();
 
 	@Test
 	public void testHammingWeight() {
 		long startTime = 0;
 		long endTime = 0;
+		BitBoard board = new BitBoard();
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
 		MoveGen.initialiseKnightLookupTable();
@@ -24,35 +24,35 @@ public class MoveGenTest {
 		System.out.println("lookup table init time: " + (endTime - startTime) + "ms");
 
 		startTime = System.currentTimeMillis();
-		long perft1 = perft(1);
+		long perft1 = perft(board, 1);
 		System.out.println("perft 1: " + perft1);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 1 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft2 = perft(2);
+		long perft2 = perft(board, 2);
 		System.out.println("perft 2: " + perft2);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 2 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft3 = perft(3);
+		long perft3 = perft(board, 3);
 		System.out.println("perft 3: " + perft3);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 3 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft4 = perft(4);
+		long perft4 = perft(board, 4);
 		System.out.println("perft 4: " + perft4);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 4 time: " + (endTime - startTime) + "ms");
 
 		board.resetToInitialSetup();
 		startTime = System.currentTimeMillis();
-		long perft5 = perft(5);
+		long perft5 = perft(board, 5);
 		System.out.println("perft 5: " + perft5);
 		endTime = System.currentTimeMillis();
 		System.out.println("perft 5 time: " + (endTime - startTime) + "ms");
@@ -70,7 +70,7 @@ public class MoveGenTest {
 		assertEquals(true, board.stalemate(1));
 	}
 
-	public long perft(int depth) {
+	public long perft(BitBoard board, int depth) {
 		long nodes = 0;
 		LinkedList<Move> moveList = MoveGen.generateMoves(board, true);
 		int nMoves = moveList.size();
@@ -80,7 +80,7 @@ public class MoveGenTest {
 
 		for (int i = 0; i < nMoves; i++) {
 			board.move(moveList.get(i));
-			nodes += perft(depth - 1);
+			nodes += perft(board, depth - 1);
 			board.undo();
 		}
 		return nodes;
