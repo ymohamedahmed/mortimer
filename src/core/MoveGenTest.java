@@ -70,6 +70,8 @@ public class MoveGenTest {
 		assertEquals(true, board.stalemate(1));
 	}
 
+	// Perft tests the move generation by traversing the strictly legal game
+	// tree $\label{code:perft}$
 	public long perft(BitBoard board, int depth) {
 		long nodes = 0;
 		LinkedList<Move> moveList = MoveGen.generateMoves(board, true);
