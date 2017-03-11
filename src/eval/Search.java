@@ -14,8 +14,7 @@ public class Search {
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
 	// This is the method that is accessed from the main controller class, and
 	// returns what the program deems to be the best available move to a
-	// particular colour.
-
+	// particular colour. $\label{code:rootNegamax}$
 	public Move rootNegamax(BitBoard board, int color) {
 		long overallStartTime = System.currentTimeMillis();
 		double maxScore = Double.NEGATIVE_INFINITY;

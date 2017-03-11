@@ -109,7 +109,7 @@ public class MoveGen {
 
 		// Iterator has to be used to avoid concurrent modification exception
 		// i.e. so that we can remove from the LinkedList as we loop through it
-		// $\label{code:listRemove}$
+		// 
 		Iterator<Move> iter = moveList.iterator();
 		while (iter.hasNext()) {
 			Move move = iter.next();
@@ -118,7 +118,7 @@ public class MoveGen {
 				board.move(move);
 				// If it results in check for the player's king
 				// Or the king moves in the square surrounding another king
-				// The move is invalid and hence removed
+				// The move is invalid and hence removed $\label{code:listRemove}$
 				boolean check = board.check(side);
 				boolean kingInKingSquare = kingInKingSquare(board, side);
 				board.undo();
@@ -135,8 +135,8 @@ public class MoveGen {
 			boolean enPassant, boolean promotion, byte castling) {
 		while (moves != 0) {
 			// Each set bit in the long moves represents a positon where the
-			// piece could move $\label{code:listAdd)$
-			// Each move is added to an LinkedList containing all the moves
+			// piece could move 
+			// Each move is added to an LinkedList containing all the moves $\label{code:listAdd}$
 			Move move = new Move(pieceType, index, BitBoard.bitScanForward(moves));
 			move.setCastling(castling);
 			move.setPromotion(promotion);
