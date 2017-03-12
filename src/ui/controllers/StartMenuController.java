@@ -42,7 +42,7 @@ public class StartMenuController {
 	// Displays a dialog allowing the user to select which colour they wish to
 	// play with $\label{code:chooseColour}$
 	private void chooseColour() {
-		String choice = new String();
+		String choice = "";
 		List<String> choices = new ArrayList<>();
 		choices.add("White");
 		choices.add("Black");

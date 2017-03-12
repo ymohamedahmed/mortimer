@@ -49,7 +49,9 @@ public class BitBoard {
 		epHistory = new long[2][CoreConstants.MAX_MOVES];
 		castlingHistory = new long[2][CoreConstants.MAX_MOVES];
 	}
+
 	public void loadFen(String board) {
+		moveNumber = 0;
 		// Start by resetting the board $\label{code:loadFen}$
 		reset();
 		// "/" represent end of row on the board
@@ -106,7 +108,8 @@ public class BitBoard {
 
 	public String exportFen() {
 		String result = "";
-		// Loop through the board in the order used in FEN notation $\label{code:exportFen}$
+		// Loop through the board in the order used in FEN notation
+		// $\label{code:exportFen}$
 		for (int row = 56; row >= 0; row -= 8) {
 			for (int col = 0; col <= 7; col++) {
 				int index = row + col;
@@ -300,7 +303,8 @@ public class BitBoard {
 	}
 
 	public void undo() {
-		// Update the current bitboards from the history arrays $\label{code:undo}$
+		// Update the current bitboards from the history arrays
+		// $\label{code:undo}$
 		moveNumber--;
 		bitboards[0] = whiteHistory[moveNumber];
 		bitboards[1] = blackHistory[moveNumber];
@@ -326,7 +330,8 @@ public class BitBoard {
 
 	}
 
-	//Function takes the side as input and calculates if castling is legal $\label{code:castling}$
+	// Function takes the side as input and calculates if castling is legal
+	// $\label{code:castling}$
 	void updateCastlingFlags(int side) {
 		if (side == 0) {
 			// Consider queenside white
@@ -436,7 +441,8 @@ public class BitBoard {
 
 	// Based on
 	// https://chessprogramming.wikispaces.com/Checks+and+Pinned+Pieces+(Bitboards)
-	// Effectively works backwards from the king position to see if $\label{code:check}$
+	// Effectively works backwards from the king position to see if
+	// $\label{code:check}$
 	public boolean check(int side) {
 		int kingIndex = (side == CoreConstants.WHITE)
 				? bitScanForward(bitboards[CoreConstants.WHITE_KING])
@@ -465,9 +471,19 @@ public class BitBoard {
 		}
 	}
 
+	public boolean checkmate(int side, int sideToMove) {
+		toMove = sideToMove;
+		if (check(side) && MoveGen.generateMoves(this, true).size() == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	// Player has no available moves and is not in check then the game is
 	// stalemate $\label{code:stalemate}$
 	public boolean stalemate(int sideToMove) {
+		toMove = sideToMove;
 		if (!check(sideToMove) && MoveGen.generateMoves(this, true).size() == 0) {
 			return true;
 		} else {
@@ -575,7 +591,8 @@ public class BitBoard {
 		return pos == 64 ? -1 : 63 - pos;
 	}
 
-	// Zobrist hashing is the hash function used in the evaluation system $\label{code:initZob}$
+	// Zobrist hashing is the hash function used in the evaluation system
+	// $\label{code:initZob}$
 	public static void initialiseZobrist() {
 		for (int x = 0; x <= 63; x++) {
 			for (int y = 0; y <= 11; y++) {

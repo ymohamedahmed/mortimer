@@ -1,5 +1,6 @@
 package eval;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10,8 +11,11 @@ import core.Move;
 import core.MoveGen;
 
 public class Search {
+	private ArrayList<String> fenListW = new ArrayList<>();
+	private ArrayList<String> fenListB = new ArrayList<>();
 	// Transposition table $\label{code:hashtable}$
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
+
 	// This is the method that is accessed from the main controller class, and
 	// returns what the program deems to be the best available move to a
 	// particular colour. $\label{code:rootNegamax}$
@@ -39,8 +43,8 @@ public class Search {
 				firstGuess = mtdf(board, firstGuess, depth, color);
 				// If too much time has been spent evaluating break from the
 				// loop
-				if (System.currentTimeMillis() - startTime >= timePerMove && depth >= EvalConstants.MIN_DEPTH) {
-					System.out.println("DEPTH: " + depth);
+				if (System.currentTimeMillis() - startTime >= timePerMove
+						&& depth >= EvalConstants.MIN_DEPTH) {
 					break;
 				}
 			}
@@ -112,6 +116,25 @@ public class Search {
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);
+			String fen = "";
+
+			if (!board.stalemate(0)) {
+				fen = board.exportFen();
+				if (fen != "" & !fenListW.contains(fen) && fenListW.size() < 10) {
+					fenListW.add(fen);
+				}
+			} else if (!board.stalemate(1)) {
+				fen = board.exportFen();
+				if (fen != "" & !fenListB.contains(fen) && fenListB.size() < 10) {
+					fenListB.add(fen);
+				}
+			}
+
+			if (fenListW.size() >= 10 && fenListB.size() >= 10) {
+				System.out.println(fenListW);
+				System.out.println(fenListB);
+				System.exit(0);
+			}
 			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
 			board.undo();
 			bestValue = (int) Math.max(bestValue, v);
@@ -148,7 +171,7 @@ public class Search {
 		// Split the list into left and right $\label{code:sublist}$
 		List<Move> leftList = moves.subList(0, middleIndex);
 		List<Move> rightList = moves.subList(middleIndex, size);
-		// Recursively apply the sort to left and right list 
+		// Recursively apply the sort to left and right list
 		rightList = mergeSort(board, rightList, colorFactor);
 		leftList = mergeSort(board, leftList, colorFactor);
 		// Merge the two lists
