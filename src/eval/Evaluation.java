@@ -6,7 +6,7 @@ import core.CoreConstants;
 public class Evaluation extends EvalConstants {
 
 	public static double evaluate(BitBoard board, int color) {
-		// Calculate the number of each type of piece per side
+		// Calculate the number of each type of piece per side $\label{code:evalFunction}$
 		int whiteKing = board.checkmate(CoreConstants.WHITE) ? 0 : 1;
 		int blackKing = board.checkmate(CoreConstants.BLACK) ? 0 : 1;
 		int whiteQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_QUEEN]);
