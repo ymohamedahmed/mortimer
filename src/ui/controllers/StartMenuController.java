@@ -50,7 +50,7 @@ public class StartMenuController {
 
 		ChoiceDialog<String> dialog = new ChoiceDialog<>("White", choices);
 		dialog.setTitle("Colour Choice");
-		dialog.setContentText("Choose colour you wish to play with");
+		dialog.setContentText("Choose the colour you wish to play with");
 		Optional<String> result = dialog.showAndWait();
 
 		if (result.isPresent()) {
