@@ -3,6 +3,7 @@ package core;
 import static org.junit.Assert.assertEquals;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 import org.junit.Test;
 
@@ -257,5 +258,23 @@ public class MoveGenTest {
 			assertEquals(true, board.stalemate(CoreConstants.BLACK));
 		}
 	}
-
+	
+	@Test
+	public void testRandom(){
+		int i = 0;
+		int oneCount = 0;
+		int zeroCount = 0;
+		Random random = new Random();
+		while(i < 1000000){
+			int rand = random.nextInt(2);
+			if(rand == 0){
+				zeroCount ++;
+			}else{
+				oneCount ++;
+			}
+			i++;
+		}
+		System.out.println(zeroCount);
+		System.out.println(oneCount);
+	}
 }
