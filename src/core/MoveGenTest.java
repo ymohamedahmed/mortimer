@@ -26,6 +26,7 @@ public class MoveGenTest {
 		long perft3 = perft(board, 3);
 		long perft4 = perft(board, 4);
 		long perft5 = perft(board, 5);
+		System.out.println(perft(board,6));
 		assertEquals(20, perft1);
 		assertEquals(400, perft2);
 		assertEquals(8902, perft3);
@@ -195,7 +196,7 @@ public class MoveGenTest {
 		}
 	}
 
-	@Test
+/*	@Test
 	public void testStalemate() {
 		BitBoard board = new BitBoard();
 		// Initialise the various lookup tables so that move generation works
@@ -256,6 +257,6 @@ public class MoveGenTest {
 			board.loadFen(fen);
 			assertEquals(true, board.stalemate(CoreConstants.BLACK));
 		}
-	}
+	}*/
 	
 }

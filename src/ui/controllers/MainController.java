@@ -249,10 +249,14 @@ public class MainController {
 		if (aiLost || playerLost || stalemate) {
 			String result = "";
 			String sPlayerColour = (UIConstants.PLAYER_COLOUR == 0) ? "WHITE" : "BLACK";
+			String sEnemyColour = (UIConstants.PLAYER_COLOUR == 0) ? "BLACK" : "WHITE";
 			if (aiLost) {
 				result = "Congratulations you, playing with " + sPlayerColour + ", have won!";
-			} else if (playerLost) {
+			} else if (playerLost && UIConstants.PLAYING_AI) {
 				result = "Commiserations, you have lost.";
+			} else if (playerLost && !UIConstants.PLAYING_AI) {
+				result = "The player playing with " + sPlayerColour
+						+ " has lost. Congratulations to the player playing with " + sEnemyColour;
 			} else if (stalemate) {
 				result = "It is a stalemate!";
 			}
@@ -576,6 +580,7 @@ public class MainController {
 				if (UIConstants.AI_COLOUR == CoreConstants.WHITE) {
 					moveAI(board);
 				}
+				displayEndGameMessage(board);
 			} catch (Exception e) {
 				// If there is an error, notify the user
 				Alert alert = new Alert(AlertType.ERROR);

@@ -77,28 +77,8 @@ public class MoveGen {
 		int enemyKingIndex = BitBoard.bitScanForward(board.bitboards[12 + ((side == 0) ? 1 : 0)]);
 		// + or - 1,8,7,9 represent the indices of the 8 squares surrounding the
 		// king
-		if (myKingIndex + 1 == enemyKingIndex) {
-			return true;
-		}
-		if (myKingIndex - 1 == enemyKingIndex) {
-			return true;
-		}
-		if (myKingIndex + 8 == enemyKingIndex) {
-			return true;
-		}
-		if (myKingIndex - 8 == enemyKingIndex) {
-			return true;
-		}
-		if (myKingIndex + 7 == enemyKingIndex) {
-			return true;
-		}
-		if (myKingIndex - 7 == enemyKingIndex) {
-			return true;
-		}
-		if (myKingIndex + 9 == enemyKingIndex) {
-			return true;
-		}
-		if (myKingIndex - 9 == enemyKingIndex) {
+
+		if(((1 >>> myKingIndex) & CoreConstants.KING_TABLE[enemyKingIndex]) != 0){
 			return true;
 		}
 		return false;
