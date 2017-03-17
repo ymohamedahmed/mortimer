@@ -26,7 +26,6 @@ public class MoveGenTest {
 		long perft3 = perft(board, 3);
 		long perft4 = perft(board, 4);
 		long perft5 = perft(board, 5);
-		System.out.println(perft(board,6));
 		assertEquals(20, perft1);
 		assertEquals(400, perft2);
 		assertEquals(8902, perft3);

@@ -118,14 +118,16 @@ public class Search {
 			board.move(move);
 			String fen = "";
 
-			if (!board.stalemate(0)) {
+			if (board.stalemate(0)) {
 				fen = board.exportFen();
 				if (fen != "" & !fenListW.contains(fen) && fenListW.size() < 10) {
+					System.out.println("ADDED W");
 					fenListW.add(fen);
 				}
-			} else if (!board.stalemate(1)) {
+			} else if (board.stalemate(1)) {
 				fen = board.exportFen();
 				if (fen != "" & !fenListB.contains(fen) && fenListB.size() < 10) {
+					System.out.println("ADDED B");
 					fenListB.add(fen);
 				}
 			}

@@ -75,10 +75,7 @@ public class MoveGen {
 	private static boolean kingInKingSquare(BitBoard board, int side) {
 		int myKingIndex = BitBoard.bitScanForward(board.bitboards[12 + side]);
 		int enemyKingIndex = BitBoard.bitScanForward(board.bitboards[12 + ((side == 0) ? 1 : 0)]);
-		// + or - 1,8,7,9 represent the indices of the 8 squares surrounding the
-		// king
-
-		if(((1 >>> myKingIndex) & CoreConstants.KING_TABLE[enemyKingIndex]) != 0){
+		if(((1L << myKingIndex) & CoreConstants.KING_TABLE[enemyKingIndex]) != 0){
 			return true;
 		}
 		return false;
