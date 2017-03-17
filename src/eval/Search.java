@@ -1,6 +1,5 @@
 package eval;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,8 +12,6 @@ import core.MoveGen;
 public class Search {
 	// Transposition table $\label{code:hashtable}$
 	private Hashtable<Integer, TranspositionEntry> hashtable = new Hashtable<>();
-	private ArrayList<String> fenListW = new ArrayList<>();
-	private ArrayList<String> fenListB = new ArrayList<>();
 
 	// This is the method that is accessed from the main controller class, and
 	// returns what the program deems to be the best available move to a
@@ -45,6 +42,7 @@ public class Search {
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove
 						&& depth >= EvalConstants.MIN_DEPTH) {
+					//System.out.println("FINAL DEPTH: " + depth);
 					break;
 				}
 			}
@@ -116,27 +114,6 @@ public class Search {
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);
-			String fen = "";
-
-			if (board.stalemate(0)) {
-				fen = board.exportFen();
-				if (fen != "" & !fenListW.contains(fen) && fenListW.size() < 10) {
-					System.out.println("ADDED W");
-					fenListW.add(fen);
-				}
-			} else if (board.stalemate(1)) {
-				fen = board.exportFen();
-				if (fen != "" & !fenListB.contains(fen) && fenListB.size() < 10) {
-					System.out.println("ADDED B");
-					fenListB.add(fen);
-				}
-			}
-
-			if (fenListW.size() >= 10 && fenListB.size() >= 10) {
-				System.out.println(fenListW);
-				System.out.println(fenListB);
-				System.exit(0);
-			}
 			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
 			board.undo();
 			bestValue = (int) Math.max(bestValue, v);

@@ -483,12 +483,16 @@ public class BitBoard {
 	// Player has no available moves and is not in check then the game is
 	// stalemate $\label{code:stalemate}$
 	public boolean stalemate(int sideToMove) {
+		int origToMove = toMove;
 		toMove = sideToMove;
 		if (!check(sideToMove) && MoveGen.generateMoves(this, true).size() == 0) {
+			toMove = origToMove;
 			return true;
 		} else {
+			toMove = origToMove;
 			return false;
 		}
+		
 	}
 
 	// Almost identical to the check method, except this takes the index of a

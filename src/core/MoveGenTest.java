@@ -195,7 +195,7 @@ public class MoveGenTest {
 		}
 	}
 
-/*	@Test
+	@Test
 	public void testStalemate() {
 		BitBoard board = new BitBoard();
 		// Initialise the various lookup tables so that move generation works
@@ -218,10 +218,10 @@ public class MoveGenTest {
 				"r1b1k1nr/pppp1ppp/8/5q2/1b1n2K1/4P3/PPP2PPP/RNBQ1BNR",
 				"r1b1k1nr/pppp1ppp/8/6q1/1b1n3K/4P3/PPP2PPP/RNBQ1BNR" };
 		// Test cases where white is next to move and game is in stalemate
-		String[] whiteToMoveInStalemateTestCases = { "8/8/8/8/8/5q2/7K/7k w",
-				"8/8/8/8/8/5q2/8/6Kk w", "8/8/8/8/6q1/8/7K/7k w", "8/8/8/1q6/8/8/8/K6k w",
-				"8/8/8/1q6/8/8/K7/7k w", "8/8/8/1q6/8/K7/8/7k w", "8/8/8/5q2/8/8/8/6Kk w",
-				"8/8/8/6q1/8/7K/8/7k w", "7K/8/6q1/8/8/8/8/7k w", "7K/5q2/8/8/8/8/8/7k w" };
+		String[] whiteToMoveInStalemateTestCases = { "7k/8/8/8/8/8/5q2/7K", "7k/8/8/8/8/6q1/8/7K",
+				"8/6k1/8/8/8/6q1/8/7K", "8/7k/8/8/8/6q1/8/7K", "6k1/8/8/8/8/6q1/8/7K",
+				"8/6k1/8/8/8/8/5q2/7K", "8/7k/8/8/8/8/5q2/7K", "6k1/8/8/8/8/8/5q2/7K",
+				"8/8/5k2/8/8/6q1/8/7K", "8/8/6k1/8/8/6q1/8/7K" };
 		// Test cases where black is next to move and game is not in stalemate
 		String[] blackToMoveNotInStalemateTestCases = {
 				"rnb1kbnr/1p1ppppp/p1p5/q7/3PP3/5N2/PPP2PPP/RNBQKB1R",
@@ -235,10 +235,10 @@ public class MoveGenTest {
 				"rnb1kbnr/pp1ppppp/8/q1P5/8/N7/PPP1PPPP/R1BQKBNR",
 				"rnb1kbnr/pp1ppppp/8/q1P5/8/5N2/PPP1PPPP/RNBQKB1R" };
 		// Test cases where black is next to move and game is in stalemate
-		String[] blackToMoveInStalemateTestCases = { "7k/8/6Q1/8/8/8/8/6K1 b",
-				"7k/8/6Q1/8/8/8/6K1/8 b", "7k/8/6Q1/8/8/8/7K/8 b", "7k/8/6Q1/8/8/8/8/7K b",
-				"7k/5Q2/8/8/8/8/8/7K b", "7k/5Q2/8/8/8/8/8/6K1 b", "7k/5Q2/8/8/8/8/6K1/8 b",
-				"7k/5Q2/8/8/8/8/7K/8 b", "7k/8/6Q1/8/8/8/8/5K2 b", "7k/8/6Q1/8/8/8/5K2/8 b" };
+		String[] blackToMoveInStalemateTestCases = { "7K/8/8/8/8/8/5Q2/7k b", "7K/8/8/8/8/6Q1/8/7k b",
+				"8/6K1/8/8/8/6Q1/8/7k b", "8/7K/8/8/8/6Q1/8/7k b", "6K1/8/8/8/8/6Q1/8/7k b",
+				"8/6K1/8/8/8/8/5Q2/7k b", "8/7K/8/8/8/8/5Q2/7k b", "6K1/8/8/8/8/8/5Q2/7k b",
+				"8/8/5K2/8/8/6Q1/8/7k b", "8/8/6K1/8/8/6Q1/8/7k b"};
 		// Check each test case matches the expected output
 		for (String fen : whiteToMoveNotInStalemateTestCases) {
 			board.loadFen(fen);
@@ -256,6 +256,6 @@ public class MoveGenTest {
 			board.loadFen(fen);
 			assertEquals(true, board.stalemate(CoreConstants.BLACK));
 		}
-	}*/
-	
+	}
+
 }
