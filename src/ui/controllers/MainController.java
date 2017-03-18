@@ -336,8 +336,12 @@ public class MainController {
 	// chess game $\label{code:updatePGN}$
 	private void updatePGNTextField(BitBoard board, Move move, boolean capture) {
 		String result = "";
+		// New line after every two moves
 		if (board.getMoveNumber() % 2 == 0) {
 			result = " ";
+		}
+		if (board.getMoveNumber() % 2 == 1 && board.getMoveNumber() != 1) {
+			result += "\n";
 		}
 		pgnTextField.setWrapText(true);
 		int side = move.getPieceType() % 2;
@@ -369,10 +373,7 @@ public class MainController {
 		} else if (board.check(enemy)) {
 			result += "+";
 		}
-		// New line after every two moves
-		if (board.getMoveNumber() % 2 == 0 && board.getMoveNumber() != 0) {
-			result += "\n";
-		}
+	
 		pgnTextField
 				.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
 		// Store history of the field so that undos work
@@ -415,7 +416,7 @@ public class MainController {
 					board.bitboards[i] = Long.valueOf(reader.readLine());
 				}
 
-				for (int i = 0; i < noOfMoves - 1; i++) {
+				for (int i = 0; i < noOfMoves; i++) {
 					board.moveHistory[i] = Long.valueOf(reader.readLine());
 					board.whiteHistory[i] = Long.valueOf(reader.readLine());
 					board.blackHistory[i] = Long.valueOf(reader.readLine());
@@ -440,7 +441,16 @@ public class MainController {
 				}
 				board.castling[0] = Integer.valueOf(reader.readLine());
 				board.castling[1] = Integer.valueOf(reader.readLine());
-				pgnTextField.setText(reader.readLine());
+				int pgnNoOfLines = Integer.valueOf(reader.readLine());
+				String pgnText = "";
+				for (int i = 0; i < pgnNoOfLines; i++) {
+					if (i != pgnNoOfLines-1) {
+						pgnText += reader.readLine() + "\n";
+					}else{
+						pgnText += reader.readLine();
+					}
+				}
+				pgnTextField.setText(pgnText);
 				UIConstants.PLAYER_COLOUR = Integer.valueOf(reader.readLine());
 				UIConstants.AI_COLOUR = Integer.valueOf(reader.readLine());
 				clearCanvas();
@@ -503,9 +513,11 @@ public class MainController {
 		}
 		result += board.castling[0] + "\n";
 		result += board.castling[1] + "\n";
+		result += String.valueOf(
+				countLines(pgnTextField.getText())) + "\n";
 		result += pgnTextField.getText() + "\n";
 		result += String.valueOf(UIConstants.PLAYER_COLOUR) + "\n";
-		result += String.valueOf(UIConstants.AI_COLOUR);
+		result += String.valueOf(UIConstants.AI_COLOUR) + "\n";
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Game");
 		Stage stage = Main.primaryStage;
@@ -641,4 +653,9 @@ public class MainController {
 		paintChessBoard(board);
 	}
 
+	// http://stackoverflow.com/questions/2850203/count-the-number-of-lines-in-a-java-string#2850259
+	private static int countLines(String str) {
+		String[] lines = str.split("\r\n|\r|\n");
+		return lines.length;
+	}
 }
