@@ -225,7 +225,8 @@ public class BitBoard {
 		removePiece(oldIndex);
 		// Then readd the piece at the new position
 		addPiece(piece, finalIndex);
-		// Update the castling flags for the next player to move i.e. the enemy
+		// Update the castling flags for both players
+		updateCastlingFlags(side);
 		updateCastlingFlags(enemy);
 
 		// If a pawn makes a double push, store the square behind as being

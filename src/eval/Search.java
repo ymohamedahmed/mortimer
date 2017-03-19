@@ -42,7 +42,7 @@ public class Search {
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove
 						&& depth >= EvalConstants.MIN_DEPTH) {
-					//System.out.println("FINAL DEPTH: " + depth);
+					System.out.println("FINAL DEPTH: " + depth);
 					break;
 				}
 			}
