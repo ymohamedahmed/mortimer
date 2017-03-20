@@ -363,9 +363,15 @@ public class MainController {
 		if (move.getCastlingFlag() != 0) {
 			if (move.getCastlingFlag() == CoreConstants.wQSide
 					|| move.getCastlingFlag() == CoreConstants.bQSide) {
-				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O";
+				result = String.valueOf(
+						((board.getMoveNumber() % 2 == 1 && board.getMoveNumber() != 1) ? "\n" : "")
+								+ String.valueOf((board.getMoveNumber() / 2) + 1))
+						+ "." + " O-O";
 			} else {
-				result = String.valueOf((board.getMoveNumber() / 2) + 1) + "." + " O-O-O";
+				result = String.valueOf(
+						((board.getMoveNumber() % 2 == 1 && board.getMoveNumber() != 1) ? "\n" : "")
+								+ String.valueOf((board.getMoveNumber() / 2) + 1))
+						+ "." + " O-O-O";
 			}
 		}
 		if (board.checkmate(enemy)) {
@@ -373,7 +379,7 @@ public class MainController {
 		} else if (board.check(enemy)) {
 			result += "+";
 		}
-	
+
 		pgnTextField
 				.setText((pgnTextField.getText() == null ? "" : pgnTextField.getText()) + result);
 		// Store history of the field so that undos work
@@ -444,9 +450,9 @@ public class MainController {
 				int pgnNoOfLines = Integer.valueOf(reader.readLine());
 				String pgnText = "";
 				for (int i = 0; i < pgnNoOfLines; i++) {
-					if (i != pgnNoOfLines-1) {
+					if (i != pgnNoOfLines - 1) {
 						pgnText += reader.readLine() + "\n";
-					}else{
+					} else {
 						pgnText += reader.readLine();
 					}
 				}
@@ -513,8 +519,7 @@ public class MainController {
 		}
 		result += board.castling[0] + "\n";
 		result += board.castling[1] + "\n";
-		result += String.valueOf(
-				countLines(pgnTextField.getText())) + "\n";
+		result += String.valueOf(countLines(pgnTextField.getText())) + "\n";
 		result += pgnTextField.getText() + "\n";
 		result += String.valueOf(UIConstants.PLAYER_COLOUR) + "\n";
 		result += String.valueOf(UIConstants.AI_COLOUR) + "\n";
