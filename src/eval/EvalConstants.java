@@ -4,7 +4,7 @@ public class EvalConstants {
 	// Constants are used as a part of the evaluation function and provide
 	// values used in the calculations
 	// Max move 'thinking' time (ms)
-	public static double THINKING_TIME = 500.0;
+	public static double THINKING_TIME = 30.0;
 	public static double MAX_THINKING_TIME = 1000.0;
 	public static double MIN_THINKING_TIME = 30.0;
 	// Max search depth
