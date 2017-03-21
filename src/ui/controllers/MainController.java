@@ -618,6 +618,7 @@ public class MainController {
 	private void exportFenMenuItem(ActionEvent event) {
 		String fen = board.exportFen();
 		TextInputDialog alert = new TextInputDialog(fen);
+		alert.setResizable(true);
 		alert.setTitle("Export FEN");
 		alert.setHeaderText("The FEN notation for the current board");
 		alert.getEditor().setEditable(false);
