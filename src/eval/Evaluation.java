@@ -100,7 +100,7 @@ public class Evaluation extends EvalConstants {
 		}
 		return color * (materialScore + posScore);
 	}
-	public static double fastEval(BitBoard board){
+	public static double fastEval(BitBoard board, int colorFactor){
 		int whiteQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_QUEEN]);
 		int blackQueens = BitBoard.hammingWeight(board.bitboards[CoreConstants.BLACK_QUEEN]);
 		int whiteRooks = BitBoard.hammingWeight(board.bitboards[CoreConstants.WHITE_ROOK]);
@@ -121,6 +121,6 @@ public class Evaluation extends EvalConstants {
 		// Work out the difference between the material score of white and black
 		int materialScore = (900 * qDiff) + (500 * rDiff) + (330 * bDiff)
 				+ (320 * nDiff) + (100 * pDiff);
-		return materialScore;
+		return colorFactor * materialScore;
 	}
 }

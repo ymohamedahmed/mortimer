@@ -34,7 +34,7 @@ public class Search {
 			double firstGuess = 0;
 			// If there is more time, keep increasing the depth of the search
 			// (i.e. the number of moves looked ahead)
-			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth += 2) {
+			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth ++) {
 				// Use the mtdf algorithm to generate an value for the board at
 				// a particular depth
 				firstGuess = mtdf(board, firstGuess, depth, color);
@@ -168,11 +168,11 @@ public class Search {
 		// Note: move must be undone to return the board to its original state
 		Move leftMove = leftIter.next();
 		board.move(leftMove);
-		double leftEval = Evaluation.fastEval(board);
+		double leftEval = Evaluation.fastEval(board, colorFactor);
 		board.undo();
 		Move rightMove = rightIter.next();
 		board.move(rightMove);
-		double rightEval = Evaluation.fastEval(board);
+		double rightEval = Evaluation.fastEval(board, colorFactor);
 		board.undo();
 		// The while loops is broken as and when is appropriate
 		while (true) {
@@ -186,7 +186,7 @@ public class Search {
 						// Update evaluation values
 						leftMove = leftIter.next();
 						board.move(leftMove);
-						leftEval = Evaluation.fastEval(board);
+						leftEval = Evaluation.fastEval(board, colorFactor);
 						board.undo();
 					} else {
 						// If the left list is empty, add the rest of the right
@@ -203,7 +203,7 @@ public class Search {
 					if (rightIter.hasNext()) {
 						rightMove = rightIter.next();
 						board.move(rightMove);
-						rightEval = Evaluation.fastEval(board);
+						rightEval = Evaluation.fastEval(board, colorFactor);
 						board.undo();
 					} else {
 						result.add(leftMove);
@@ -223,7 +223,7 @@ public class Search {
 					if (leftIter.hasNext()) {
 						leftMove = leftIter.next();
 						board.move(leftMove);
-						leftEval = Evaluation.fastEval(board);
+						leftEval = Evaluation.fastEval(board,colorFactor);
 						board.undo();
 					} else {
 						result.add(rightMove);
@@ -237,7 +237,7 @@ public class Search {
 					if (rightIter.hasNext()) {
 						rightMove = rightIter.next();
 						board.move(rightMove);
-						rightEval = Evaluation.fastEval(board);
+						rightEval = Evaluation.fastEval(board, colorFactor);
 						board.undo();
 					} else {
 						result.add(leftMove);
