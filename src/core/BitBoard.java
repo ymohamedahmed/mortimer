@@ -3,9 +3,9 @@ package core;
 import java.util.Random;
 
 public class BitBoard {
-	public long[] bitboards = new long[14];
-	public byte[] board = new byte[64];
-	public long[] epTargetSquares = new long[2];
+	private long[] bitboards = new long[14];
+	private byte[] board = new byte[64];
+	private long[] epTargetSquares = new long[2];
 	// Castling flag
 	// WHITE
 	// wQueensideLegal | wKingsideLegal | wKingMoved | wRookQueensideMoved |
@@ -13,7 +13,7 @@ public class BitBoard {
 	// BLACK
 	// bQueensideLegal | bKingsideLegal | bKingMoved | bRookQueensideMoved |
 	// bRookKingsideMoved
-	public long[] castling = new long[] { 0L, 0L };
+	private long[] castling = new long[] { 0L, 0L };
 	public int toMove = CoreConstants.WHITE;
 	int moveNumber = 0;
 
@@ -213,7 +213,9 @@ public class BitBoard {
 			castling[side] |= 0b100;
 		}
 		// Remove the piece being captured
-		if (capture) {
+		byte capturedPiece = board[finalIndex];
+		if (capture && capturedPiece != CoreConstants.WHITE_KING
+				&& capturedPiece != CoreConstants.BLACK_KING) {
 			removePiece(finalIndex);
 		}
 		// Remove the piece 'behind' the pawn if it is an en passant move
@@ -221,10 +223,12 @@ public class BitBoard {
 			int offset = (side == 0) ? -8 : 8;
 			removePiece(finalIndex + offset);
 		}
-		// Otherwise simply remove the piece being moved
-		removePiece(oldIndex);
-		// Then readd the piece at the new position
-		addPiece(piece, finalIndex);
+		if (finalIndex >= 0 && finalIndex < 64) {
+			// Otherwise simply remove the piece being moved
+			removePiece(oldIndex);
+			// Then readd the piece at the new position
+			addPiece(piece, finalIndex);
+		}
 		// Update the castling flags for both players
 		updateCastlingFlags(side);
 		updateCastlingFlags(enemy);
@@ -296,7 +300,9 @@ public class BitBoard {
 		queenHistory[1][moveNumber] = bitboards[11];
 		kingHistory[0][moveNumber] = bitboards[12];
 		kingHistory[1][moveNumber] = bitboards[13];
-		boardHistory[moveNumber] = board.clone();
+		for(int i = 0; i < 64; i++){
+			boardHistory[moveNumber][i] = board[i];
+		}
 		epHistory[0][moveNumber] = epTargetSquares[0];
 		epHistory[1][moveNumber] = epTargetSquares[1];
 		castlingHistory[0][moveNumber] = castling[0];
@@ -321,7 +327,9 @@ public class BitBoard {
 		bitboards[11] = queenHistory[1][moveNumber];
 		bitboards[12] = kingHistory[0][moveNumber];
 		bitboards[13] = kingHistory[1][moveNumber];
-		board = boardHistory[moveNumber].clone();
+		for(int i = 0; i < 64; i++){
+			board[i] = boardHistory[moveNumber][i];
+		}
 		epTargetSquares[0] = epHistory[0][moveNumber];
 		epTargetSquares[1] = epHistory[1][moveNumber];
 		castling[0] = castlingHistory[0][moveNumber];
@@ -473,10 +481,13 @@ public class BitBoard {
 	}
 
 	public boolean checkmate(int side, int sideToMove) {
+		int origToMove = toMove;
 		toMove = sideToMove;
 		if (check(side) && MoveGen.generateMoves(this, true).size() == 0) {
+			toMove = origToMove;
 			return true;
 		} else {
+			toMove = origToMove;
 			return false;
 		}
 	}
@@ -493,7 +504,7 @@ public class BitBoard {
 			toMove = origToMove;
 			return false;
 		}
-		
+
 	}
 
 	// Almost identical to the check method, except this takes the index of a
@@ -636,6 +647,13 @@ public class BitBoard {
 		return moveNumber;
 	}
 
+	public byte[] cloneBoard(byte[] origArray, byte[] newArray) {
+		for (int i = 0; i < 64; i++) {
+			newArray[i] = origArray[i];
+		}
+		return newArray;
+	}
+
 	// Change the number of moves played
 	public void setMoveNumber(int n) {
 		moveNumber = n;
@@ -643,5 +661,17 @@ public class BitBoard {
 
 	public byte[] getBoardArray() {
 		return board;
+	}
+
+	public long[] getBitBoards() {
+		return bitboards;
+	}
+
+	public long[] getEpTargetSquares() {
+		return epTargetSquares;
+	}
+
+	public long[] getCastlingFlags() {
+		return castling;
 	}
 }

@@ -34,7 +34,7 @@ public class Search {
 			double firstGuess = 0;
 			// If there is more time, keep increasing the depth of the search
 			// (i.e. the number of moves looked ahead)
-			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth ++) {
+			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth+=2) {
 				// Use the mtdf algorithm to generate an value for the board at
 				// a particular depth
 				firstGuess = mtdf(board, firstGuess, depth, color);
@@ -42,7 +42,6 @@ public class Search {
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove
 						&& depth >= EvalConstants.MIN_DEPTH) {
-					System.out.println("FINAL DEPTH: " + depth);
 					break;
 				}
 			}
@@ -109,8 +108,8 @@ public class Search {
 		double bestValue = Double.NEGATIVE_INFINITY;
 		// Pseudo-legal moves are generated to speed up the algorithm
 		// By sorting them by evaluation value, cutoffs are more likely to occur
-		List<Move> moves = mergeSort(board, MoveGen.generateMoves(board, false), colorFactor);
-
+		//List<Move> moves = mergeSort(board, MoveGen.generateMoves(board, false), colorFactor);
+		List<Move> moves = MoveGen.generateMoves(board, false);
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);

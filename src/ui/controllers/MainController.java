@@ -97,7 +97,7 @@ public class MainController {
 
 		for (int row = 0; row < 8; row++) {
 			for (int col = 0; col < 8; col++) {
-				byte piece = board.board[(row * 8) + col];
+				byte piece = board.getBoardArray()[(row * 8) + col];
 				// If the square is not empty it draws the image based on the
 				// type of piece
 				if (piece != CoreConstants.EMPTY) {
@@ -124,7 +124,7 @@ public class MainController {
 		board = new BitBoard();
 		board.resetToInitialSetup();
 		pgnTextField.setText("");
-		moveList = MoveGen.generateMoves(board, false);
+		moveList = MoveGen.generateMoves(board, true);
 		double cellSize = paintChessBoard(board);
 		// Make sure there is an active action listener
 		chessPane.setOnMouseClicked(evt -> clickListener(board, evt, cellSize));
@@ -145,10 +145,10 @@ public class MainController {
 		// Get the piece that was clicked
 		int index = (8 * row) + column;
 		if (index < 64 && x <= (8 * cellSize) && y <= (8 * cellSize)) {
-			byte piece = board.board[index];
+			byte piece = board.getBoardArray()[index];
 			for (int square : blueSquares) {
 				if (square == index) {
-					move(board, getMove(moveList, board.board[oldPos], oldPos, index), true);
+					move(board, getMove(moveList, board.getBoardArray()[oldPos], oldPos, index), true);
 					blueSquares.clear();
 					pieceMoved = true;
 					break;
@@ -168,7 +168,7 @@ public class MainController {
 				for (Move move : moves) {
 					int rowMove = Math.floorDiv(move.getFinalPos(), 8);
 					int colMove = move.getFinalPos() % 8;
-					if (board.board[move.getFinalPos()] == CoreConstants.EMPTY) {
+					if (board.getBoardArray()[move.getFinalPos()] == CoreConstants.EMPTY) {
 						g.setFill(Color.BLUE);
 						g.fillOval(colMove * cellSize, (7 - rowMove) * cellSize, cellSize,
 								cellSize);
@@ -210,7 +210,7 @@ public class MainController {
 	}
 
 	public void move(BitBoard board, Move move, boolean repaint) {
-		boolean capture = board.board[move.getFinalPos()] != CoreConstants.EMPTY;
+		boolean capture = board.getBoardArray()[move.getFinalPos()] != CoreConstants.EMPTY;
 		board.move(move);
 		// Even piece id means white piece, odd mean black piece
 		int side = move.getPieceType() % 2;
@@ -416,10 +416,10 @@ public class MainController {
 				int noOfMoves = Integer.valueOf(reader.readLine());
 				board.setMoveNumber(noOfMoves);
 				for (int i = 0; i <= 63; i++) {
-					board.board[i] = (byte) ((int) Integer.valueOf(reader.readLine()));
+					board.getBoardArray()[i] = (byte) ((int) Integer.valueOf(reader.readLine()));
 				}
 				for (int i = 0; i <= 13; i++) {
-					board.bitboards[i] = Long.valueOf(reader.readLine());
+					board.getBitBoards()[i] = Long.valueOf(reader.readLine());
 				}
 
 				for (int i = 0; i < noOfMoves; i++) {
@@ -445,8 +445,8 @@ public class MainController {
 					board.epHistory[0][i] = Long.valueOf(reader.readLine());
 					board.epHistory[1][i] = Long.valueOf(reader.readLine());
 				}
-				board.castling[0] = Integer.valueOf(reader.readLine());
-				board.castling[1] = Integer.valueOf(reader.readLine());
+				board.getCastlingFlags()[0] = Integer.valueOf(reader.readLine());
+				board.getCastlingFlags()[1] = Integer.valueOf(reader.readLine());
 				int pgnNoOfLines = Integer.valueOf(reader.readLine());
 				String pgnText = "";
 				for (int i = 0; i < pgnNoOfLines; i++) {
@@ -489,10 +489,10 @@ public class MainController {
 		result += board.toMove + "\n";
 		result += String.valueOf(noOfMoves) + "\n";
 		for (int i = 0; i <= 63; i++) {
-			result += board.board[i] + "\n";
+			result += board.getBoardArray()[i] + "\n";
 		}
 		for (int i = 0; i <= 13; i++) {
-			result += String.valueOf(board.bitboards[i]) + "\n";
+			result += String.valueOf(board.getBitBoards()[i]) + "\n";
 		}
 		for (int i = 0; i < noOfMoves; i++) {
 			result += String.valueOf(board.moveHistory[i]) + "\n";
@@ -517,8 +517,8 @@ public class MainController {
 			result += String.valueOf(board.epHistory[0][i]) + "\n";
 			result += String.valueOf(board.epHistory[1][i]) + "\n";
 		}
-		result += board.castling[0] + "\n";
-		result += board.castling[1] + "\n";
+		result += board.getCastlingFlags()[0] + "\n";
+		result += board.getCastlingFlags()[1] + "\n";
 		result += String.valueOf(countLines(pgnTextField.getText())) + "\n";
 		result += pgnTextField.getText() + "\n";
 		result += String.valueOf(UIConstants.PLAYER_COLOUR) + "\n";
