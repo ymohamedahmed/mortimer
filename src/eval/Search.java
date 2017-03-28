@@ -29,24 +29,27 @@ public class Search {
 		double timePerMove = EvalConstants.THINKING_TIME / noOfMoves;
 		for (Move move : moves) {
 			// Make the move then judge the resulting board
-			board.move(move);
 			long startTime = System.currentTimeMillis();
 			double firstGuess = 0;
 			// If there is more time, keep increasing the depth of the search
 			// (i.e. the number of moves looked ahead)
-			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth+=2) {
+			for (int depth = 0; depth <= EvalConstants.MAX_DEPTH; depth++) {
 				// Use the mtdf algorithm to generate an value for the board at
 				// a particular depth
+				board.move(move);
 				firstGuess = mtdf(board, firstGuess, depth, color);
+				board.undo();
 				// If too much time has been spent evaluating break from the
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove
 						&& depth >= EvalConstants.MIN_DEPTH) {
+					System.out.println("FINAL DEPTH: " + depth);
 					break;
 				}
+
 			}
+			System.out.println("SCORE: " + firstGuess);
 			// Return board to original state
-			board.undo();
 			// The highest scoring move is optimal for white
 			if (color == EvalConstants.WHITE) {
 				if (firstGuess > maxScore) {
@@ -108,14 +111,14 @@ public class Search {
 		double bestValue = Double.NEGATIVE_INFINITY;
 		// Pseudo-legal moves are generated to speed up the algorithm
 		// By sorting them by evaluation value, cutoffs are more likely to occur
-		//List<Move> moves = mergeSort(board, MoveGen.generateMoves(board, false), colorFactor);
-		List<Move> moves = MoveGen.generateMoves(board, false);
+		List<Move> moves = mergeSort(board, MoveGen.generateMoves(board, false), colorFactor);
+		//List<Move> moves = MoveGen.generateMoves(board, false);
 		// Analyses each move
 		for (Move move : moves) {
 			board.move(move);
 			double v = -negamax(-beta, -alpha, board, depth - 1, -1 * colorFactor);
 			board.undo();
-			bestValue = (int) Math.max(bestValue, v);
+			bestValue = Math.max(bestValue, v);
 			alpha = Math.max(alpha, v);
 			if (alpha >= beta) {
 				break;
@@ -222,7 +225,7 @@ public class Search {
 					if (leftIter.hasNext()) {
 						leftMove = leftIter.next();
 						board.move(leftMove);
-						leftEval = Evaluation.fastEval(board,colorFactor);
+						leftEval = Evaluation.fastEval(board, colorFactor);
 						board.undo();
 					} else {
 						result.add(rightMove);
