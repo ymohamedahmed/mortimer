@@ -43,12 +43,10 @@ public class Search {
 				// loop
 				if (System.currentTimeMillis() - startTime >= timePerMove
 						&& depth >= EvalConstants.MIN_DEPTH) {
-					System.out.println("FINAL DEPTH: " + depth);
 					break;
 				}
 
 			}
-			System.out.println("SCORE: " + firstGuess);
 			// Return board to original state
 			// The highest scoring move is optimal for white
 			if (color == EvalConstants.WHITE) {
