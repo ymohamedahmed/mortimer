@@ -9,7 +9,7 @@ public class EvalConstants {
 	public static double MIN_THINKING_TIME = 200.0;
 	// Max search depth
 	public static final double MAX_DEPTH = 15;
-	public static final double MIN_DEPTH = 4;
+	public static final double MIN_DEPTH = 2;
 
 	// New identifiers used for colours and piece types
 	public static final int WHITE = 1;
