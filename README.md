@@ -1,6 +1,6 @@
 # Mortimer
 Mortimer is a chess playing program (commonly referred to as a chess engine) which I wrote as a part of my Computer Science A-Level Coursework. However, this project was primarily completed as a means of pursuing my wider interest in Artificial Intelligence. The full write up can be found [here](https://drive.google.com/open?id=0B-q1OPqj3iCmN0ZXcTJlUG1lYjA).
-![Alt text](https://github.com/ymohamedahmed/mortimer/blob/bitboard/res/gif/mortimer.gif)
+![](https://github.com/ymohamedahmed/mortimer/blob/bitboard/res/gif/mortimer.gif)
 
 ## Basic Description
 Mortimer uses bitboards as its internal board representation this leads to it having very fast move generation speeds since binary number manipulation is very fast on modern computers. As a result, when searching the game tree it can search to relatively high depths (for an amateur project). This helps to make up somewhat for the simple evaluation function. In future, to improve the strength of the AI, the evaluation function would have to consider additional factors such as king safety etc.
