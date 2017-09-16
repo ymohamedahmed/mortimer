@@ -29,7 +29,7 @@ Mortimer uses bitboards as its internal board representation this leads to it ha
 * [Positional evaluation](https://chessprogramming.wikispaces.com/Simplified+evaluation+function)
 
 ## Usage
-A jar is included and can be downloaded [here](https://github.com/ymohamedahmed/mortimer/raw/bitboard/morty.jar). Alternatively the repo can be cloned and then the code executed as follows:
+A jar is included and can be downloaded [here](https://github.com/ymohamedahmed/mortimer/raw/bitboard/morty.jar). Alternatively the repo can be cloned and then the code executed as follows (requires JUnit to be compiled):
 ```
 git clone https://github.com/ymohamedahmed/mortimer.git
 cd mortimer/src/
