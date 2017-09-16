@@ -32,8 +32,8 @@ Mortimer uses bitboards as its internal board representation this leads to it ha
 A jar is included and can be downloaded [here](https://github.com/ymohamedahmed/mortimer/raw/bitboard/morty.jar). Alternatively the repo can be cloned and then the code executed as follows:
 ```
 git clone https://github.com/ymohamedahmed/mortimer.git
-cd mortimer/src/core/
-javac main.java
-java main
+cd mortimer/src/
+javac */*.java
+java core.main
 ```
 
