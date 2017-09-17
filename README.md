@@ -1,5 +1,5 @@
 # Mortimer
-Mortimer is a chess playing program (commonly referred to as a chess engine) which I wrote as a part of my Computer Science A-Level Coursework. However, this project was primarily completed as a means of pursuing my wider interest in Artificial Intelligence. The full write up can be found [here](https://drive.google.com/open?id=0B-q1OPqj3iCmN0ZXcTJlUG1lYjA). A video outlining some of the features can be found here [here](https://www.youtube.com/watch?v=LOsC6-85fvk).
+Mortimer is a chess playing program (commonly referred to as a chess engine) which I wrote as a part of my Computer Science A-Level Coursework. However, this project was primarily completed as a means of pursuing my wider interest in Artificial Intelligence. The full write up can be found [here](https://drive.google.com/open?id=0B-q1OPqj3iCmN0ZXcTJlUG1lYjA). A video outlining some of the features can be found [here](https://www.youtube.com/watch?v=LOsC6-85fvk).
 
 ![](https://github.com/ymohamedahmed/mortimer/blob/bitboard/res/gif/mortimer.gif). 
 ## Basic Description
